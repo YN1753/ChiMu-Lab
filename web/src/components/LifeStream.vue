@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { LifeEntry } from '../types'
+import { ref, computed, watch } from 'vue'
+import type { LifeEntry, ArchiveCategory } from '../types'
+import { getEntryCategory } from '../types'
 import { ArrowUpRight } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -8,72 +9,84 @@ const props = defineProps<{
   limit?: number
   showFilters?: boolean
   dateFilter?: string
+  currentCategory?: ArchiveCategory
 }>()
 
 const emit = defineEmits<{
   (e: 'clearDateFilter'): void
+  (e: 'changeCategory', category: ArchiveCategory): void
 }>()
 
-const activeFilter = ref<string>('all')
+const activeCategory = ref<ArchiveCategory>(props.currentCategory || 'all')
 
-const filters = [
-  { key: 'all', label: '全部' },
-  { key: 'thought', label: '随想' },
-  { key: 'photo', label: '胶卷摄影' },
-  { key: 'coffee', label: '手冲咖啡' },
-  { key: 'music', label: '听音' },
-  { key: 'book', label: '书摘' },
-  { key: 'place', label: '行迹' },
-  { key: 'project', label: '造物' },
-  { key: 'game', label: '游戏' },
-  { key: 'purchase', label: '好物' },
+watch(() => props.currentCategory, (newCat) => {
+  if (newCat) {
+    activeCategory.value = newCat
+  }
+})
+
+// 五重核心生活档案视图
+const categoryFilters: { key: ArchiveCategory; label: string }[] = [
+  { key: 'all', label: '全部记录' },
+  { key: 'daily', label: '日常' },
+  { key: 'thought', label: '想法' },
+  { key: 'project', label: '项目' },
+  { key: 'collection', label: '收藏' },
 ]
 
 const filteredEntries = computed(() => {
   let list = props.entries
+
+  // 1. 日期筛选 (来自生活刻度点击)
   if (props.dateFilter) {
     const target = props.dateFilter.replace(/-/g, '.').trim()
     list = list.filter(e => e.date.replace(/-/g, '.').trim() === target)
   }
-  if (activeFilter.value !== 'all') {
-    list = list.filter(e => e.type === activeFilter.value)
+
+  // 2. 核心 5 重分类视图筛选
+  if (activeCategory.value !== 'all') {
+    list = list.filter(e => getEntryCategory(e) === activeCategory.value)
   }
-  if (props.limit && props.limit > 0 && !props.dateFilter) {
+
+  // 3. 数量限制
+  if (props.limit && props.limit > 0 && !props.dateFilter && activeCategory.value === 'all') {
     return list.slice(0, props.limit)
   }
+
   return list
 })
 
-const getTypeName = (type: string) => {
-  const map: Record<string, string> = {
-    thought: '随想',
-    photo: '胶卷摄影',
-    coffee: '手冲咖啡',
-    music: '听音',
-    book: '书摘',
-    place: '行迹',
-    project: '造物',
-    game: '游戏',
-    purchase: '日常好物',
-    gear: '日常装备',
-    moment: '日常',
+const handleCategoryClick = (cat: ArchiveCategory) => {
+  activeCategory.value = cat
+  emit('changeCategory', cat)
+}
+
+// 归一化条目显示归属 (日常 / 想法 / 项目 / 收藏)
+const getCategoryName = (entry: LifeEntry) => {
+  const cat = getEntryCategory(entry)
+  const map: Record<ArchiveCategory, string> = {
+    all: '全部记录',
+    daily: '日常',
+    thought: '想法',
+    project: '项目',
+    collection: '收藏',
   }
-  return map[type] || type
+  return map[cat] || '日常'
 }
 </script>
 
 <template>
   <div class="w-full text-left">
     
-    <!-- 克制的文字筛选栏 -->
-    <div v-if="showFilters" class="flex flex-wrap items-center gap-x-5 gap-y-2 mb-14 text-xs font-mono-archive text-[var(--ink-muted)] border-b border-[var(--border-subtle)] pb-4">
-      <span class="text-[var(--ink-secondary)] mr-2">分类 //</span>
+    <!-- 克制的五重分类筛选栏 (无 Tag 标签系统，仅 5 种纯粹视图观察方式) -->
+    <div v-if="showFilters" class="flex flex-wrap items-center gap-x-6 gap-y-2 mb-12 text-xs font-mono-archive text-[var(--ink-muted)] border-b border-[var(--border-subtle)] pb-4">
+      <span class="text-[var(--ink-secondary)] mr-1">视角 //</span>
       <button
-        v-for="f in filters"
+        v-for="f in categoryFilters"
         :key="f.key"
-        @click="activeFilter = f.key"
+        @click="handleCategoryClick(f.key)"
         class="transition-colors cursor-pointer py-1 hover:text-[var(--ink-primary)]"
-        :class="{ 'text-[var(--ink-primary)] font-semibold border-b border-[var(--ink-primary)]': activeFilter === f.key }"
+        :class="{ 'text-[var(--ink-primary)] font-semibold border-b border-[var(--ink-primary)]': activeCategory === f.key }"
       >
         {{ f.label }}
       </button>
@@ -89,16 +102,16 @@ const getTypeName = (type: string) => {
         @click="emit('clearDateFilter')"
         class="text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover-underline cursor-pointer"
       >
-        [显示全部记录]
+        [显示全部日期记录]
       </button>
     </div>
 
     <!-- 空状态 -->
     <div v-if="filteredEntries.length === 0" class="py-16 text-center text-sm font-serif-editorial text-[var(--ink-muted)]">
-      该筛选条件下暂无生活记录。
+      该观察视角下暂无生活记录。
     </div>
 
-    <!-- 时间流列表：无 Card UI，纯粹的独立出版物杂志排版，无任何 emoji -->
+    <!-- 时间流列表：无 Card UI，纯粹的独立出版物杂志排版，无任何 emoji，无杂乱 Tag 标签 -->
     <div v-else class="divide-y divide-[var(--border-subtle)]">
       
       <article
@@ -108,7 +121,7 @@ const getTypeName = (type: string) => {
       >
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 items-start">
           
-          <!-- 左侧：时间锚点与类型 -->
+          <!-- 左侧：时间锚点与生活归属 (纯文字注脚) -->
           <div class="md:col-span-3 space-y-2">
             <div class="font-mono-archive text-xs tracking-wider text-[var(--ink-muted)]">
               <span class="text-[var(--ink-secondary)] font-semibold block text-sm">{{ entry.year }}年</span>
@@ -120,16 +133,16 @@ const getTypeName = (type: string) => {
               </span>
             </div>
 
-            <!-- 极简类型文本标识 -->
+            <!-- 极简归类：日常 · 想法 · 项目 · 收藏 -->
             <div class="pt-2">
               <span class="inline-block text-[11px] tracking-wider text-[var(--ink-muted)] border-b border-[var(--border-subtle)] pb-0.5">
-                · {{ getTypeName(entry.type) }}
+                · {{ getCategoryName(entry) }}
               </span>
             </div>
 
-            <!-- 地点注脚 (无 emoji) -->
-            <div v-if="entry.location" class="text-xs text-[var(--ink-muted)] pt-1 font-normal">
-              地点：{{ entry.location }}
+            <!-- 地点注脚 -->
+            <div v-if="entry.location" class="text-xs text-[var(--ink-muted)] pt-1 font-normal font-serif-editorial">
+              {{ entry.location }}
             </div>
           </div>
 
@@ -141,7 +154,7 @@ const getTypeName = (type: string) => {
               {{ entry.title }}
             </h3>
 
-            <!-- 大幅摄影排版 -->
+            <!-- 大幅摄影表现 (摄影是内容的表达形式，容纳在日常记录中) -->
             <div v-if="entry.images" class="pt-2">
               <div class="relative w-full overflow-hidden bg-[var(--bg-subtle)] rounded-sm">
                 <img
@@ -167,7 +180,7 @@ const getTypeName = (type: string) => {
               <span>— {{ entry.meta }}</span>
             </div>
 
-            <!-- 项目/仓库链接 -->
+            <!-- 项目/造物链接 (克制细线，无按钮卡片) -->
             <div v-if="entry.link" class="pt-2">
               <a
                 :href="entry.link"

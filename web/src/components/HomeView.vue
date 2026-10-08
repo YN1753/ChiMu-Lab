@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { LifeEntry, NowStatus } from '../types'
+import { ref, computed } from 'vue'
+import type { LifeEntry, NowStatus, ArchiveCategory } from '../types'
 import LifeActivityMap from './LifeActivityMap.vue'
 import LifeStream from './LifeStream.vue'
 import { ArrowRight } from 'lucide-vue-next'
 
-defineProps<{
+const props = defineProps<{
   entries: LifeEntry[]
   now?: NowStatus | null
+  currentCategory?: ArchiveCategory
 }>()
 
 const emit = defineEmits<{
   (e: 'navigate', view: string): void
+  (e: 'changeCategory', category: ArchiveCategory): void
 }>()
 
 const selectedDate = ref<string>('')
@@ -25,6 +27,41 @@ const handleDateSelect = (date: string) => {
     }
   }
 }
+
+const currentCategoryInfo = computed(() => {
+  switch (props.currentCategory) {
+    case 'daily':
+      return {
+        label: '日常',
+        title: '日常 // 生活时间流',
+        desc: '现实生活足迹：出门、吃饭、旅行、手冲、行迹与身边小事',
+      }
+    case 'thought':
+      return {
+        label: '想法',
+        title: '想法 // 生活时间流',
+        desc: '思想与文字：随笔、感悟、计划与碎片化思索',
+      }
+    case 'project':
+      return {
+        label: '项目',
+        title: '项目 // 生活时间流',
+        desc: '创造与探索：ArchCanvas、Go 底层工具、开源服务与个人创作',
+      }
+    case 'collection':
+      return {
+        label: '收藏',
+        title: '收藏 // 生活时间流',
+        desc: '喜爱与长伴：唱片、书籍、游戏、设备与值得保留之物',
+      }
+    default:
+      return {
+        label: '全部记录',
+        title: '全部记录 // 生活时间流',
+        desc: '完整生活时间线：日常、想法、项目与收藏自然相融',
+      }
+  }
+})
 </script>
 
 <template>
@@ -104,44 +141,63 @@ const handleDateSelect = (date: string) => {
     <!-- 首页第二核心：生活时间流 (Timeline / Life Stream) -->
     <section id="timeline-section" class="pt-16 sm:pt-20 pb-28">
       
-      <div class="flex items-center justify-between pb-8 mb-6 border-b border-[var(--border-subtle)]">
+      <!-- 动态视图标题与状态 -->
+      <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 pb-8 mb-6 border-b border-[var(--border-subtle)]">
         <div>
-          <h2 class="text-base sm:text-lg font-semibold tracking-wider text-[var(--ink-primary)] font-serif-editorial">
-            近况印记 // 生活时间流
-          </h2>
+          <div class="flex items-center gap-3">
+            <h2 class="text-base sm:text-lg font-semibold tracking-wider text-[var(--ink-primary)] font-serif-editorial">
+              {{ currentCategoryInfo.title }}
+            </h2>
+            <span class="text-xs font-mono-archive text-[var(--ink-muted)]">
+              （当前视图 {{ entries.length }} 条）
+            </span>
+          </div>
           <p class="text-xs font-mono-archive text-[var(--ink-muted)] mt-1">
-            随想、摄影、听音、造物、手冲与行迹自然相融
+            {{ currentCategoryInfo.desc }}
           </p>
         </div>
 
-        <button
-          @click="emit('navigate', 'life')"
-          class="text-xs text-[var(--ink-muted)] hover:text-[var(--ink-primary)] hover-underline cursor-pointer flex items-center gap-1 font-mono-archive"
-        >
-          <span>生活完整档案</span>
-          <ArrowRight class="w-3.5 h-3.5" />
-        </button>
+        <div class="flex items-center gap-4 text-xs font-mono-archive">
+          <!-- 切换回全景 -->
+          <button
+            v-if="currentCategory && currentCategory !== 'all'"
+            @click="emit('changeCategory', 'all')"
+            class="text-[var(--accent-warm)] hover:text-[var(--ink-primary)] hover-underline cursor-pointer"
+          >
+            [查看全部记录]
+          </button>
+
+          <button
+            @click="emit('navigate', 'archive')"
+            class="text-[var(--ink-muted)] hover:text-[var(--ink-primary)] hover-underline cursor-pointer flex items-center gap-1"
+          >
+            <span>年度归档</span>
+            <ArrowRight class="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
-      <!-- 时间流列表 (支持点击热力图聚焦某一天) -->
+      <!-- 时间流列表 (支持右上角 5 重视角切换与刻度聚焦) -->
       <LifeStream
         :entries="entries"
-        :limit="7"
+        :limit="currentCategory === 'all' ? 8 : 0"
         :showFilters="false"
         :dateFilter="selectedDate"
+        :currentCategory="currentCategory"
         @clearDateFilter="selectedDate = ''"
+        @changeCategory="emit('changeCategory', $event)"
       />
 
       <!-- 底部探索更多 -->
       <div class="pt-16 mt-8 border-t border-[var(--border-subtle)] flex items-center justify-between">
         <span class="text-xs font-mono-archive text-[var(--ink-muted)]">
-          以上为近期的生活刻度
+          {{ currentCategoryInfo.label }} · 真实生活记录
         </span>
         <button
-          @click="emit('navigate', 'life')"
+          @click="emit('navigate', 'archive')"
           class="inline-flex items-center gap-2 text-xs text-[var(--ink-primary)] hover-underline cursor-pointer font-mono-archive"
         >
-          <span>翻阅全部生活档案</span>
+          <span>按年归档一览</span>
           <ArrowRight class="w-3.5 h-3.5" />
         </button>
       </div>

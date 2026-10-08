@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import HeaderNav from './components/HeaderNav.vue'
 import HomeView from './components/HomeView.vue'
 import LifeStream from './components/LifeStream.vue'
@@ -8,7 +8,8 @@ import NowView from './components/NowView.vue'
 import ProjectsView from './components/ProjectsView.vue'
 import AboutView from './components/AboutView.vue'
 import FooterArchive from './components/FooterArchive.vue'
-import type { LifeEntry, NowStatus, Project } from './types'
+import type { LifeEntry, NowStatus, Project, ArchiveCategory } from './types'
+import { getEntryCategory } from './types'
 
 const currentView = ref<string>('home')
 
@@ -398,6 +399,23 @@ const projects = ref<Project[]>([
   },
 ])
 
+const currentCategory = ref<ArchiveCategory>('all')
+
+const filteredEntriesByCategory = computed(() => {
+  if (currentCategory.value === 'all') {
+    return entries.value
+  }
+  return entries.value.filter(e => getEntryCategory(e) === currentCategory.value)
+})
+
+const handleCategoryChange = (cat: ArchiveCategory) => {
+  currentCategory.value = cat
+  if (currentView.value !== 'home' && currentView.value !== 'life') {
+    currentView.value = 'home'
+    window.location.hash = 'home'
+  }
+}
+
 const navigateTo = (view: string) => {
   currentView.value = view
   window.location.hash = view
@@ -447,18 +465,25 @@ watch(currentView, (newV) => {
 <template>
   <div class="min-h-screen bg-[var(--bg-archive)] text-[var(--ink-primary)] flex flex-col justify-between selection:bg-[var(--accent-warm)]/15 selection:text-[var(--accent-warm)] transition-colors duration-300">
     
-    <!-- 极简克制顶部导航 -->
-    <HeaderNav :currentView="currentView" @navigate="navigateTo" />
+    <!-- 极简克制顶部导航（集成右上角五重视角切换浮层：全部记录⌄） -->
+    <HeaderNav
+      :currentView="currentView"
+      :currentCategory="currentCategory"
+      @navigate="navigateTo"
+      @changeCategory="handleCategoryChange"
+    />
 
     <!-- 主视图区 -->
     <main class="flex-grow">
       
-      <!-- 1. HOME 视图：克制开篇封面 + 2026生活刻度热力图 + 当下剪影 + 近况生活流 -->
+      <!-- 1. HOME 视图：克制开篇封面 + 2026生活刻度热力图 + 当下剪影 + 近况生活流 (响应五重视角) -->
       <HomeView
         v-if="currentView === 'home'"
-        :entries="entries"
+        :entries="filteredEntriesByCategory"
         :now="nowStatus"
+        :currentCategory="currentCategory"
         @navigate="navigateTo"
+        @changeCategory="handleCategoryChange"
       />
 
       <!-- 2. LIFE 视图：完整的生活时间线档案 -->
@@ -476,7 +501,12 @@ watch(currentView, (newV) => {
             时间按顺序流淌的真实印记：随想、摄影、听音、造物与行迹。
           </p>
         </header>
-        <LifeStream :entries="entries" :showFilters="true" />
+        <LifeStream
+          :entries="filteredEntriesByCategory"
+          :showFilters="true"
+          :currentCategory="currentCategory"
+          @changeCategory="handleCategoryChange"
+        />
       </div>
 
       <!-- 3. ARCHIVE 视图：按年/按月索引 -->

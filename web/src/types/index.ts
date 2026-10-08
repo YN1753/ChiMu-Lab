@@ -9,7 +9,32 @@ export type EntryType =
   | 'project'
   | 'purchase'
   | 'coffee'
-  | 'gear'
+export type ArchiveCategory = 'all' | 'daily' | 'thought' | 'project' | 'collection'
+
+export const getEntryCategory = (entry: LifeEntry): ArchiveCategory => {
+  const t = (entry.type || '').toLowerCase()
+  if (t === 'thought' || t === 'idea' || t === 'note' || t === 'essay') {
+    return 'thought'
+  }
+  if (t === 'project' || t === 'code' || t === 'craft') {
+    return 'project'
+  }
+  if (t === 'music' || t === 'book' || t === 'game' || t === 'purchase' || t === 'gear' || t === 'movie' || t === 'device') {
+    return 'collection'
+  }
+  return 'daily'
+}
+
+export const getCategoryDisplayName = (cat: ArchiveCategory): string => {
+  const map: Record<ArchiveCategory, string> = {
+    all: '全部记录',
+    daily: '日常',
+    thought: '想法',
+    project: '项目',
+    collection: '收藏',
+  }
+  return map[cat] || '全部记录'
+}
 
 export interface LifeEntry {
   id: number
