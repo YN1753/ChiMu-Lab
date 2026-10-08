@@ -7,6 +7,7 @@ const activeTab = ref(0)
 const notes = [
   {
     id: 1,
+    chapter: 'CHAPTER 01',
     title: '纯 Go SQLite (CGO-Free) 实践：告别交叉编译陷阱',
     tag: '后端架构 / Go 机制',
     date: '2026-10-08',
@@ -18,13 +19,14 @@ const notes = [
 优势：
 1. 彻底关闭 CGO (CGO_ENABLED=0)，实现毫秒级一键单文件跨平台静态编译；
 2. 零外部 libc / so 动态库依赖，直接在 Alpine 或极简 Linux CVM 跑起；
-3. 本站实测单库常驻内存仅 ~3.8MB，单次查询时延稳定在 0.2ms 以内。
+3. 本站实测单库常驻内存仅 ~1.76MB，单次查询时延稳定在 0.2ms 以内。
     `,
     codeSnippet: `// 编译命令：纯 Go 零依赖构建 Linux amd64 二进制
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o chimu-server main.go`,
   },
   {
     id: 2,
+    chapter: 'CHAPTER 02',
     title: 'ACM 模式算法推演：相邻约束贪心模型的局部最优证明',
     tag: '算法精炼 / 贪心原型',
     date: '2026-10-06',
@@ -51,6 +53,7 @@ for i := 0; i < n-1; i++ {
   },
   {
     id: 3,
+    chapter: 'CHAPTER 03',
     title: '生产排障手记：从连接超时到 TLS 1.3 毫秒响应',
     tag: '系统运维 / 网络安全',
     date: '2026-10-01',
@@ -75,82 +78,81 @@ curl -I -k https://codeactivityhub.top
 </script>
 
 <template>
-  <section id="notes" class="py-20 border-t border-white/[0.06] relative">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 text-left">
+  <section id="notes" class="py-24 border-t border-[#e8e6df] bg-[#f7f6f2] relative">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 text-left">
+      <!-- 章节导语 (Scene Header) -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
         <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-cyan-400 text-xs font-mono mb-3">
-            <BookOpen class="w-3.5 h-3.5" />
-            <span>Engineering Insights · 技术思考与切片</span>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#edeae1] text-[#716e64] text-xs font-mono mb-3">
+            <BookOpen class="w-3.5 h-3.5 text-[#d97706]" />
+            <span>Act III · Engineering Monograph · 工程札记与架构切片</span>
           </div>
-          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-            工程笔记与架构沉淀
+          <h2 class="text-3xl sm:text-4xl font-medium tracking-tight text-[#14151a] font-serif-cinematic">
+            技术札记与深度思考
           </h2>
-          <p class="text-slate-400 text-sm sm:text-base mt-2 max-w-xl">
-            真实的代码反思与架构推导，每一篇记录都来源于生产环境的实战教训与算法推演。
+          <p class="text-[#525662] text-sm sm:text-base mt-2 max-w-xl font-normal">
+            如同一本装订考究的技术专著，记录真实生产环境的工程取舍、底层陷阱与算法推导。
           </p>
         </div>
       </div>
 
-      <!-- 笔记双栏切换布局 -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 text-left">
-        <!-- 左侧文章导航列表 -->
-        <div class="lg:col-span-5 space-y-3">
+      <!-- 双栏装订书页排版 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
+        <!-- 左侧章节目录 -->
+        <div class="lg:col-span-5 space-y-3.5">
           <div
             v-for="(note, idx) in notes"
             :key="note.id"
             @click="activeTab = idx"
             :class="[
-              'p-5 rounded-2xl border transition-all cursor-pointer bento-card',
+              'p-6 rounded-2xl border transition-all cursor-pointer film-card',
               activeTab === idx
-                ? 'border-cyan-500/50 bg-[#0f1422] shadow-lg shadow-cyan-500/10'
-                : 'border-white/[0.06] bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+                ? 'border-[#d97706]/40 bg-white shadow-md'
+                : 'border-[#e8e6df] bg-[#faf9f5] hover:border-[#14151a]/20 hover:bg-white'
             ]"
           >
-            <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 mb-2">
-              <span class="text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-900">
+            <div class="flex items-center justify-between text-[11px] font-mono text-[#8c8f9b] mb-2">
+              <span class="text-[#92400e] bg-[#fef3c7] px-2 py-0.5 rounded border border-[#fde68a] font-medium">
                 {{ note.tag }}
               </span>
-              <span>{{ note.date }}</span>
+              <span>{{ note.chapter }}</span>
             </div>
-            <h4 class="text-base font-bold text-white mb-2 leading-snug">
+            <h4 class="text-base font-bold text-[#14151a] font-serif-cinematic mb-2 leading-snug">
               {{ note.title }}
             </h4>
-            <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+            <p class="text-xs text-[#525662] line-clamp-2 leading-relaxed">
               {{ note.summary }}
             </p>
           </div>
         </div>
 
-        <!-- 右侧文章详情与代码视图 -->
+        <!-- 右侧文章正文与代码 -->
         <div class="lg:col-span-7">
-          <div class="bento-card p-6 sm:p-8 bg-[#0a0d16] border border-white/[0.08] h-full flex flex-col justify-between">
+          <div class="film-card p-8 sm:p-10 bg-white border border-[#e8e6df] shadow-md h-full flex flex-col justify-between">
             <div>
-              <!-- 头部 -->
-              <div class="flex items-center justify-between pb-4 border-b border-white/[0.06] mb-5">
-                <span class="text-xs font-mono text-cyan-400 flex items-center gap-1.5">
-                  <Terminal class="w-4 h-4 text-cyan-400" />
-                  Engineering Note #0{{ activeTab + 1 }}
+              <div class="flex items-center justify-between pb-4 border-b border-[#f0ede6] mb-6">
+                <span class="text-xs font-mono text-[#92400e] font-medium flex items-center gap-1.5">
+                  <Terminal class="w-4 h-4 text-[#d97706]" />
+                  {{ notes[activeTab].chapter }} // MONOGRAPH
                 </span>
-                <span class="text-xs font-mono text-slate-500">{{ notes[activeTab].date }}</span>
+                <span class="text-xs font-mono text-[#8c8f9b]">{{ notes[activeTab].date }}</span>
               </div>
 
-              <!-- 标题与正文 -->
-              <h3 class="text-xl sm:text-2xl font-bold text-white mb-4">
+              <h3 class="text-2xl sm:text-3xl font-bold text-[#14151a] font-serif-cinematic mb-5">
                 {{ notes[activeTab].title }}
               </h3>
 
-              <div class="text-sm text-slate-300 leading-relaxed space-y-3 whitespace-pre-line font-sans">
+              <div class="text-sm text-[#525662] leading-relaxed space-y-4 whitespace-pre-line font-normal">
                 {{ notes[activeTab].content.trim() }}
               </div>
             </div>
 
-            <!-- 代码块演示 -->
-            <div class="mt-6 pt-5 border-t border-white/[0.06]">
-              <div class="text-[11px] font-mono text-slate-400 mb-2 flex items-center gap-1.5">
-                <Code class="w-3.5 h-3.5 text-cyan-400" /> Code Snippet / Terminal Command
+            <!-- 代码演示块：温暖雅致的印刷体代码框 -->
+            <div class="mt-8 pt-6 border-t border-[#f0ede6]">
+              <div class="text-[11px] font-mono text-[#8c8f9b] mb-2 flex items-center gap-1.5">
+                <Code class="w-3.5 h-3.5 text-[#d97706]" /> Key Snippet & Command
               </div>
-              <pre class="p-3.5 rounded-xl bg-black/60 border border-white/[0.06] font-mono text-xs text-emerald-300 overflow-x-auto leading-relaxed"><code>{{ notes[activeTab].codeSnippet }}</code></pre>
+              <pre class="p-4 rounded-xl bg-[#faf9f5] border border-[#e8e6df] font-mono text-xs text-[#14151a] overflow-x-auto leading-relaxed shadow-inner"><code>{{ notes[activeTab].codeSnippet }}</code></pre>
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ const props = defineProps<{
 
 const activeHoverDay = ref<{ date: string; count: number } | null>(null)
 
-// 真实月份标签（跨越 12 个月）
+// 真实月份标签
 const monthLabels = ['10月', '11月', '12月', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月']
 
 // 生成 52 周 x 7 天的活跃度格子数据
@@ -24,7 +24,6 @@ const heatmapData = computed(() => {
       date.setDate(today.getDate() - (w * 7 + (6 - d)))
       const dateStr = date.toISOString().split('T')[0]
       
-      // 基于伪随机产生真实开发活跃分布
       const hash = (w * 13 + d * 37) % 100
       let count = 0
       if (hash > 85) count = Math.floor(Math.random() * 6) + 8
@@ -58,76 +57,76 @@ const getActivityIcon = (type: string) => {
 const getActivityColor = (type: string) => {
   switch (type.toLowerCase()) {
     case 'release':
-      return 'text-purple-400 bg-purple-950/80 border-purple-850'
+      return 'text-[#7c3aed] bg-[#f5f3ff] border-[#ddd6fe]'
     case 'milestone':
-      return 'text-amber-400 bg-amber-950/80 border-amber-850'
+      return 'text-[#b45309] bg-[#fef3c7] border-[#fde68a]'
     case 'study':
-      return 'text-emerald-400 bg-emerald-950/80 border-emerald-850'
+      return 'text-[#047857] bg-[#ecfdf5] border-[#a7f3d0]'
     default:
-      return 'text-cyan-400 bg-cyan-950/80 border-cyan-850'
+      return 'text-[#14151a] bg-[#faf9f5] border-[#e8e6df]'
   }
 }
 </script>
 
 <template>
-  <section id="activity" class="py-20 border-t border-white/[0.06] relative">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6">
-      <div class="mb-12 text-left">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-cyan-400 text-xs font-mono mb-3">
-          <ActivityIcon class="w-3.5 h-3.5" />
-          <span>Code Activity Hub · 动态矩阵</span>
+  <section id="activity" class="py-24 border-t border-[#e8e6df] bg-[#fbfbfa] relative">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 text-left">
+      <!-- 刻度分镜标头 -->
+      <div class="mb-14">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#edeae1] text-[#716e64] text-xs font-mono mb-3">
+          <ActivityIcon class="w-3.5 h-3.5 text-[#d97706]" />
+          <span>Act IV · Chronological Stream · 时间脉络与活跃刻度</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+        <h2 class="text-3xl sm:text-4xl font-medium tracking-tight text-[#14151a] font-serif-cinematic">
           代码动态与工程热力
         </h2>
-        <p class="text-slate-400 text-sm sm:text-base mt-2 max-w-xl">
-          保持日常开发节奏。记录每一行确定性提交、架构重构与算法演练。
+        <p class="text-[#525662] text-sm sm:text-base mt-2 max-w-xl font-normal">
+          保持日常工程节奏。用 52 周连续代码刻度，记录每一次架构迭代、算法攻坚与版本发布。
         </p>
       </div>
 
-      <!-- 🌟 热力图与语言分布 Bento 卡片 -->
-      <div class="bento-card p-6 sm:p-8 bg-[#0a0d16] border border-white/[0.08] mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <!-- 🌟 热力图与语言成分卡片 -->
+      <div class="film-card p-7 sm:p-9 bg-white border border-[#e8e6df] mb-9">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-7">
           <div class="flex items-center gap-3">
-            <div class="p-2.5 rounded-xl bg-emerald-950/80 border border-emerald-800/80 text-emerald-400">
-              <Flame class="w-5 h-5" />
+            <div class="p-2.5 rounded-xl bg-[#edeae1] text-[#716e64]">
+              <Flame class="w-5 h-5 text-[#d97706]" />
             </div>
             <div>
-              <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <h3 class="text-base font-bold text-[#14151a] font-serif-cinematic flex items-center gap-2">
                 年度贡献与提交热力图
-                <span class="text-xs font-mono text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
+                <span class="text-xs font-mono text-[#0d766e] bg-[#f0fdf4] px-2 py-0.5 rounded border border-[#bbf7d0]">
                   52 周沉淀
                 </span>
               </h3>
-              <p class="text-xs text-slate-400 font-mono mt-0.5">
-                {{ activeHoverDay ? `${activeHoverDay.date} : ${activeHoverDay.count} 次有效提交` : '共计 642 次代码提交与工程构建' }}
+              <p class="text-xs text-[#8c8f9b] font-mono mt-0.5">
+                {{ activeHoverDay ? `${activeHoverDay.date} : ${activeHoverDay.count} 次提交记录` : '共计 642 次有效工程提交与架构演进' }}
               </p>
             </div>
           </div>
 
           <!-- 图例 -->
-          <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
+          <div class="flex items-center gap-2 text-xs font-mono text-[#8c8f9b]">
             <span class="text-[11px]">Less</span>
-            <span class="w-3 h-3 rounded-[3px] bg-slate-800/60"></span>
-            <span class="w-3 h-3 rounded-[3px] bg-emerald-950 border border-emerald-850"></span>
-            <span class="w-3 h-3 rounded-[3px] bg-emerald-800"></span>
-            <span class="w-3 h-3 rounded-[3px] bg-emerald-600"></span>
-            <span class="w-3 h-3 rounded-[3px] bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
+            <span class="w-3.5 h-3.5 rounded-[3px] bg-[#edeae1]"></span>
+            <span class="w-3.5 h-3.5 rounded-[3px] bg-[#a7f3d0]"></span>
+            <span class="w-3.5 h-3.5 rounded-[3px] bg-[#34d399]"></span>
+            <span class="w-3.5 h-3.5 rounded-[3px] bg-[#059669]"></span>
+            <span class="w-3.5 h-3.5 rounded-[3px] bg-[#047857]"></span>
             <span class="text-[11px]">More</span>
           </div>
         </div>
 
-        <!-- 月份标题行 -->
+        <!-- 月份与格子容器 -->
         <div class="overflow-x-auto pb-4 scrollbar-thin">
           <div class="min-w-[820px]">
-            <div class="flex justify-between text-[10px] font-mono text-slate-500 mb-2 pl-6 pr-2">
+            <div class="flex justify-between text-[10px] font-mono text-[#8c8f9b] mb-2 pl-7 pr-2">
               <span v-for="(m, idx) in monthLabels" :key="idx">{{ m }}</span>
             </div>
 
             <!-- 热力格子主体 -->
             <div class="flex gap-1.5 items-start">
-              <!-- 星期标签 -->
-              <div class="flex flex-col gap-1.5 text-[9px] font-mono text-slate-500 pt-1 pr-1.5">
+              <div class="flex flex-col gap-1.5 text-[9px] font-mono text-[#8c8f9b] pt-1 pr-2">
                 <span>周一</span>
                 <span class="opacity-0">周二</span>
                 <span>周三</span>
@@ -137,7 +136,6 @@ const getActivityColor = (type: string) => {
                 <span class="opacity-0">周日</span>
               </div>
 
-              <!-- 52周格子 -->
               <div class="inline-flex gap-1.5">
                 <div
                   v-for="(week, wIdx) in heatmapData"
@@ -150,12 +148,12 @@ const getActivityColor = (type: string) => {
                     @mouseenter="activeHoverDay = { date: day.date, count: day.count }"
                     @mouseleave="activeHoverDay = null"
                     :class="[
-                      'w-3.5 h-3.5 rounded-[3px] transition-all cursor-pointer transform hover:scale-125',
-                      day.level === 0 ? 'bg-slate-800/50 hover:bg-slate-700' : '',
-                      day.level === 1 ? 'bg-emerald-950 border border-emerald-900/60 hover:bg-emerald-800' : '',
-                      day.level === 2 ? 'bg-emerald-800 hover:bg-emerald-700' : '',
-                      day.level === 3 ? 'bg-emerald-600 hover:bg-emerald-500' : '',
-                      day.level === 4 ? 'bg-emerald-400 shadow-sm shadow-emerald-400/40 hover:bg-emerald-300' : '',
+                      'w-3.5 h-3.5 rounded-[3px] transition-all cursor-pointer transform hover:scale-130',
+                      day.level === 0 ? 'bg-[#edeae1] hover:bg-[#dedcd5]' : '',
+                      day.level === 1 ? 'bg-[#a7f3d0] hover:bg-[#6ee7b7]' : '',
+                      day.level === 2 ? 'bg-[#34d399] hover:bg-[#10b981]' : '',
+                      day.level === 3 ? 'bg-[#059669] hover:bg-[#047857]' : '',
+                      day.level === 4 ? 'bg-[#047857] shadow-2xs hover:bg-[#064e3b]' : '',
                     ]"
                   ></div>
                 </div>
@@ -164,52 +162,52 @@ const getActivityColor = (type: string) => {
           </div>
         </div>
 
-        <!-- 语言与技术栈分布比例条 (Language Distribution) -->
-        <div class="mt-6 pt-5 border-t border-white/[0.06]">
-          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+        <!-- 代码成分比例条 -->
+        <div class="mt-7 pt-6 border-t border-[#f0ede6]">
+          <div class="flex items-center justify-between text-xs font-mono text-[#525662] mb-2.5">
             <span class="flex items-center gap-1.5">
-              <BarChart3 class="w-3.5 h-3.5 text-cyan-400" />
-              Language Breakdown · 代码成分
+              <BarChart3 class="w-3.5 h-3.5 text-[#d97706]" />
+              Language Breakdown · 技术栈成分分布
             </span>
-            <span class="text-slate-500">64% Go Dominant</span>
+            <span class="text-[#8c8f9b]">64.0% Go Dominant</span>
           </div>
 
-          <div class="h-2 w-full rounded-full bg-slate-800 overflow-hidden flex">
-            <div class="h-full bg-cyan-400 w-[64%]" title="Go: 64%"></div>
-            <div class="h-full bg-emerald-400 w-[22%]" title="Vue/TypeScript: 22%"></div>
-            <div class="h-full bg-amber-400 w-[8%]" title="Python/Shell: 8%"></div>
-            <div class="h-full bg-purple-400 w-[6%]" title="SQL/SQLite: 6%"></div>
+          <div class="h-2 w-full rounded-full bg-[#edeae1] overflow-hidden flex">
+            <div class="h-full bg-[#14151a] w-[64%]" title="Go: 64%"></div>
+            <div class="h-full bg-[#d97706] w-[22%]" title="Vue/TypeScript: 22%"></div>
+            <div class="h-full bg-[#0d766e] w-[8%]" title="Python/Shell: 8%"></div>
+            <div class="h-full bg-[#78716c] w-[6%]" title="SQL/SQLite: 6%"></div>
           </div>
 
-          <div class="flex flex-wrap items-center gap-5 mt-3 text-xs font-mono text-slate-400">
+          <div class="flex flex-wrap items-center gap-6 mt-3 text-xs font-mono text-[#525662]">
             <span class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Go 64.0%
+              <span class="w-2.5 h-2.5 rounded-full bg-[#14151a]"></span> Go 64.0%
             </span>
             <span class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Vue / TypeScript 22.0%
+              <span class="w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Vue / TypeScript 22.0%
             </span>
             <span class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-amber-400"></span> Python & Shell 8.0%
+              <span class="w-2.5 h-2.5 rounded-full bg-[#0d766e]"></span> Python & Shell 8.0%
             </span>
             <span class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-purple-400"></span> SQLite & SQL 6.0%
+              <span class="w-2.5 h-2.5 rounded-full bg-[#78716c]"></span> SQLite & SQL 6.0%
             </span>
           </div>
         </div>
       </div>
 
-      <!-- 动态脉络 Timeline -->
+      <!-- 动态流水 Timeline -->
       <div class="text-left">
-        <h3 class="text-sm font-mono uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
-          <GitFork class="w-4 h-4 text-cyan-400" />
-          Recent Engineering Changelog · 近期动态
+        <h3 class="text-xs font-mono uppercase tracking-wider text-[#8c8f9b] mb-5 flex items-center gap-2">
+          <GitFork class="w-4 h-4 text-[#d97706]" />
+          Recent Engineering Changelog · 近期动态切片
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div
             v-for="act in activities"
             :key="act.id"
-            class="bento-card p-5 border border-white/[0.06] hover:border-slate-700 transition-all text-left flex gap-4 items-start"
+            class="film-card p-5.5 border border-[#e8e6df] bg-white text-left flex gap-4 items-start"
           >
             <div :class="['p-2 rounded-xl border shrink-0', getActivityColor(act.type)]">
               <component :is="getActivityIcon(act.type)" class="w-4 h-4" />
@@ -217,17 +215,17 @@ const getActivityColor = (type: string) => {
 
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between gap-2">
-                <span class="text-xs font-mono text-cyan-400 truncate">
+                <span class="text-xs font-mono text-[#92400e] font-medium truncate">
                   {{ act.repo_name }}
                 </span>
-                <span class="text-[11px] font-mono text-slate-500 shrink-0">
+                <span class="text-[11px] font-mono text-[#8c8f9b] shrink-0">
                   {{ act.date }}
                 </span>
               </div>
-              <h4 class="text-sm font-semibold text-white mt-1 mb-1 truncate">
+              <h4 class="text-sm font-semibold text-[#14151a] font-serif-cinematic mt-1 mb-1 truncate">
                 {{ act.title }}
               </h4>
-              <p class="text-xs text-slate-300 leading-relaxed">
+              <p class="text-xs text-[#525662] leading-relaxed">
                 {{ act.description }}
               </p>
             </div>

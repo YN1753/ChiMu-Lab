@@ -165,7 +165,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#06070a] text-slate-100 flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-200">
+  <div class="min-h-screen bg-[#f7f6f2] text-[#14151a] flex flex-col justify-between selection:bg-[#d97706]/15 selection:text-[#92400e]">
     <Navbar />
     <main class="flex-grow">
       <Hero :profile="profile" :stats="stats" />
