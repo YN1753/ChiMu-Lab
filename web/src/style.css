@@ -1,30 +1,82 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --bg-base: #06070a;
+    --bg-surface: #0c0e14;
+    --bg-card: rgba(14, 17, 26, 0.75);
+    --border-subtle: rgba(255, 255, 255, 0.07);
+    --border-glow: rgba(56, 189, 248, 0.3);
+  }
+
   body {
-    background-color: #0b0f19;
+    background-color: var(--bg-base);
     color: #e2e8f0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  code, pre, .font-mono {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
 }
 
-/* 自定义极客光晕和微质感 */
-.glass-panel {
-  background: rgba(17, 24, 39, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+/* 顶部细致氛围光晕 */
+.bg-ambient-grid {
+  background-image: 
+    radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.12) 0%, rgba(99, 102, 241, 0.06) 40%, transparent 70%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+  background-position: 0 0, -1px -1px, -1px -1px;
+}
+
+/* 极客玻璃拟态与便当盒卡片 */
+.bento-card {
+  background: rgba(13, 16, 24, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-.glow-card {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+.bento-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02) 50%, rgba(56, 189, 248, 0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
-.glow-card:hover {
+.bento-card:hover {
+  border-color: rgba(56, 189, 248, 0.3);
   transform: translateY(-2px);
-  border-color: rgba(56, 189, 248, 0.4);
-  box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.15);
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.6), 0 0 24px -6px rgba(56, 189, 248, 0.12);
+}
+
+/* 细腻滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #06070a;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e2230;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
 }

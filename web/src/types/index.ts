@@ -40,7 +40,13 @@ export interface Stats {
   total_activities: number
   active_days: number
   uptime_hours: number
+  uptime_seconds?: number
   last_updated: string
+  go_version?: string
+  goroutines?: number
+  memory_alloc_mb?: number
+  database_type?: string
+  query_latency_ms?: number
 }
 
 export interface SiteConfig {

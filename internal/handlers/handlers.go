@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"runtime"
 	"time"
 
 	"chimu-lab/internal/db"
@@ -49,24 +51,39 @@ func GetActivities(c *gin.Context) {
 	c.JSON(http.StatusOK, activities)
 }
 
-// StatsResponse 实验室统计数据
+// StatsResponse 实验室统计数据与运行时 HUD
 type StatsResponse struct {
-	TotalProjects   int64  `json:"total_projects"`
-	TotalActivities int64  `json:"total_activities"`
-	ActiveDays      int    `json:"active_days"`
-	UptimeHours     int    `json:"uptime_hours"`
-	LastUpdated     string `json:"last_updated"`
+	TotalProjects   int64   `json:"total_projects"`
+	TotalActivities int64   `json:"total_activities"`
+	ActiveDays      int     `json:"active_days"`
+	UptimeHours     int     `json:"uptime_hours"`
+	UptimeSeconds   int64   `json:"uptime_seconds"`
+	LastUpdated     string  `json:"last_updated"`
+	GoVersion       string  `json:"go_version"`
+	Goroutines      int     `json:"goroutines"`
+	MemoryAllocMB   float64 `json:"memory_alloc_mb"`
+	DatabaseType    string  `json:"database_type"`
+	QueryLatencyMs  float64 `json:"query_latency_ms"`
 }
 
 // GetStats 获取概览统计数据
 func GetStats(c *gin.Context) {
+	startQuery := time.Now()
+
 	var projectCount int64
 	var activityCount int64
 
 	db.DB.Model(&models.Project{}).Count(&projectCount)
 	db.DB.Model(&models.Activity{}).Count(&activityCount)
 
-	uptimeHours := int(time.Since(startTime).Hours())
+	queryLatency := float64(time.Since(startQuery).Microseconds()) / 1000.0
+
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	memAllocMB := float64(m.Alloc) / 1024.0 / 1024.0
+
+	uptimeSec := int64(time.Since(startTime).Seconds())
+	uptimeHours := int(uptimeSec / 3600)
 	if uptimeHours < 1 {
 		uptimeHours = 1
 	}
@@ -74,9 +91,15 @@ func GetStats(c *gin.Context) {
 	res := StatsResponse{
 		TotalProjects:   projectCount,
 		TotalActivities: activityCount,
-		ActiveDays:      180, // 沉淀打卡天数
+		ActiveDays:      218,
 		UptimeHours:     uptimeHours,
-		LastUpdated:     time.Now().Format("2006-01-02 15:04"),
+		UptimeSeconds:   uptimeSec,
+		LastUpdated:     time.Now().Format("2006-01-02 15:04:05"),
+		GoVersion:       runtime.Version(),
+		Goroutines:      runtime.NumGoroutine(),
+		MemoryAllocMB:   float64(int(memAllocMB*100)) / 100.0,
+		DatabaseType:    "Pure-Go SQLite (CGO-Free)",
+		QueryLatencyMs:  float64(int(queryLatency*100)) / 100.0,
 	}
 	c.JSON(http.StatusOK, res)
 }
@@ -94,9 +117,12 @@ func GetConfig(c *gin.Context) {
 // HealthCheck 健康探测接口
 func HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"status":  "operational",
-		"service": "ChiMu-Lab Core API",
-		"version": "1.0.0",
-		"time":    time.Now().Unix(),
+		"status":     "operational",
+		"service":    "ChiMu-Lab Core API",
+		"version":    "2.0.0",
+		"runtime":    runtime.Version(),
+		"goroutines": runtime.NumGoroutine(),
+		"time":       time.Now().Unix(),
+		"message":    fmt.Sprintf("ChiMu-Lab Engine running smoothly on %s", runtime.GOARCH),
 	})
 }
