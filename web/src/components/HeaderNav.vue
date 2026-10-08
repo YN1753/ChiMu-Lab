@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { ArrowUpRight, CloudRain, Menu, X } from 'lucide-vue-next'
 import { audio } from '../utils/audio'
 
-const props = defineProps<{
+defineProps<{
   currentView: string
 }>()
 
@@ -15,12 +15,12 @@ const mobileMenuOpen = ref(false)
 const isRainPlaying = ref(false)
 
 const navItems = [
-  { key: 'home', label: 'HOME' },
-  { key: 'life', label: 'LIFE' },
-  { key: 'archive', label: 'ARCHIVE' },
-  { key: 'now', label: 'NOW' },
-  { key: 'projects', label: 'PROJECTS' },
-  { key: 'about', label: 'ABOUT' },
+  { key: 'home', label: '首页' },
+  { key: 'life', label: '生活' },
+  { key: 'archive', label: '归档' },
+  { key: 'now', label: '当下' },
+  { key: 'projects', label: '造物' },
+  { key: 'about', label: '关于' },
 ]
 
 const setView = (view: string) => {
@@ -40,26 +40,26 @@ const toggleRain = () => {
   <header class="sticky top-0 z-50 w-full bg-[var(--bg-archive)]/90 backdrop-blur-md border-b border-[var(--border-subtle)] transition-colors duration-300">
     <div class="max-w-5xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
       
-      <!-- 极简文字标识 -->
+      <!-- 极简中文标识：迟暮 · 生活档案 -->
       <button
         @click="setView('home')"
         class="text-left group cursor-pointer"
       >
-        <span class="font-serif-editorial text-lg tracking-widest text-[var(--ink-primary)] font-medium">
-          CHIMU
+        <span class="font-serif-editorial text-xl font-medium tracking-wider text-[var(--ink-primary)]">
+          迟暮
         </span>
-        <span class="text-[11px] font-mono-archive text-[var(--ink-muted)] ml-2.5 hidden sm:inline tracking-wider">
-          / archive
+        <span class="text-xs text-[var(--ink-muted)] ml-2.5 hidden sm:inline tracking-wider font-normal">
+          / 生活档案
         </span>
       </button>
 
-      <!-- 桌面端克制导航 -->
+      <!-- 桌面端克制纯中文导航 -->
       <nav class="hidden md:flex items-center gap-7">
         <button
           v-for="item in navItems"
           :key="item.key"
           @click="setView(item.key)"
-          class="text-xs font-mono-archive tracking-wider transition-colors cursor-pointer py-1"
+          class="text-sm tracking-wider transition-colors cursor-pointer py-1"
           :class="currentView === item.key 
             ? 'text-[var(--ink-primary)] font-semibold border-b border-[var(--ink-primary)]' 
             : 'text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'"
@@ -68,7 +68,7 @@ const toggleRain = () => {
         </button>
       </nav>
 
-      <!-- 辅助极简小挂件：自然雨声 + 小 GitHub 链接 -->
+      <!-- 辅助极简挂件：细雨白噪音 + GitHub -->
       <div class="hidden sm:flex items-center gap-4 text-xs font-mono-archive text-[var(--ink-muted)]">
         <button
           @click="toggleRain"
@@ -77,7 +77,7 @@ const toggleRain = () => {
           title="自然雨声白噪音"
         >
           <CloudRain class="w-3.5 h-3.5" :class="{ 'animate-pulse': isRainPlaying }" />
-          <span class="text-[11px]">{{ isRainPlaying ? 'rain on' : 'rain' }}</span>
+          <span class="text-xs">{{ isRainPlaying ? '雨声 · 开' : '雨声' }}</span>
         </button>
 
         <span class="text-[var(--border-divider)]">/</span>
@@ -88,7 +88,7 @@ const toggleRain = () => {
           rel="noopener noreferrer"
           class="flex items-center gap-1 hover:text-[var(--ink-primary)] transition-colors"
         >
-          <span>github</span>
+          <span>GitHub</span>
           <ArrowUpRight class="w-3 h-3" />
         </a>
       </div>
@@ -109,7 +109,7 @@ const toggleRain = () => {
       v-if="mobileMenuOpen"
       class="md:hidden border-b border-[var(--border-subtle)] bg-[var(--bg-archive)] px-6 py-6 space-y-4"
     >
-      <div class="space-y-3 font-mono-archive text-sm">
+      <div class="space-y-3 text-base">
         <button
           v-for="item in navItems"
           :key="item.key"
@@ -124,10 +124,10 @@ const toggleRain = () => {
       <div class="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs font-mono-archive text-[var(--ink-muted)]">
         <button @click="toggleRain" class="flex items-center gap-1.5">
           <CloudRain class="w-3.5 h-3.5" />
-          <span>{{ isRainPlaying ? 'rain: on' : 'rain: off' }}</span>
+          <span>{{ isRainPlaying ? '雨声：开' : '雨声：关' }}</span>
         </button>
         <a href="https://github.com/YN1753" target="_blank" class="flex items-center gap-1">
-          <span>github.com/YN1753</span>
+          <span>GitHub</span>
           <ArrowUpRight class="w-3 h-3" />
         </a>
       </div>

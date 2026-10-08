@@ -7,11 +7,16 @@ import { ArrowUpRight } from 'lucide-vue-next'
     
     <!-- 标头 -->
     <header class="pb-10 border-b border-[var(--border-subtle)] mb-14 space-y-3">
-      <h1 class="font-serif-editorial text-4xl sm:text-5xl font-normal text-[var(--ink-primary)]">
-        ABOUT ME
-      </h1>
-      <p class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
-        A personal reflection, context, and why this space exists.
+      <div class="flex items-center gap-3">
+        <h1 class="font-serif-editorial text-4xl sm:text-5xl font-normal text-[var(--ink-primary)]">
+          关于
+        </h1>
+        <span class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
+          // ABOUT
+        </span>
+      </div>
+      <p class="font-serif-editorial text-sm sm:text-base text-[var(--ink-secondary)]">
+        一段关于我、这处空间与生活档案馆初衷的独白。
       </p>
     </header>
 
@@ -20,11 +25,11 @@ import { ArrowUpRight } from 'lucide-vue-next'
       
       <!-- 我是谁 -->
       <section class="space-y-4">
-        <h2 class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
-          // Who I Am
+        <h2 class="font-mono-archive text-xs tracking-wider text-[var(--ink-muted)]">
+          // 我是谁 · WHO I AM
         </h2>
         <p class="text-[var(--ink-primary)]">
-          我是 <strong class="font-medium">迟暮 (ChiMu)</strong>。现生活在杭州。
+          我是 <strong class="font-medium">迟暮</strong>。现生活在杭州。
         </p>
         <p>
           我喜欢具体的、有体温的事物。清晨手冲咖啡时漫开的花果香气、骑着公路车穿过西湖杨公堤时迎面扑来的湿润晚风、老旁轴相机快门闭合时清脆的一声咔哒，以及在深夜书房里用 Go 雕琢出一套干净的并发状态机。
@@ -36,8 +41,8 @@ import { ArrowUpRight } from 'lucide-vue-next'
 
       <!-- 为什么做这个网站 -->
       <section class="space-y-4 pt-4 border-t border-[var(--border-subtle)]">
-        <h2 class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
-          // Why This Archive Exists
+        <h2 class="font-mono-archive text-xs tracking-wider text-[var(--ink-muted)]">
+          // 为什么做这个网站 · WHY THIS ARCHIVE EXISTS
         </h2>
         <p class="text-[var(--ink-primary)] italic">
           “生活大于项目，真实大于表演。”
@@ -49,14 +54,14 @@ import { ArrowUpRight } from 'lucide-vue-next'
           但我渐渐发现，那些真正构成我生命质感的东西——读完一本书时的触动、和朋友在深夜连麦打游戏的畅快、秋天满觉陇落满青石板的金桂底片——在那些标准的简历模板里根本无处安放。
         </p>
         <p>
-          所以我决定彻底推翻传统的 Portfolio 结构，亲手做这本**数字生活档案馆**。时间是这里唯一的刻度。无论是一张照片、一段随笔、一个亲手造的轮子，还是一张循环播放的唱片，它们都是我生命中真真切切发生过的事情。
+          所以我决定彻底推翻传统的作品集结构，亲手做这本<strong>数字生活档案馆</strong>。时间是这里唯一的刻度。无论是一张照片、一段随笔、一个亲手造的轮子，还是一张循环播放的唱片，它们都是我生命中真真切切发生过的事情。
         </p>
       </section>
 
       <!-- 喜欢与珍视的事物 -->
       <section class="space-y-4 pt-4 border-t border-[var(--border-subtle)]">
-        <h2 class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
-          // Things I Value & Love
+        <h2 class="font-mono-archive text-xs tracking-wider text-[var(--ink-muted)]">
+          // 珍视的事物 · THINGS I VALUE
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-base font-normal pt-2">
           <div class="space-y-2">
@@ -72,7 +77,7 @@ import { ArrowUpRight } from 'lucide-vue-next'
 
       <!-- 联系方式 -->
       <footer class="pt-8 border-t border-[var(--border-subtle)] font-mono-archive text-xs text-[var(--ink-muted)] flex flex-wrap items-center justify-between gap-4">
-        <span>If you'd like to say hello: chimu@codeactivityhub.top</span>
+        <span>来信交流：chimu@codeactivityhub.top</span>
         <a
           href="https://github.com/YN1753"
           target="_blank"

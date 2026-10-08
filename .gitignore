@@ -1,5 +1,6 @@
 # Binaries
 chimu-server
+chimu-server-linux
 *.exe
 *.exe~
 *.dll

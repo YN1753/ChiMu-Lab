@@ -12,11 +12,16 @@ defineProps<{
     
     <!-- 标头 -->
     <header class="pb-12 border-b border-[var(--border-subtle)] mb-14 space-y-4">
-      <h1 class="font-serif-editorial text-4xl sm:text-5xl font-normal text-[var(--ink-primary)]">
-        THINGS I MADE
-      </h1>
+      <div class="flex items-center gap-3">
+        <h1 class="font-serif-editorial text-4xl sm:text-5xl font-normal text-[var(--ink-primary)]">
+          造物
+        </h1>
+        <span class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
+          // THINGS I MADE
+        </span>
+      </div>
       <p class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
-        Experiments, tools, and things crafted with curiosity.
+        手艺、工具与好奇心驱动的尝试。
       </p>
       <p class="text-base sm:text-lg text-[var(--ink-secondary)] font-serif-editorial max-w-2xl leading-relaxed pt-2">
         编程只是我体验生活、表达创造力的一门手艺。就像手冲一杯咖啡、或者打磨一件木器一样，在逻辑的泥土里亲手塑造出确定性的东西。这里记录着我做过的工具、踩过的坑，以及那些在大学和深夜工位里诞生的真实经历。
@@ -35,7 +40,7 @@ defineProps<{
         <div class="flex items-center justify-between text-xs font-mono-archive text-[var(--ink-muted)]">
           <div class="flex items-center gap-2">
             <span class="text-[var(--ink-primary)] font-semibold">0{{ idx + 1 }}.</span>
-            <span class="uppercase tracking-wider">{{ proj.category }}</span>
+            <span class="tracking-wider">{{ proj.category }}</span>
           </div>
           <span class="border border-[var(--border-subtle)] px-2 py-0.5 rounded-xs text-[10px] uppercase">
             {{ proj.status }}
@@ -77,7 +82,7 @@ defineProps<{
             class="inline-flex items-center gap-1.5 text-[var(--ink-primary)] hover-underline pb-0.5"
           >
             <Github class="w-3.5 h-3.5" />
-            <span>View source on GitHub</span>
+            <span>查看 GitHub 源码</span>
             <ArrowUpRight class="w-3 h-3" />
           </a>
         </div>

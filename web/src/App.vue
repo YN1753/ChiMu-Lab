@@ -12,7 +12,7 @@ import type { LifeEntry, NowStatus, Project } from './types'
 
 const currentView = ref<string>('home')
 
-// 真实生活档案数据 (含默认离线备选)
+// 真实生活档案数据 (涵盖 2026 全年真实生活印记，含默认离线备选)
 const entries = ref<LifeEntry[]>([
   {
     id: 1,
@@ -152,6 +152,142 @@ const entries = ref<LifeEntry[]>([
     tags: '好物,文具,旧物,陪伴',
     featured: false,
   },
+  {
+    id: 10,
+    date: '2026.09.05',
+    year: '2026',
+    month: '09',
+    day: '05',
+    time: '21:00',
+    type: 'project',
+    title: 'ArchCanvas：AI 辅助 Go 架构设计画布',
+    content: '想让 AI 辅助开发不只停留在单文件的补全上，而是从全局需求语义直观生成整套可运行的 Go 架构拓扑。开始构建 ArchCanvas 的 AST 双向同步引擎。',
+    meta: 'TypeScript / Go AST / Architecture Canvas',
+    link: 'https://github.com/YN1753/ArchCanvas',
+    tags: '造物,AI架构,实验',
+    featured: false,
+  },
+  {
+    id: 11,
+    date: '2026.08.20',
+    year: '2026',
+    month: '08',
+    day: '20',
+    time: '19:30',
+    type: 'project',
+    title: 'GoLens：交互式状态机下的运行时透视镜',
+    content: '把 Go 复杂的 GMP 协程调度、三色标记 GC 写屏障做成交互式状态机动画。亲手敲完一套调度流转，才算真正摸到了并发系统的齿轮。',
+    meta: 'Go Internals Visualization / GMP / GC Barrier',
+    link: 'https://github.com/YN1753/GoLens',
+    tags: '造物,Go底层,状态机',
+    featured: false,
+  },
+  {
+    id: 12,
+    date: '2026.07.18',
+    year: '2026',
+    month: '07',
+    day: '18',
+    time: '05:15',
+    type: 'photo',
+    title: '东极岛的日出与第一缕海风',
+    content: '凌晨四点半爬起来走到东福山岛的最东端。海平线先是从深蓝泛出极淡的鹅黄，然后是一抹不可思议的粉紫。浪头撞在黑色的礁石上激起三米高的雪白浪花。坐在礁石上吹着咸湿的海风，天地浩大，人的那些微小烦恼瞬间显得微不足道。',
+    images: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+    location: '舟山 · 东极岛东福山',
+    meta: 'Contax T2 · 38mm f/2.8 · Kodak Ektar 100',
+    tags: '摄影,旅行,海边,日出',
+    featured: true,
+  },
+  {
+    id: 13,
+    date: '2026.06.21',
+    year: '2026',
+    month: '06',
+    day: '21',
+    time: '19:45',
+    type: 'thought',
+    title: '夏至黄昏的暴雨与空街',
+    content: '夏至这天傍晚，暴雨毫无预兆地倾盆而下。站在便利店屋檐下等雨停，看着水流顺着沥青路面汇入下水道，空气里满是泥土被雨水浇透后的清新气味。城市突然按下了静音键。很享受这样被意外困住的片刻，不用赶路，只要看雨就好。',
+    meta: '雨天屋檐随记',
+    tags: '随笔,夏至,雨天',
+    featured: false,
+  },
+  {
+    id: 14,
+    date: '2026.05.02',
+    year: '2026',
+    month: '05',
+    day: '02',
+    time: '14:30',
+    type: 'place',
+    title: '莫干山竹林徒步：春末初夏的青翠',
+    content: '五一假期避开人群，钻进莫干山后山的野竹林里徒步了五公里。阳光从密密匝匝的竹叶缝隙里漏下来，脚下的泥土松软带着竹叶香。山涧溪水冰凉刺骨，捧起来洗了把脸，神清气爽。',
+    images: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80',
+    location: '浙江 · 湖州莫干山',
+    meta: '山野徒步 · 5.8 km 穿行',
+    tags: '徒步,山野,自然,行迹',
+    featured: false,
+  },
+  {
+    id: 15,
+    date: '2026.04.12',
+    year: '2026',
+    month: '04',
+    day: '12',
+    time: '16:00',
+    type: 'coffee',
+    title: '哥伦比亚双重厌氧瑰夏：水蜜桃与肉桂尾韵',
+    content: '收到了新到的哥伦比亚蕙兰双重厌氧瑰夏豆。研磨时的香气像刚切开的多汁水蜜桃。90°C 水温萃取，前段是明艳的水果红茶感，温度降到微温后，肉桂与红糖的尾韵浮现出来。好的豆子确实能让人在舌尖上旅行。',
+    images: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1000&q=80',
+    location: '书房',
+    meta: '哥伦比亚双重厌氧瑰夏 · V60滤杯',
+    tags: '咖啡,手冲,瑰夏',
+    featured: false,
+  },
+  {
+    id: 16,
+    date: '2026.03.20',
+    year: '2026',
+    month: '03',
+    day: '20',
+    time: '23:40',
+    type: 'music',
+    title: '深夜重听 Bill Evans《Sunday at the Village Vanguard》',
+    content: '春分这天夜里，重新翻出 Bill Evans 1961 年在先锋村的现场录音。背景里隐隐约约有酒杯轻碰的声音、低声的交谈，以及保罗·莫蒂安极其克制细腻的刷子鼓点。生活不需要时刻紧绷，爵士乐里那种即兴与松弛，是面对复杂世界的最好解药。',
+    images: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80',
+    meta: 'Bill Evans Trio - Sunday at the Village Vanguard (1961)',
+    tags: '音乐,爵士乐,深夜,黑胶',
+    featured: false,
+  },
+  {
+    id: 17,
+    date: '2026.02.10',
+    year: '2026',
+    month: '02',
+    day: '10',
+    time: '01:20',
+    type: 'game',
+    title: '春节假期通关《星际拓荒 Outer Wilds》',
+    content: '在老家安静的深夜里打完了 Outer Wilds 的最后一幕。当所有乐器在宇宙尽头合奏起那首主题曲时，坐在屏幕前久久不能平静。它不仅是一款游戏，更是一首写给好奇心、科学探索与生命终极意义的伟大散文诗。',
+    images: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1000&q=80',
+    meta: 'Mobius Digital · 22分钟循环的终点',
+    tags: '游戏,OuterWilds,科幻,感动',
+    featured: false,
+  },
+  {
+    id: 18,
+    date: '2026.01.01',
+    year: '2026',
+    month: '01',
+    day: '01',
+    time: '10:00',
+    type: 'thought',
+    title: '给二零二六年的自己写一封信',
+    content: '新年第一天清晨，在手账本第一页写下：新的一年，不求做多宏大的事情，但求认认真真过好具体的一天天。多看几卷胶卷，多冲几杯好咖啡，多去山林和湖边吹风，少一些盲目的自我消耗。真实而安静地生活。',
+    meta: '新年手账寄语',
+    tags: '新年,随笔,初心,生活志',
+    featured: true,
+  },
 ])
 
 // 「此刻的我」当前状态
@@ -167,7 +303,7 @@ const nowStatus = ref<NowStatus | null>({
   last_updated: '2026.10.09',
 })
 
-// 造物项目列表 (Things I made)
+// 造物项目列表 (Things I made - 强调经历与手艺，非商业堆叠)
 const projects = ref<Project[]>([
   {
     id: 1,
@@ -175,10 +311,10 @@ const projects = ref<Project[]>([
     subtitle: '四川轻化工大学开放原子开源协会 · 业务后端',
     description: '为高校开源协会搭建的高可用业务后端体系，支撑协会事务流转、招新管理与校园开源数据接口。',
     story: '大二时参与协会建设，发现校园组织的招新和事务常散落在群聊里。于是和同伴一起用 Go 搭建了这套业务核心。也是我第一次深入将分层架构与领域逻辑应用到实际生产场景中。',
-    category: 'Campus OpenSource',
-    tags: 'Go,Gin,Campus OpenSource',
+    category: '校园开源',
+    tags: 'Go,Gin,校园开源',
     github_url: 'https://github.com/suse-edu-cn/SUSE-OAA-BACKEND',
-    status: 'Active',
+    status: '运行中',
     featured: true,
     order: 1,
   },
@@ -188,10 +324,10 @@ const projects = ref<Project[]>([
     subtitle: 'AI 辅助 Go 架构设计画布',
     description: '让 AI 与开发者一起，从需求语义理解、ER 实体建模到架构设计，快速生成与构建可运行的 Go 工程骨架。',
     story: '在画系统架构图时常常觉得图与代码是割裂的。我想做一个直观的画板，把拖拽出来的实体和微服务边界实时映射为干净的 Go struct 代码。也是探索 AI 与工程设计工具融合的小实验。',
-    category: 'AI & Architecture',
+    category: '架构实验',
     tags: 'TypeScript,Go,Architecture',
     github_url: 'https://github.com/YN1753/ArchCanvas',
-    status: 'Active',
+    status: '迭代中',
     featured: true,
     order: 2,
   },
@@ -201,10 +337,10 @@ const projects = ref<Project[]>([
     subtitle: '基于交互式状态机的 Go 底层机制透视镜',
     description: '让 GMP 协程调度、三色标记 GC 屏障与 Channel 阻塞机制清晰可见的高交互度运行时可视化工具。',
     story: '学 Go 底层时被各种纸上谈兵的图解绕晕了。既然理解不了抽象，就手写一套状态机把它像电影放映机一样在浏览器里跑起来。做完之后，GMP 的工作偷取机制就像齿轮一样印在脑子里了。',
-    category: 'Visualization',
+    category: '底层透视',
     tags: 'JavaScript,Go Internals,GMP',
     github_url: 'https://github.com/YN1753/GoLens',
-    status: 'Stable',
+    status: '已稳定',
     featured: true,
     order: 3,
   },
@@ -214,10 +350,10 @@ const projects = ref<Project[]>([
     subtitle: '基于 Wails 的图笔记桌面端应用',
     description: '星链 2.0。探索 Go + 前端混合桌面开发（Wails 架构），支持双向链接、图谱可视化与本地隐私优先的知识管理。',
     story: '一直渴望一款数据 100% 留在本地硬盘、不依赖云端账户的个人笔记。用 Wails 把 WebKit 前端和 Go 核心绑在一起，启动轻快，内存只占几十兆。',
-    category: 'Desktop App',
+    category: '桌面工具',
     tags: 'Go,Wails,Vue,Desktop',
     github_url: 'https://github.com/YN1753/AstraLink-Desktop',
-    status: 'Active',
+    status: '自用中',
     featured: false,
     order: 4,
   },
@@ -227,10 +363,10 @@ const projects = ref<Project[]>([
     subtitle: '轻量分布式 HTTP 压测探针',
     description: '自制轻量级高并发压测工具，毫秒级统计 P90 / P99 延迟直方图。',
     story: '觉得现成压测工具安装繁琐，就用 Go 原生协程池手打了一个发压器。小巧单文件，丢到服务器上就能测。',
-    category: 'CLI Tool',
+    category: '命令行工具',
     tags: 'Go,Benchmark,CLI',
     github_url: 'https://github.com/YN1753/Go-Load',
-    status: 'Stable',
+    status: '已归档',
     featured: false,
     order: 5,
   },
@@ -240,10 +376,10 @@ const projects = ref<Project[]>([
     subtitle: '轻量 Linux 服务器管理控制台',
     description: '个人云服务器状态监控与容器服务守护面板。',
     story: '管理自己的轻量云服务器时写的工具，随时扫一眼内存、磁盘和守护进程。',
-    category: 'DevOps',
+    category: '运维监控',
     tags: 'Vue,Linux,DevOps',
     github_url: 'https://github.com/YN1753/nexus',
-    status: 'WIP',
+    status: '维护中',
     featured: false,
     order: 6,
   },
@@ -253,10 +389,10 @@ const projects = ref<Project[]>([
     subtitle: '支持 Mac 小组件的设备成本统计 App',
     description: '基于 Swift 原生开发，支持 macOS WidgetKit，记录电子产品日均使用成本。',
     story: '想看看手里买了三年的相机和电脑到底均摊到了多少钱一天。写了个简洁的 macOS 桌面 Widget。',
-    category: 'macOS App',
+    category: 'macOS 原生',
     tags: 'Swift,macOS,WidgetKit',
     github_url: 'https://github.com/YN1753/DeviceDaily',
-    status: 'Active',
+    status: '日常自用',
     featured: false,
     order: 7,
   },
@@ -317,21 +453,27 @@ watch(currentView, (newV) => {
     <!-- 主视图区 -->
     <main class="flex-grow">
       
-      <!-- 1. HOME 视图：克制开篇封面 + RECENTLY 最近时间流 -->
+      <!-- 1. HOME 视图：克制开篇封面 + 2026生活刻度热力图 + 当下剪影 + 近况生活流 -->
       <HomeView
         v-if="currentView === 'home'"
         :entries="entries"
+        :now="nowStatus"
         @navigate="navigateTo"
       />
 
       <!-- 2. LIFE 视图：完整的生活时间线档案 -->
       <div v-else-if="currentView === 'life'" class="max-w-5xl mx-auto px-5 sm:px-8 py-20 sm:py-28 text-left">
         <header class="pb-10 border-b border-[var(--border-subtle)] mb-12 space-y-3">
-          <h1 class="font-serif-editorial text-4xl sm:text-5xl font-normal text-[var(--ink-primary)]">
-            LIFE STREAM
-          </h1>
-          <p class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
-            A chronological stream of moments, memories, thoughts, and things made.
+          <div class="flex items-center gap-3">
+            <h1 class="font-serif-editorial text-4xl sm:text-5xl font-normal text-[var(--ink-primary)]">
+              生活时间流
+            </h1>
+            <span class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
+              // LIFE STREAM
+            </span>
+          </div>
+          <p class="font-serif-editorial text-sm sm:text-base text-[var(--ink-secondary)]">
+            时间按顺序流淌的真实印记：随想、摄影、听音、造物与行迹。
           </p>
         </header>
         <LifeStream :entries="entries" :showFilters="true" />
@@ -349,7 +491,7 @@ watch(currentView, (newV) => {
         :now="nowStatus"
       />
 
-      <!-- 5. PROJECTS 视图：作为人生经历的一章 (Things I Made) -->
+      <!-- 5. PROJECTS 视图：作为人生经历的一章 (造物 / Things I Made) -->
       <ProjectsView
         v-else-if="currentView === 'projects'"
         :projects="projects"

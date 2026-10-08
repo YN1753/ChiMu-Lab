@@ -7,45 +7,67 @@ const props = defineProps<{
   entries: LifeEntry[]
   limit?: number
   showFilters?: boolean
+  dateFilter?: string
+}>()
+
+const emit = defineEmits<{
+  (e: 'clearDateFilter'): void
 }>()
 
 const activeFilter = ref<string>('all')
 
 const filters = [
-  { key: 'all', label: 'ALL' },
-  { key: 'thought', label: 'THOUGHTS' },
-  { key: 'photo', label: 'PHOTOGRAPHY' },
-  { key: 'music', label: 'MUSIC' },
-  { key: 'book', label: 'BOOKS' },
-  { key: 'place', label: 'PLACES' },
-  { key: 'project', label: 'PROJECTS' },
-  { key: 'game', label: 'GAMES' },
+  { key: 'all', label: '全部' },
+  { key: 'thought', label: '随想' },
+  { key: 'photo', label: '胶卷摄影' },
+  { key: 'coffee', label: '手冲咖啡' },
+  { key: 'music', label: '听音' },
+  { key: 'book', label: '书摘' },
+  { key: 'place', label: '行迹' },
+  { key: 'project', label: '造物' },
+  { key: 'game', label: '游戏' },
+  { key: 'purchase', label: '好物' },
 ]
 
 const filteredEntries = computed(() => {
   let list = props.entries
+  if (props.dateFilter) {
+    const target = props.dateFilter.replace(/-/g, '.').trim()
+    list = list.filter(e => e.date.replace(/-/g, '.').trim() === target)
+  }
   if (activeFilter.value !== 'all') {
     list = list.filter(e => e.type === activeFilter.value)
   }
-  if (props.limit && props.limit > 0) {
+  if (props.limit && props.limit > 0 && !props.dateFilter) {
     return list.slice(0, props.limit)
   }
   return list
 })
 
-const getMonthName = (monthStr: string) => {
-  const m = parseInt(monthStr, 10)
-  const names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-  return names[m - 1] || monthStr
+const getTypeName = (type: string) => {
+  const map: Record<string, string> = {
+    thought: '随想',
+    photo: '胶卷摄影',
+    coffee: '手冲咖啡',
+    music: '听音',
+    book: '书摘',
+    place: '行迹',
+    project: '造物',
+    game: '游戏',
+    purchase: '日常好物',
+    gear: '日常装备',
+    moment: '日常',
+  }
+  return map[type] || type
 }
 </script>
 
 <template>
   <div class="w-full text-left">
     
-    <!-- 克制的文字筛选栏 (仅在显式开启时展示) -->
+    <!-- 克制的文字筛选栏 -->
     <div v-if="showFilters" class="flex flex-wrap items-center gap-x-5 gap-y-2 mb-14 text-xs font-mono-archive text-[var(--ink-muted)] border-b border-[var(--border-subtle)] pb-4">
-      <span class="text-[var(--ink-secondary)] mr-2">FILTER //</span>
+      <span class="text-[var(--ink-secondary)] mr-2">分类 //</span>
       <button
         v-for="f in filters"
         :key="f.key"
@@ -57,8 +79,27 @@ const getMonthName = (monthStr: string) => {
       </button>
     </div>
 
-    <!-- 时间流列表：绝无千篇一律的 Card UI，纯粹的独立出版物杂志排版 -->
-    <div class="divide-y divide-[var(--border-subtle)]">
+    <!-- 日期筛选提醒 (纯文字，无卡片) -->
+    <div v-if="dateFilter" class="mb-10 pb-4 border-b border-[var(--border-subtle)] flex items-center justify-between text-xs font-mono-archive">
+      <div class="flex items-center gap-2">
+        <span class="text-[var(--accent-warm)] font-medium">聚焦日期：{{ dateFilter }}</span>
+        <span class="text-[var(--ink-muted)]">（共 {{ filteredEntries.length }} 条生活印记）</span>
+      </div>
+      <button
+        @click="emit('clearDateFilter')"
+        class="text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover-underline cursor-pointer"
+      >
+        [显示全部记录]
+      </button>
+    </div>
+
+    <!-- 空状态 -->
+    <div v-if="filteredEntries.length === 0" class="py-16 text-center text-sm font-serif-editorial text-[var(--ink-muted)]">
+      该筛选条件下暂无生活记录。
+    </div>
+
+    <!-- 时间流列表：无 Card UI，纯粹的独立出版物杂志排版，无任何 emoji -->
+    <div v-else class="divide-y divide-[var(--border-subtle)]">
       
       <article
         v-for="entry in filteredEntries"
@@ -67,32 +108,32 @@ const getMonthName = (monthStr: string) => {
       >
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 items-start">
           
-          <!-- 左侧：时间与类型锚点 (Typographic Anchor) -->
+          <!-- 左侧：时间锚点与类型 -->
           <div class="md:col-span-3 space-y-2">
             <div class="font-mono-archive text-xs tracking-wider text-[var(--ink-muted)]">
-              <span class="text-[var(--ink-secondary)] font-semibold block text-sm">{{ entry.year }}</span>
+              <span class="text-[var(--ink-secondary)] font-semibold block text-sm">{{ entry.year }}年</span>
               <span class="text-base text-[var(--ink-primary)] font-serif-editorial block mt-0.5">
-                {{ getMonthName(entry.month) }} {{ entry.day }}
+                {{ entry.month }}月{{ entry.day }}日
               </span>
               <span v-if="entry.time" class="block text-[11px] text-[var(--ink-muted)] mt-1">
                 {{ entry.time }}
               </span>
             </div>
 
-            <!-- 极简类型标识 -->
+            <!-- 极简类型文本标识 -->
             <div class="pt-2">
-              <span class="inline-block text-[10px] font-mono-archive uppercase tracking-widest text-[var(--ink-muted)] border-b border-[var(--border-subtle)] pb-0.5">
-                # {{ entry.type }}
+              <span class="inline-block text-[11px] tracking-wider text-[var(--ink-muted)] border-b border-[var(--border-subtle)] pb-0.5">
+                · {{ getTypeName(entry.type) }}
               </span>
             </div>
 
-            <!-- 地点注脚 -->
-            <div v-if="entry.location" class="text-xs font-mono-archive text-[var(--ink-muted)] pt-1">
-              📍 {{ entry.location }}
+            <!-- 地点注脚 (无 emoji) -->
+            <div v-if="entry.location" class="text-xs text-[var(--ink-muted)] pt-1 font-normal">
+              地点：{{ entry.location }}
             </div>
           </div>
 
-          <!-- 右侧：有机自然排版的内容主体 (根据内容形态自适应，非固定 Card) -->
+          <!-- 右侧：有机排版的内容主体 -->
           <div class="md:col-span-9 space-y-5">
             
             <!-- 标题 -->
@@ -100,7 +141,7 @@ const getMonthName = (monthStr: string) => {
               {{ entry.title }}
             </h3>
 
-            <!-- 大幅摄影排版 (Large Editorial Photo) -->
+            <!-- 大幅摄影排版 -->
             <div v-if="entry.images" class="pt-2">
               <div class="relative w-full overflow-hidden bg-[var(--bg-subtle)] rounded-sm">
                 <img
@@ -116,24 +157,25 @@ const getMonthName = (monthStr: string) => {
               </div>
             </div>
 
-            <!-- 正文叙事 (宽松行距与呼吸感) -->
-            <p class="text-base sm:text-lg text-[var(--ink-secondary)] leading-relaxed font-normal whitespace-pre-line max-w-2xl">
+            <!-- 正文叙事 -->
+            <p class="text-base sm:text-lg text-[var(--ink-secondary)] leading-relaxed font-normal whitespace-pre-line max-w-2xl font-serif-editorial">
               {{ entry.content }}
             </p>
 
-            <!-- 附加信息与链接 (音乐专辑 / 项目仓库 / 书籍作者 / 随笔参数) -->
+            <!-- 附加参数与说明 (无大图时的元信息) -->
             <div v-if="entry.meta && !entry.images" class="pt-2 flex items-center gap-3 text-xs font-mono-archive text-[var(--ink-muted)]">
               <span>— {{ entry.meta }}</span>
             </div>
 
+            <!-- 项目/仓库链接 -->
             <div v-if="entry.link" class="pt-2">
               <a
                 :href="entry.link"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-1.5 text-xs font-mono-archive text-[var(--ink-primary)] hover-underline pb-0.5"
+                class="inline-flex items-center gap-1.5 text-xs text-[var(--ink-primary)] hover-underline pb-0.5 font-mono-archive"
               >
-                <span>View project / repository</span>
+                <span>查看项目与代码仓库</span>
                 <ArrowUpRight class="w-3.5 h-3.5" />
               </a>
             </div>

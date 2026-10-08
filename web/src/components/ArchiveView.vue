@@ -23,11 +23,29 @@ const yearEntries = computed(() => {
   return props.entries.filter(e => (e.year || '2026') === selectedYear.value)
 })
 
+const getTypeName = (type: string) => {
+  const map: Record<string, string> = {
+    thought: '随想',
+    photo: '摄影',
+    coffee: '咖啡',
+    music: '听音',
+    book: '书摘',
+    place: '行迹',
+    project: '造物',
+    game: '游戏',
+    purchase: '好物',
+    gear: '装备',
+    moment: '日常',
+  }
+  return map[type] || type
+}
+
 // 轻量统计
 const yearStats = computed(() => {
   const counts: Record<string, number> = {}
   yearEntries.value.forEach(e => {
-    counts[e.type] = (counts[e.type] || 0) + 1
+    const t = getTypeName(e.type)
+    counts[t] = (counts[t] || 0) + 1
   })
   return counts
 })
@@ -48,18 +66,18 @@ const monthGroups = computed(() => {
 
 const getMonthFull = (m: string) => {
   const names: Record<string, string> = {
-    '10': 'OCTOBER',
-    '09': 'SEPTEMBER',
-    '08': 'AUGUST',
-    '07': 'JULY',
-    '06': 'JUNE',
-    '05': 'MAY',
-    '04': 'APRIL',
-    '03': 'MARCH',
-    '02': 'FEBRUARY',
-    '01': 'JANUARY',
+    '10': '十月 · OCTOBER',
+    '09': '九月 · SEPTEMBER',
+    '08': '八月 · AUGUST',
+    '07': '七月 · JULY',
+    '06': '六月 · JUNE',
+    '05': '五月 · MAY',
+    '04': '四月 · APRIL',
+    '03': '三月 · MARCH',
+    '02': '二月 · FEBRUARY',
+    '01': '一月 · JANUARY',
   }
-  return names[m] || `MONTH ${m}`
+  return names[m] || `${m}月`
 }
 </script>
 
@@ -68,11 +86,16 @@ const getMonthFull = (m: string) => {
     
     <!-- 标头 -->
     <header class="pb-10 border-b border-[var(--border-subtle)] mb-12 space-y-3">
-      <h1 class="font-serif-editorial text-4xl sm:text-5xl font-normal text-[var(--ink-primary)]">
-        ARCHIVE
-      </h1>
-      <p class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
-        Chronological index of memories, moments and things made.
+      <div class="flex items-center gap-3">
+        <h1 class="font-serif-editorial text-4xl sm:text-5xl font-normal text-[var(--ink-primary)]">
+          归档
+        </h1>
+        <span class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
+          // ARCHIVE
+        </span>
+      </div>
+      <p class="font-serif-editorial text-sm sm:text-base text-[var(--ink-secondary)]">
+        按岁月回溯过往的记忆、瞬间与造物。
       </p>
     </header>
 
@@ -87,17 +110,17 @@ const getMonthFull = (m: string) => {
           ? 'text-[var(--ink-primary)] font-bold border-b-2 border-[var(--ink-primary)]' 
           : 'text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'"
       >
-        {{ y }}
+        {{ y }}年
       </button>
     </div>
 
     <!-- 极轻量文本统计（非 Dashboard，纯文字注脚） -->
-    <div class="font-mono-archive text-xs text-[var(--ink-muted)] pb-8 mb-12 border-b border-[var(--border-subtle)]">
-      <span>{{ selectedYear }} // </span>
-      <span class="text-[var(--ink-secondary)] font-medium">{{ yearEntries.length }} entries</span>
+    <div class="font-mono-archive text-xs text-[var(--ink-muted)] pb-8 mb-12 border-b border-[var(--border-subtle)] flex flex-wrap items-center gap-y-1">
+      <span>{{ selectedYear }}年 // </span>
+      <span class="text-[var(--ink-secondary)] font-medium ml-1">共 {{ yearEntries.length }} 条生活记录</span>
       <span class="mx-2">·</span>
       <span v-for="(count, type) in yearStats" :key="type" class="mr-3">
-        {{ count }} {{ type }}s
+        {{ count }} 条{{ type }}
       </span>
     </div>
 
@@ -108,9 +131,9 @@ const getMonthFull = (m: string) => {
         :key="month"
         class="space-y-6"
       >
-        <div class="font-mono-archive text-xs tracking-widest text-[var(--ink-muted)] uppercase border-b border-[var(--border-subtle)] pb-2 flex justify-between items-center">
+        <div class="font-mono-archive text-xs tracking-wider text-[var(--ink-muted)] border-b border-[var(--border-subtle)] pb-2 flex justify-between items-center">
           <span class="text-[var(--ink-secondary)] font-semibold">{{ getMonthFull(month) }}</span>
-          <span>{{ items.length }} records</span>
+          <span>{{ items.length }} 条记录</span>
         </div>
 
         <div class="divide-y divide-[var(--border-subtle)]/60">
@@ -130,7 +153,7 @@ const getMonthFull = (m: string) => {
 
             <div class="flex items-center gap-3 text-xs font-mono-archive text-[var(--ink-muted)] shrink-0 pl-16 sm:pl-0">
               <span v-if="item.location" class="hidden md:inline">{{ item.location }}</span>
-              <span class="text-[10px] uppercase tracking-wider text-[var(--ink-muted)]">#{{ item.type }}</span>
+              <span class="text-[11px] tracking-wider text-[var(--ink-muted)]">· {{ getTypeName(item.type) }}</span>
             </div>
           </div>
         </div>
