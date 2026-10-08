@@ -105,7 +105,7 @@ const getProjectDossier = (title: string) => {
 </script>
 
 <template>
-  <section id="projects" class="py-24 border-t border-[var(--border-color)] bg-[var(--bg-surface-subtle)]/50 relative transition-colors duration-400">
+  <section id="craft" class="py-24 border-t border-[var(--border-color)] bg-[var(--bg-surface-subtle)]/40 relative transition-colors duration-400">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
       
       <!-- 展台分镜标头 -->
@@ -113,13 +113,13 @@ const getProjectDossier = (title: string) => {
         <div>
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface)] text-[var(--ink-secondary)] text-xs font-mono mb-3 border border-[var(--border-color)] shadow-2xs">
             <Layers class="w-3.5 h-3.5 text-[var(--accent-amber)]" />
-            <span>THE CRAFT · 真实造物工坊档案</span>
+            <span>THE CRAFT · 生活中的一门手艺</span>
           </div>
           <h2 class="text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ink-primary)] font-serif-cinematic">
-            工程造物与核心仓库
+            我的造物工坊与开源项目
           </h2>
-          <p class="text-sm text-[var(--ink-secondary)] mt-2 font-mono">
-            来自 GitHub 真实公开仓库 · 点击任意项目查看「蓝图底片档案」
+          <p class="text-sm text-[var(--ink-secondary)] mt-2 font-mono max-w-2xl leading-relaxed">
+            写代码于我而言，不是冰冷的指标，而是像做木工、冲咖啡一样用逻辑雕刻出的确定性。这里陈列着自己造过的轮子与真实参与的开源项目。
           </p>
         </div>
 

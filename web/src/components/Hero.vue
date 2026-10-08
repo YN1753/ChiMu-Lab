@@ -1,30 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import type { Profile, Stats } from '../types'
-import { ArrowDown, Cpu, Sparkles, Terminal, ArrowUpRight, RefreshCw } from 'lucide-vue-next'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { ArrowDown, Sparkles, MapPin, Coffee, BookOpen, Music, Film, Compass, Heart, Terminal } from 'lucide-vue-next'
 import { audio } from '../utils/audio'
 
-const props = defineProps<{
-  profile: Profile | null
-  stats: Stats | null
-}>()
-
-// 迟暮当下状态轮盘
-const currentStates = [
-  { icon: '⚙️', text: '正在调优 suseoaa 的并发通道与事务', tag: 'SUSE-OAA' },
-  { icon: '☕', text: '手冲一杯浅烘耶加雪菲 · 92°C 细水闷蒸', tag: 'HandDrip' },
-  { icon: '📐', text: '在写 ArchCanvas 的 AST 架构剪枝生成', tag: 'ArchCanvas' },
-  { icon: '🚲', text: '秋夜在西湖边骑行，感受微凉晚风', tag: 'Hangzhou' },
-  { icon: '🎧', text: '在听坂本龙一《async》，终端里静默编译', tag: 'BGM' },
+// 迟暮当下生活便签状态
+const todayNotes = [
+  { label: '所在坐标', val: '中国 · 杭州 (西湖区 / 余杭)', icon: MapPin },
+  { label: '当前时令', val: '寒露微凉 · 桂花初落满青石板', icon: Sparkles },
+  { label: '今日风味', val: '手冲埃塞俄比亚古吉花魁 (92°C 细水萃取)', icon: Coffee },
+  { label: '正在循环', val: '坂本龙一 · 《async》/《Merry Christmas Mr. Lawrence》', icon: Music },
+  { label: '案头在读', val: '罗伯特·波西格 · 《禅与摩托车维修艺术》', icon: BookOpen },
+  { label: '随身镜头', val: 'Contax T2 · 38mm f/2.8 · Kodak Portra 400', icon: Film },
+  { label: '闲暇造物', val: 'SUSE 协会业务后端 & Go 调度状态机', icon: Terminal },
 ]
 
-const currentStateIndex = ref(0)
-const cycleState = () => {
-  currentStateIndex.value = (currentStateIndex.value + 1) % currentStates.length
-  audio.playShutter()
-}
-
-// 实时时间流
+// 实时流动时间
 const currentTime = ref('')
 let timer: number | null = null
 
@@ -42,13 +32,6 @@ onUnmounted(() => {
   if (timer) clearInterval(timer)
 })
 
-const skillList = computed(() => {
-  if (!props.profile?.skills) {
-    return ['Go', 'Wails', 'Vue 3', 'TypeScript', 'Docker', 'Linux', 'SQLite', 'Gin', 'Tailwind']
-  }
-  return props.profile.skills.split(',').map(s => s.trim())
-})
-
 const scrollTo = (selector: string) => {
   audio.playTink()
   const el = document.querySelector(selector)
@@ -57,16 +40,16 @@ const scrollTo = (selector: string) => {
 </script>
 
 <template>
-  <section id="hero" class="relative pt-12 pb-24 cinematic-canvas transition-colors duration-400">
+  <section id="hero" class="relative pt-10 pb-20 cinematic-canvas transition-colors duration-400">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-left">
       
-      <!-- 胶片场次打板横标 (Film Slate Bar) -->
+      <!-- 场次与时令横标 -->
       <div class="flex flex-wrap items-center justify-between text-[11px] font-mono text-[var(--ink-muted)] tracking-wider pb-5 border-b border-[var(--border-color)] mb-12 gap-3">
         <div class="flex items-center gap-3">
           <span class="inline-block w-2 h-2 rounded-full bg-[var(--accent-amber)] animate-pulse"></span>
-          <span class="text-[var(--ink-primary)] font-semibold">SCENE: CHIMU-ATELIER</span>
+          <span class="text-[var(--ink-primary)] font-semibold">CHIMU'S LIFE JOURNAL</span>
           <span class="text-[var(--border-hover)]">/</span>
-          <span>TAKE: 2026.FALL</span>
+          <span>AUTUMN 2026</span>
           <span class="text-[var(--border-hover)]">/</span>
           <span>HANGZHOU (30.27° N, 120.15° E)</span>
         </div>
@@ -75,96 +58,85 @@ const scrollTo = (selector: string) => {
           <span class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--accent-teal)]">
             UTC+8 {{ currentTime }}
           </span>
-          <span class="hidden sm:inline">KODAK WARM TONE</span>
+          <span class="hidden sm:inline">温润暖骨白 · 胶片生活志</span>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
         
-        <!-- 左侧：非对称电影级排版与自白 -->
-        <div class="lg:col-span-7 space-y-8">
+        <!-- 左侧：生活态度自白 -->
+        <div class="lg:col-span-7 space-y-7">
           
-          <!-- 迟暮此刻正在做什么（互动轮盘） -->
-          <div
-            @click="cycleState"
-            class="group inline-flex items-center gap-3 px-3.5 py-1.5 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--accent-amber)] cursor-pointer shadow-2xs transition-all duration-300"
-            title="点击切换迟暮的当下状态"
-          >
-            <span class="text-sm">{{ currentStates[currentStateIndex].icon }}</span>
-            <span class="text-xs text-[var(--ink-primary)] font-medium font-mono">
-              {{ currentStates[currentStateIndex].text }}
-            </span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-surface-subtle)] text-[var(--ink-muted)] font-mono border border-[var(--border-color)] group-hover:text-[var(--accent-amber)] flex items-center gap-1">
-              <RefreshCw class="w-2.5 h-2.5 group-hover:rotate-180 transition-transform duration-500" />
-              <span>切频</span>
-            </span>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface)] text-[var(--ink-secondary)] text-xs font-mono border border-[var(--border-color)] shadow-2xs">
+            <Compass class="w-3.5 h-3.5 text-[var(--accent-amber)]" />
+            <span>迟暮的私人生活自留地 · Life & Mind</span>
           </div>
 
-          <!-- 电影海报主标题 -->
+          <!-- 主标题：生活是全方位的 -->
           <div class="space-y-4">
             <h1 class="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight text-[var(--ink-primary)] font-serif-cinematic leading-[1.18]">
-              造有骨肉的工程，
+              认认真真生活，
               <br />
               <span class="italic text-[var(--accent-amber)]">
-                过有体温的生活。
+                安安静静记录。
               </span>
             </h1>
             
             <p class="text-base sm:text-lg text-[var(--ink-secondary)] leading-relaxed max-w-2xl pt-2 font-normal">
-              我是 <strong class="text-[var(--ink-primary)] font-semibold">迟暮 (ChiMu)</strong>。这里不是对外宣讲的简历橱窗，而是我自己的私人暗房与数字工坊。左手记录真实写下的代码架构、底层调度与踩坑；右手收集秋天的桂花、夜雨的咖啡、胶卷底片与吉光片羽。
+              我是 <strong class="text-[var(--ink-primary)] font-semibold">迟暮 (ChiMu)</strong>。这里是属于我自己的自留地，记录着<strong class="text-[var(--ink-primary)]">生活的方方面面</strong>——骑行路上迎面吹来的夜风、清晨手冲咖啡的香气、读过的书摘与听过的唱片、拍下的胶卷，以及偶尔亲手敲下的代码与造物。
             </p>
           </div>
 
-          <!-- 双轨切入交互按钮 -->
+          <!-- 双轨导航入口 -->
           <div class="flex flex-wrap items-center gap-4 pt-2">
             <button
-              @click="scrollTo('#projects')"
+              @click="scrollTo('#life')"
               class="px-5 py-3 rounded-xl bg-[var(--ink-primary)] hover:opacity-90 text-[var(--bg-page)] text-xs font-mono font-medium transition-all shadow-sm flex items-center gap-2 group cursor-pointer"
             >
-              <Terminal class="w-4 h-4 text-[var(--accent-amber)]" />
-              <span>01 / 探访造物工坊 (The Craft)</span>
+              <Sparkles class="w-4 h-4 text-[var(--accent-amber)]" />
+              <span>01 / 漫步生活全景 (Life Chronicles)</span>
               <ArrowDown class="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />
             </button>
 
             <button
-              @click="scrollTo('#moments')"
+              @click="scrollTo('#craft')"
               class="px-5 py-3 rounded-xl bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-subtle)] border border-[var(--border-color)] text-[var(--ink-primary)] text-xs font-mono font-medium transition-all shadow-2xs flex items-center gap-2 group cursor-pointer"
             >
-              <Sparkles class="w-4 h-4 text-[var(--accent-amber)]" />
-              <span>02 / 翻阅生活切片 (Life Frames)</span>
+              <Terminal class="w-4 h-4 text-[var(--accent-amber)]" />
+              <span>02 / 探访造物工坊 (Craft & Code)</span>
               <ArrowDown class="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />
             </button>
           </div>
 
-          <!-- 常备技术手艺 -->
+          <!-- 生活棱镜标签 -->
           <div class="pt-4 border-t border-[var(--border-color)]">
             <div class="text-[11px] font-mono uppercase tracking-wider text-[var(--ink-muted)] mb-3 flex items-center gap-2">
-              <Cpu class="w-3.5 h-3.5 text-[var(--accent-amber)]" />
-              <span>常用手艺 · Personal Tech Stack</span>
+              <Heart class="w-3.5 h-3.5 text-rose-500" />
+              <span>生活的多面体 · Facets of Living</span>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="skill in skillList"
-                :key="skill"
-                class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-xs font-mono text-[var(--ink-secondary)] hover:border-[var(--accent-amber)] hover:text-[var(--ink-primary)] transition-all shadow-2xs"
-              >
-                {{ skill }}
-              </span>
+            <div class="flex flex-wrap gap-2 text-xs font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--ink-secondary)]">🚲 城市骑行</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--ink-secondary)]">☕ 手冲咖啡</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--ink-secondary)]">📷 胶卷摄影</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--ink-secondary)]">📖 书房阅读</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--ink-secondary)]">🎧 唱片音乐</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--ink-secondary)]">💭 深夜随想</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--ink-secondary)]">🎒 桌面好物</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--ink-secondary)]">⚙️ 造物手艺</span>
             </div>
           </div>
 
         </div>
 
-        <!-- 右侧：物理感工坊档案卡 (Atelier Dossier Specimen) -->
+        <!-- 右侧：生活便签板 (Today's Life Slate) -->
         <div class="lg:col-span-5">
-          <div class="film-card p-6 sm:p-7 relative overflow-hidden">
+          <div class="film-card p-6 sm:p-7 relative overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-color)]">
             
-            <!-- 胶片孔与档案戳 -->
-            <div class="flex items-center justify-between pb-5 border-b border-[var(--border-color)] mb-6">
+            <div class="flex items-center justify-between pb-4 border-b border-[var(--border-color)] mb-5">
               <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-[var(--accent-teal)]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[var(--accent-amber)]"></span>
                 <span class="text-xs font-mono font-semibold text-[var(--ink-primary)] tracking-wide">
-                  ATELIER SPECIMEN · 01
+                  TODAY'S LIFE SLATE · 当下便签
                 </span>
               </div>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-subtle)] text-[var(--ink-muted)] border border-[var(--border-color)]">
@@ -172,62 +144,25 @@ const scrollTo = (selector: string) => {
               </span>
             </div>
 
-            <!-- 当前首位置顶作品重点索引 -->
-            <div class="mb-6 p-4 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-color)] relative group">
-              <div class="text-[10px] font-mono text-[var(--accent-amber)] font-medium mb-1 flex items-center gap-1.5">
-                <span>★ 置顶核心仓库 #1</span>
-                <span>·</span>
-                <span>suse-edu-cn 组织项目</span>
-              </div>
-              <h3 class="text-base font-serif-cinematic font-semibold text-[var(--ink-primary)] group-hover:text-[var(--accent-amber)] transition-colors">
-                SUSE-OAA-BACKEND
-              </h3>
-              <p class="text-xs text-[var(--ink-secondary)] mt-1.5 line-clamp-2">
-                四川轻化工大学开放原子开源协会业务后端服务体系。Go + Gin 高性能微架构。
-              </p>
-              <div class="mt-3 flex items-center justify-between pt-2 border-t border-[var(--border-color)]/60 text-[11px] font-mono">
-                <span class="text-[var(--ink-muted)]">Campus OpenSource</span>
-                <a
-                  href="https://github.com/suse-edu-cn/SUSE-OAA-BACKEND"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  @click="audio.playShutter()"
-                  class="text-[var(--ink-primary)] hover:text-[var(--accent-amber)] inline-flex items-center gap-1 font-medium"
-                >
-                  <span>检视仓库</span>
-                  <ArrowUpRight class="w-3 h-3" />
-                </a>
+            <!-- 便签条目列表 -->
+            <div class="space-y-3.5 text-xs font-mono">
+              <div
+                v-for="(item, i) in todayNotes"
+                :key="i"
+                class="p-2.5 rounded-xl bg-[var(--bg-surface-subtle)]/70 border border-[var(--border-color)]/60 flex items-start gap-3"
+              >
+                <component :is="item.icon" class="w-4 h-4 text-[var(--accent-amber)] shrink-0 mt-0.5" />
+                <div class="flex-1 min-w-0">
+                  <div class="text-[10px] text-[var(--ink-muted)]">{{ item.label }}</div>
+                  <div class="text-[var(--ink-primary)] font-medium mt-0.5 truncate">{{ item.val }}</div>
+                </div>
               </div>
             </div>
 
-            <!-- 运行时遥测指标 -->
-            <div class="space-y-3 font-mono text-xs">
-              <div class="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/50">
-                <span class="text-[var(--ink-muted)]">运行时架构</span>
-                <span class="text-[var(--ink-primary)] font-medium">{{ stats?.go_version || 'Go 1.27 (Linux)' }}</span>
-              </div>
-              <div class="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/50">
-                <span class="text-[var(--ink-muted)]">活动协程数</span>
-                <span class="text-[var(--accent-teal)] font-medium">{{ stats?.goroutines || 8 }} Goroutines</span>
-              </div>
-              <div class="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/50">
-                <span class="text-[var(--ink-muted)]">数据库引擎</span>
-                <span class="text-[var(--ink-primary)] font-medium">Pure-Go SQLite</span>
-              </div>
-              <div class="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/50">
-                <span class="text-[var(--ink-muted)]">查询响应时延</span>
-                <span class="text-[var(--accent-amber)] font-medium">{{ stats?.query_latency_ms || 0.45 }} ms</span>
-              </div>
-              <div class="flex justify-between items-center py-1.5">
-                <span class="text-[var(--ink-muted)]">服务连续存活</span>
-                <span class="text-[var(--ink-primary)] font-medium">{{ stats?.uptime_hours || 24 }} 小时</span>
-              </div>
-            </div>
-
-            <!-- 底部印章 -->
-            <div class="mt-6 pt-4 border-t border-[var(--border-color)] flex items-center justify-between text-[11px] font-mono text-[var(--ink-muted)]">
-              <span>CHIMU / ARCHIVED</span>
-              <span class="text-[var(--ink-secondary)]">100% 真实源码足迹</span>
+            <!-- 底部生活注脚 -->
+            <div class="mt-5 pt-4 border-t border-[var(--border-color)] flex items-center justify-between text-[11px] font-mono text-[var(--ink-muted)]">
+              <span>CHIMU'S MEMO</span>
+              <span class="text-[var(--ink-secondary)]">生活是具体的，且充满温度</span>
             </div>
 
           </div>

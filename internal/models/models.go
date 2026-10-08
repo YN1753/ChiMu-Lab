@@ -63,22 +63,24 @@ type SiteConfig struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-// LifeMoment 迟暮的生活切片与日常记录
+// LifeMoment 迟暮的生活方方面面与日常记录
 type LifeMoment struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Date      string    `json:"date"`      // 2026.10.08
 	Time      string    `json:"time"`      // 23:30
-	Location  string    `json:"location"`  // 杭州 · 余杭工位 / 西湖边
+	Location  string    `json:"location"`  // 杭州 · 满觉陇 / 西湖边 / 书房桌面
 	Weather   string    `json:"weather"`   // 19°C · 秋夜微雨
-	Mood      string    `json:"mood"`      // 专注 / 松弛 / 放空 / 拾光
-	Category  string    `json:"category"`  // film (胶片), thought (随想), coffee (日常), reading (阅读/音乐)
+	Mood      string    `json:"mood"`      // 惬意 / 专注 / 放空 / 拾光
+	Category  string    `json:"category"`  // thought (随想), photo (胶卷摄影), coffee (手冲咖啡), reading (书房阅读), music (唱片音乐), cycling (骑行漫游), gear (桌面好物)
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
-	Note      string    `json:"note"`      // 拍立得卡片背面手写便签
-	ImageURL  string    `json:"image_url"` // 胶卷/生活意象
-	Camera    string    `json:"camera"`    // 镜头/设备隐喻
+	Quote     string    `json:"quote"`     // 随行批注或诗意金句
+	Note      string    `json:"note"`      // 拍立得背后手写便签
+	ImageURL  string    `json:"image_url"` // 生活意象图
+	MetaInfo  string    `json:"meta_info"` // 参数信息（咖啡水温粉比、镜头光圈、骑行里程等）
 	Tags      string    `json:"tags"`
 	Likes     int       `json:"likes"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
 

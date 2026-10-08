@@ -67,13 +67,16 @@ export interface LifeMoment {
   location: string
   weather: string
   mood: string
-  category: 'film' | 'thought' | 'coffee' | 'reading' | string
+  category: 'thought' | 'photo' | 'coffee' | 'reading' | 'music' | 'cycling' | 'gear' | string
   title: string
   content: string
+  quote?: string
   note: string
   image_url: string
-  camera: string
+  meta_info?: string
+  camera?: string
   tags: string
   likes: number
 }
+
 

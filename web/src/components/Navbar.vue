@@ -9,9 +9,9 @@ const isSoundOn = ref(true)
 const isRainPlaying = ref(false)
 
 const navLinks = [
-  { label: '01 / 造物工坊', en: 'THE CRAFT', href: '#projects' },
-  { label: '02 / 生活切片', en: 'LIFE FRAMES', href: '#moments' },
-  { label: '03 / 轨迹刻度', en: 'TRACE', href: '#activity' },
+  { label: '01 / 生活方方面面', en: 'LIFE CHRONICLES', href: '#life' },
+  { label: '02 / 造物与手艺', en: 'THE CRAFT & CODE', href: '#craft' },
+  { label: '03 / 岁月与足迹', en: 'TEMPORAL TRACE', href: '#activity' },
 ]
 
 const toggleTheme = (theme: 'alabaster' | 'amber' | 'noir') => {
@@ -58,10 +58,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 w-full border-b border-[var(--border-color)] bg-[var(--bg-page)]/85 backdrop-blur-xl transition-colors duration-400">
+  <header class="sticky top-0 z-50 w-full border-b border-[var(--border-color)] bg-[var(--bg-page)]/90 backdrop-blur-xl transition-colors duration-400">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
       
-      <!-- 品牌印章 -->
+      <!-- 品牌标识：迟暮的生活自留地 -->
       <a href="#hero" @click="audio.playShutter()" class="flex items-center gap-3.5 group">
         <div class="relative w-9 h-9 rounded-xl bg-[var(--ink-primary)] flex items-center justify-center text-[var(--bg-page)] font-serif-cinematic text-base font-semibold shadow-sm group-hover:scale-105 transition-transform duration-300">
           <span>暮</span>
@@ -70,19 +70,19 @@ onMounted(() => {
         <div class="text-left">
           <div class="flex items-center gap-2">
             <span class="font-bold text-base tracking-tight text-[var(--ink-primary)] font-serif-cinematic">
-              ChiMu-Lab
+              迟暮 · ChiMu
             </span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-surface-subtle)] text-[var(--ink-secondary)] font-mono border border-[var(--border-color)]">
-              Digital Atelier
+              生活志与自留地
             </span>
           </div>
           <p class="text-[11px] text-[var(--ink-muted)] font-mono tracking-wider -mt-0.5 hidden sm:block">
-            造物与生活切片 · 杭州 (30.27° N, 120.15° E)
+            记录生活的方方面面 · 杭州 (30.27° N, 120.15° E)
           </p>
         </div>
       </a>
 
-      <!-- 桌面端中央导航分镜 -->
+      <!-- 中央生活章节导航 -->
       <nav class="hidden md:flex items-center gap-1 bg-[var(--bg-surface-subtle)]/80 border border-[var(--border-color)] rounded-full px-4 py-1.5 backdrop-blur-sm shadow-2xs">
         <button
           v-for="item in navLinks"
@@ -95,10 +95,10 @@ onMounted(() => {
         </button>
       </nav>
 
-      <!-- 电影控制台：滤镜调色 + 氛围声响 + GitHub -->
+      <!-- 电影控制台：滤镜调色 + 自然白噪音 + 触感 + 个人主页 -->
       <div class="hidden lg:flex items-center gap-3">
         
-        <!-- 自然雨声微合成器 -->
+        <!-- 自然微雨白噪音 -->
         <button
           @click="toggleRain"
           class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] text-xs font-mono transition-all hover:border-[var(--accent-teal)]"
@@ -118,7 +118,7 @@ onMounted(() => {
         <button
           @click="toggleSound"
           class="p-2 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] transition-all"
-          :title="isSoundOn ? '音效已开启（机械快门音）' : '音效已静音'"
+          :title="isSoundOn ? '微音效已开启（机械快门音）' : '微音效已静音'"
         >
           <Volume2 v-if="isSoundOn" class="w-3.5 h-3.5" />
           <VolumeX v-else class="w-3.5 h-3.5 text-[var(--ink-muted)]" />
@@ -152,7 +152,7 @@ onMounted(() => {
           </button>
         </div>
 
-        <!-- 真实 GitHub 链接 -->
+        <!-- GitHub 外部主页 -->
         <a
           href="https://github.com/YN1753"
           target="_blank"
@@ -166,7 +166,7 @@ onMounted(() => {
         </a>
       </div>
 
-      <!-- 移动端操作栏 -->
+      <!-- 移动端汉堡按钮 -->
       <div class="flex items-center gap-2 lg:hidden">
         <button
           @click="toggleRain"
