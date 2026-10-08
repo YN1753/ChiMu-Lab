@@ -49,79 +49,114 @@ func InitDB(dbPath string) (*gorm.DB, error) {
 	return database, nil
 }
 
-// seedData 填充默认种子数据（保证初次运行时内容完整丰富，备案审核合规）
+// seedData 填充迟暮真实的个人项目与仓库数据
 func seedData(database *gorm.DB) {
 	var count int64
 	database.Model(&models.Profile{}).Count(&count)
 	if count == 0 {
 		profile := models.Profile{
 			Name:     "迟暮",
-			Title:    "全栈研发工程师 / Gopher / 独立开发者",
-			Bio:      "立足工程美学与极客实践。热衷于 Go 高性能后端、现代前端与自动化技术探索，在数字世界构建优雅而坚固的实验室工具。",
+			Title:    "Gopher / 全栈开发者",
+			Bio:      "迟暮的个人数字工坊。不迎合外界，只记录自己造过的轮子、踩过的坑与真实的工程探索。",
 			Avatar:   "https://avatars.githubusercontent.com/u/108920146?v=4",
 			Github:   "https://github.com/YN1753",
 			Email:    "chimu@codeactivityhub.top",
 			Location: "中国 · 杭州",
-			Skills:   "Go,Vue 3,TypeScript,Docker,Linux,SQLite,MySQL,Gin,Tailwind CSS,Git,Redis",
+			Skills:   "Go,Wails,Vue 3,TypeScript,Docker,Linux,Swift,SQLite,Gin,Tailwind CSS",
 		}
 		database.Create(&profile)
 	}
 
-	database.Model(&models.Project{}).Count(&count)
-	if count == 0 {
-		projects := []models.Project{
-			{
-				Title:       "面试练习站 · Daily Practice Hub",
-				Subtitle:    "算法每日打卡与高频面试考点演练平台",
-				Description: "围绕 ACM 模式、数组贪心算法、高频场景题构建的沉浸式每日刷题平台。支持闭卷练习、代码思路验证与历史归档回溯。",
-				Category:    "core",
-				Tags:        "Go,Algorithms,ACM,Vue,Tailwind",
-				DemoURL:     "/interview",
-				GithubURL:   "https://github.com/YN1753",
-				Status:      "Active",
-				Featured:    true,
-				Order:       1,
-			},
-			{
-				Title:       "ChiMu-Lab 迟暮实验室",
-				Subtitle:    "极简主义全栈工坊与代码动态聚合站",
-				Description: "本站核心工程。基于 Go + Vue 3 + SQLite 构建的轻量级开发实验室，整合项目展厅、工程动态追踪与合规备案中心。",
-				Category:    "lab",
-				Tags:        "Go,Gin,Vue3,TypeScript,SQLite,Tailwind",
-				DemoURL:     "https://codeactivityhub.top",
-				GithubURL:   "https://github.com/YN1753/ChiMu-Lab",
-				Status:      "Active",
-				Featured:    true,
-				Order:       2,
-			},
-			{
-				Title:       "GopherSpace 分布式存储探测工具",
-				Subtitle:    "高性能并发网络扫描与节点状态同步守护进程",
-				Description: "轻量级网络探测器，专为探测节点连通性、实时延迟与健康状态设计，具备极低资源占用与高吞吐并发能力。",
-				Category:    "tool",
-				Tags:        "Go,Goroutine,Network,Linux,Syscall",
-				DemoURL:     "",
-				GithubURL:   "https://github.com/YN1753",
-				Status:      "Stable",
-				Featured:    true,
-				Order:       3,
-			},
-			{
-				Title:       "Hermes 自动化工作流引擎",
-				Subtitle:    "每日任务调度、内容聚合与静态站点自动化发布管线",
-				Description: "定时拉取技术动态与刷题计划，自动化编译生成静态练习页并无缝推送到生产 Web 服务。",
-				Category:    "lab",
-				Tags:        "Automation,Python,Shell,CI/CD,Linux",
-				DemoURL:     "",
-				GithubURL:   "https://github.com/YN1753",
-				Status:      "Active",
-				Featured:    false,
-				Order:       4,
-			},
-		}
-		for _, p := range projects {
-			database.Create(&p)
-		}
+	// 每次更新时重新同步真实项目
+	database.Exec("DELETE FROM projects")
+	projects := []models.Project{
+		{
+			Title:       "SUSE-OAA-BACKEND",
+			Subtitle:    "四川轻化工大学开放原子开源协会 · 核心业务后端",
+			Description: "为四川轻化工大学开源协会研发的 Go 后端服务体系，支撑协会事务协作、招新管理与数据接口。",
+			Category:    "core",
+			Tags:        "Go,Gin,suse-edu-cn,Campus OpenSource",
+			DemoURL:     "",
+			GithubURL:   "https://github.com/suse-edu-cn/SUSE-OAA-BACKEND",
+			Status:      "Active",
+			Featured:    true,
+			Order:       1,
+		},
+		{
+			Title:       "ArchCanvas",
+			Subtitle:    "AI 辅助 Go 架构设计画布",
+			Description: "让 AI 与开发者一起，从需求语义理解、ER 实体建模到架构设计，快速生成与构建可运行的 Go 工程骨架。",
+			Category:    "core",
+			Tags:        "TypeScript,Go,Architecture,AI Canvas",
+			DemoURL:     "",
+			GithubURL:   "https://github.com/YN1753/ArchCanvas",
+			Status:      "Active",
+			Featured:    true,
+			Order:       2,
+		},
+		{
+			Title:       "GoLens",
+			Subtitle:    "基于交互式状态机的 Go 底层机制透视镜",
+			Description: "让 GMP 协程调度、三色标记 GC 屏障与 Channel 阻塞机制清晰可见的高交互度运行时可视化工具。",
+			Category:    "tool",
+			Tags:        "JavaScript,Go Internals,GMP,Visualization",
+			DemoURL:     "",
+			GithubURL:   "https://github.com/YN1753/GoLens",
+			Status:      "Stable",
+			Featured:    true,
+			Order:       3,
+		},
+		{
+			Title:       "AstraLink-Desktop",
+			Subtitle:    "基于 Wails 的图笔记桌面端应用",
+			Description: "星链 2.0。探索 Go + 前端混合桌面开发（Wails 架构），支持双向链接、图谱可视化与本地隐私优先的知识管理。",
+			Category:    "tool",
+			Tags:        "Go,Wails,Vue,Desktop,Graph",
+			DemoURL:     "",
+			GithubURL:   "https://github.com/YN1753/AstraLink-Desktop",
+			Status:      "Active",
+			Featured:    false,
+			Order:       4,
+		},
+		{
+			Title:       "Go-Load",
+			Subtitle:    "轻量级高并发 HTTP 压测工具",
+			Description: "基于 Go 语言原生并发模型编写的高性能压测工具，轻巧无外部依赖，具备低资源开销与精确的时延吞吐量统计。",
+			Category:    "tool",
+			Tags:        "Go,Benchmark,High Concurrency,CLI",
+			DemoURL:     "",
+			GithubURL:   "https://github.com/YN1753/Go-Load",
+			Status:      "Stable",
+			Featured:    false,
+			Order:       5,
+		},
+		{
+			Title:       "nexus",
+			Subtitle:    "面向开发者的现代化 Linux 服务器管理平台",
+			Description: "轻量化 Linux 运维控制台，用于打理自己的云服务器，监控基础硬件性能、容器与服务状态。",
+			Category:    "tool",
+			Tags:        "Vue,Linux,DevOps,System",
+			DemoURL:     "",
+			GithubURL:   "https://github.com/YN1753/nexus",
+			Status:      "WIP",
+			Featured:    false,
+			Order:       6,
+		},
+		{
+			Title:       "DeviceDaily",
+			Subtitle:    "支持 Mac 原生小组件的设备成本统计 App",
+			Description: "用 Swift 原生开发的实用记账与设备折旧折算工具，支持 macOS 原生 Widget 小组件常驻桌面。",
+			Category:    "tool",
+			Tags:        "Swift,macOS,WidgetKit,Utility",
+			DemoURL:     "",
+			GithubURL:   "https://github.com/YN1753/DeviceDaily",
+			Status:      "Active",
+			Featured:    false,
+			Order:       7,
+		},
+	}
+	for _, p := range projects {
+		database.Create(&p)
 	}
 
 	database.Model(&models.Activity{}).Count(&count)
@@ -130,39 +165,39 @@ func seedData(database *gorm.DB) {
 		activities := []models.Activity{
 			{
 				Date:        now.Format("2006-01-02"),
-				Type:        "release",
-				Title:       "迟暮实验室 ChiMu-Lab 1.0 正式上线",
-				Description: "完成全栈架构搭建，基于 Go + Vue 3 + SQLite 实现单二进制极简部署与现代化响应式 UI。",
-				RepoName:    "YN1753/ChiMu-Lab",
-				Count:       12,
-				Link:        "https://github.com/YN1753/ChiMu-Lab",
-			},
-			{
-				Date:        now.AddDate(0, 0, -2).Format("2006-01-02"),
 				Type:        "commit",
-				Title:       "重构面试每日题静态排版与移动端自适应",
-				Description: "优化 ACM 模式题目展示效果，增加平滑滚动与语法高亮支持。",
-				RepoName:    "YN1753/interview-hub",
-				Count:       6,
-				Link:        "https://github.com/YN1753",
-			},
-			{
-				Date:        now.AddDate(0, 0, -5).Format("2006-01-02"),
-				Type:        "study",
-				Title:       "贪心与动态规划状态转移专题复习",
-				Description: "深度演练相邻约束类贪心原型题目，输出白板题解与复杂度推导笔记。",
-				RepoName:    "YN1753/algo-notes",
-				Count:       4,
-				Link:        "https://github.com/YN1753",
-			},
-			{
-				Date:        now.AddDate(0, 0, -9).Format("2006-01-02"),
-				Type:        "milestone",
-				Title:       "启用独立主域名 codeactivityhub.top",
-				Description: "完成云服务器 DNS 解析、全站 HTTPS/TLS 证书签发与安全加固配置。",
-				RepoName:    "YN1753/infra",
+				Title:       "SUSE-OAA-BACKEND 架构优化与接口梳理",
+				Description: "重构业务逻辑层与中间件鉴权，提升校园协会服务响应性能。",
+				RepoName:    "suse-edu-cn/SUSE-OAA-BACKEND",
 				Count:       8,
-				Link:        "https://codeactivityhub.top",
+				Link:        "https://github.com/suse-edu-cn/SUSE-OAA-BACKEND",
+			},
+			{
+				Date:        now.AddDate(0, 0, -1).Format("2006-01-02"),
+				Type:        "commit",
+				Title:       "ArchCanvas AI 画布核心状态机与实体生成测试",
+				Description: "打通从需求文本解析到 Go struct 及 GORM 实体定义代码生成链条。",
+				RepoName:    "YN1753/ArchCanvas",
+				Count:       12,
+				Link:        "https://github.com/YN1753/ArchCanvas",
+			},
+			{
+				Date:        now.AddDate(0, 0, -4).Format("2006-01-02"),
+				Type:        "release",
+				Title:       "GoLens 运行时可视化透视镜初版调试",
+				Description: "完成 GMP 调度状态转移与 Channel 缓冲队列的可视化逻辑。",
+				RepoName:    "YN1753/GoLens",
+				Count:       5,
+				Link:        "https://github.com/YN1753/GoLens",
+			},
+			{
+				Date:        now.AddDate(0, 0, -8).Format("2006-01-02"),
+				Type:        "milestone",
+				Title:       "AstraLink-Desktop Wails 桌面端跨平台打包",
+				Description: "验证 macOS / Windows 双平台打包产物与 SQLite 本地数据存储。",
+				RepoName:    "YN1753/AstraLink-Desktop",
+				Count:       6,
+				Link:        "https://github.com/YN1753/AstraLink-Desktop",
 			},
 		}
 		for _, a := range activities {
@@ -174,7 +209,7 @@ func seedData(database *gorm.DB) {
 	if count == 0 {
 		config := models.SiteConfig{
 			SiteName:     "迟暮实验室 · ChiMu-Lab",
-			SiteDesc:     "Code Activity Hub · 迟暮的个人极客工坊与代码动态中心",
+			SiteDesc:     "迟暮的个人数字工坊与工程工作台",
 			Domain:       "codeactivityhub.top",
 			ICPNumber:    "浙ICP备2026081664号",
 			ICPLink:      "https://beian.miit.gov.cn",
@@ -184,5 +219,5 @@ func seedData(database *gorm.DB) {
 		database.Create(&config)
 	}
 
-	log.Println("Database initialized and seeded successfully.")
+	log.Println("Database initialized and real repos seeded successfully.")
 }

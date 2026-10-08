@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Profile, Stats } from '../types'
-import { ArrowRight, Code2, Cpu, Zap, Compass } from 'lucide-vue-next'
+import { ArrowDown, Github, Cpu, Zap, Compass, ArrowUpRight } from 'lucide-vue-next'
 
 const props = defineProps<{
   profile: Profile | null
@@ -10,7 +10,7 @@ const props = defineProps<{
 
 const skillList = computed(() => {
   if (!props.profile?.skills) {
-    return ['Go (Core)', 'Goroutine', 'Vue 3', 'TypeScript', 'Docker', 'Linux', 'SQLite', 'Gin', 'Tailwind', 'Git']
+    return ['Go', 'Wails', 'Vue 3', 'TypeScript', 'Docker', 'Linux', 'Swift', 'SQLite', 'Gin', 'Tailwind']
   }
   return props.profile.skills.split(',').map(s => s.trim())
 })
@@ -24,18 +24,18 @@ const scrollToProjects = () => {
 <template>
   <section id="hero" class="relative pt-16 pb-28 cinematic-canvas">
     <div class="max-w-6xl mx-auto px-5 sm:px-8 relative text-left">
-      <!-- 隐喻式分镜刻度条 (Scene Header) -->
+      <!-- 隐喻式分镜刻度条 -->
       <div class="flex items-center justify-between text-[11px] font-mono text-[#8c8f9b] uppercase tracking-widest pb-6 border-b border-[#e8e6df] mb-12">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-[#d97706]/70"></span>
-          <span>Act I · Prologue & Monograph</span>
+          <span>ChiMu's Personal Workbench · 自留地</span>
         </div>
         <div class="hidden sm:flex items-center gap-4 text-[#716e64]">
-          <span>Location: Hangzhou 30.27°N</span>
+          <span>Hangzhou · 30.27°N</span>
           <span>•</span>
-          <span>Tone: Warm Alabaster</span>
+          <span>SUSEer / Gopher</span>
           <span>•</span>
-          <span>Shutter: 180°</span>
+          <span>Quiet Craft</span>
         </div>
       </div>
 
@@ -45,10 +45,10 @@ const scrollToProjects = () => {
           <!-- 身份导语 -->
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#edeae1] text-[#716e64] text-xs font-mono">
             <Compass class="w-3.5 h-3.5 text-[#d97706]" />
-            <span>迟暮的数字工坊 · ChiMu-Lab 2026</span>
+            <span>迟暮的个人工作台 · ChiMu-Lab</span>
           </div>
 
-          <!-- 电影海报式大标题 -->
+          <!-- 电影海报式大标题：写给自己看 -->
           <div class="space-y-4">
             <h1 class="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight text-[#14151a] font-serif-cinematic leading-[1.18]">
               写有确定性的代码，
@@ -58,15 +58,15 @@ const scrollToProjects = () => {
               </span>
             </h1>
             <p class="text-base sm:text-lg text-[#525662] leading-relaxed max-w-2xl pt-2 font-normal">
-              你好，我是 <strong class="text-[#14151a] font-semibold">迟暮 (ChiMu)</strong>。专注于 Go 高性能后端架构、现代 Web 交互与底层系统工程。在数字世界构建如胶片般具备时间厚度的实验工坊，用严谨的算法切片与架构推导，沉淀真实的工程价值。
+              这里是 <strong class="text-[#14151a] font-semibold">迟暮 (ChiMu)</strong> 的数字自留地。记录自己造过的轮子、踩过的坑，以及那些未完成但充满趣味的探索。不迎合外界，只诚恳面向内心的创造欲与工程手艺。
             </p>
           </div>
 
-          <!-- 专长标签 -->
+          <!-- 技术栈标签 -->
           <div class="pt-2">
             <div class="text-[11px] font-mono uppercase tracking-wider text-[#8c8f9b] mb-3.5 flex items-center gap-1.5">
               <Cpu class="w-3.5 h-3.5 text-[#d97706]" />
-              <span>Technical Repertoire · 核心专长与架构栈</span>
+              <span>Personal Tech Stack · 自己常用的技术栈</span>
             </div>
             <div class="flex flex-wrap gap-2">
               <span
@@ -85,32 +85,30 @@ const scrollToProjects = () => {
               @click="scrollToProjects"
               class="px-6 py-3.5 rounded-xl bg-[#14151a] hover:bg-[#252834] text-white font-medium text-xs flex items-center gap-2.5 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer"
             >
-              <span>浏览作品分镜展厅</span>
-              <ArrowRight class="w-4 h-4 text-slate-300" />
+              <span>查看我的真实项目</span>
+              <ArrowDown class="w-4 h-4 text-slate-300" />
             </button>
 
             <a
-              href="/interview"
+              href="https://github.com/YN1753"
+              target="_blank"
               class="px-5 py-3.5 rounded-xl bg-white hover:bg-[#faf9f5] text-[#14151a] font-medium text-xs border border-[#e2ded4] hover:border-[#14151a]/20 flex items-center gap-2.5 transition-all shadow-2xs"
             >
-              <Code2 class="w-4 h-4 text-[#d97706]" />
-              <span>今日 · 面试练习站</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#f3efe4] text-[#92400e] font-mono">
-                Live
-              </span>
+              <Github class="w-4 h-4 text-[#14151a]" />
+              <span>GitHub @YN1753</span>
+              <ArrowUpRight class="w-3.5 h-3.5 text-slate-400" />
             </a>
           </div>
         </div>
 
-        <!-- 右侧：精装画册质感系统 HUD 切片卡片 -->
+        <!-- 右侧：工作台真实监控 HUD -->
         <div class="lg:col-span-5">
           <div class="film-card p-7 sm:p-8 bg-white border border-[#e8e6df] shadow-xl text-left">
-            <!-- 头部 -->
             <div class="flex items-center justify-between pb-4 border-b border-[#f0ede6]">
               <div class="flex items-center gap-2.5">
                 <div class="w-2 h-2 rounded-full bg-[#d97706]"></div>
                 <span class="text-xs font-mono text-[#14151a] font-semibold tracking-wide">
-                  SYSTEM TELEMETRY
+                  WORKBENCH TELEMETRY
                 </span>
               </div>
               <span class="text-[11px] font-mono text-[#0d766e] bg-[#f0fdf4] px-2 py-0.5 rounded border border-[#bbf7d0] flex items-center gap-1">
@@ -119,7 +117,6 @@ const scrollToProjects = () => {
               </span>
             </div>
 
-            <!-- 数据四宫格 -->
             <div class="grid grid-cols-2 gap-3.5 my-6">
               <div class="p-3.5 rounded-xl bg-[#fbfbfa] border border-[#f0ede6]">
                 <div class="text-[11px] font-mono text-[#8c8f9b]">RUNTIME</div>
@@ -152,7 +149,7 @@ const scrollToProjects = () => {
               </div>
 
               <div class="p-3.5 rounded-xl bg-[#fbfbfa] border border-[#f0ede6]">
-                <div class="text-[11px] font-mono text-[#8c8f9b]">SECURITY</div>
+                <div class="text-[11px] font-mono text-[#8c8f9b]">NETWORK</div>
                 <div class="text-xs font-bold text-[#14151a] font-mono mt-1">
                   TLS 1.3 / Port 443
                 </div>
@@ -162,16 +159,15 @@ const scrollToProjects = () => {
               </div>
             </div>
 
-            <!-- 底部分镜元数据注记 -->
             <div class="p-3.5 rounded-xl bg-[#faf9f5] border border-[#e8e6df] font-mono text-[11px] text-[#525662] space-y-1.5">
               <div class="flex items-center justify-between text-[#8c8f9b] pb-1 border-b border-[#ece8df]">
-                <span>PROD STATUS // VERIFIED</span>
-                <span class="text-[#0d766e]">PASS</span>
+                <span>CORE ACTIVE PROJECTS</span>
+                <span class="text-[#0d766e]">ONLINE</span>
               </div>
               <div class="leading-relaxed">
-                <div>> Domain: <span class="text-[#14151a] font-semibold">codeactivityhub.top</span></div>
-                <div>> License: <span class="text-[#92400e] font-semibold">浙ICP备2026081664号</span></div>
-                <div>> Goroutines: <span class="text-[#14151a]">{{ stats?.goroutines || 4 }} concurrent</span></div>
+                <div>> #1 Pinned: <span class="text-[#14151a] font-semibold">SUSE-OAA-BACKEND</span></div>
+                <div>> AI Canvas: <span class="text-[#92400e] font-semibold">ArchCanvas</span></div>
+                <div>> Visualizer: <span class="text-[#14151a]">GoLens (GMP / GC)</span></div>
               </div>
             </div>
           </div>
