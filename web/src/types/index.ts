@@ -59,3 +59,21 @@ export interface SiteConfig {
   police_number: string
   police_code: string
 }
+
+export interface LifeMoment {
+  id: number
+  date: string
+  time: string
+  location: string
+  weather: string
+  mood: string
+  category: 'film' | 'thought' | 'coffee' | 'reading' | string
+  title: string
+  content: string
+  note: string
+  image_url: string
+  camera: string
+  tags: string
+  likes: number
+}
+

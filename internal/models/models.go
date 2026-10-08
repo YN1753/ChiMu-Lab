@@ -62,3 +62,23 @@ type SiteConfig struct {
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
+
+// LifeMoment 迟暮的生活切片与日常记录
+type LifeMoment struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Date      string    `json:"date"`      // 2026.10.08
+	Time      string    `json:"time"`      // 23:30
+	Location  string    `json:"location"`  // 杭州 · 余杭工位 / 西湖边
+	Weather   string    `json:"weather"`   // 19°C · 秋夜微雨
+	Mood      string    `json:"mood"`      // 专注 / 松弛 / 放空 / 拾光
+	Category  string    `json:"category"`  // film (胶片), thought (随想), coffee (日常), reading (阅读/音乐)
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	Note      string    `json:"note"`      // 拍立得卡片背面手写便签
+	ImageURL  string    `json:"image_url"` // 胶卷/生活意象
+	Camera    string    `json:"camera"`    // 镜头/设备隐喻
+	Tags      string    `json:"tags"`
+	Likes     int       `json:"likes"`
+	CreatedAt time.Time `json:"created_at"`
+}
+

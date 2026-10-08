@@ -39,6 +39,7 @@ func InitDB(dbPath string) (*gorm.DB, error) {
 		&models.Project{},
 		&models.Activity{},
 		&models.SiteConfig{},
+		&models.LifeMoment{},
 	)
 	if err != nil {
 		return nil, err
@@ -205,6 +206,89 @@ func seedData(database *gorm.DB) {
 		}
 	}
 
+	// 真实生活切片与日常记录 (Life & Vignettes)
+	database.Exec("DELETE FROM life_moments")
+	moments := []models.LifeMoment{
+		{
+			Date:     "2026.10.08",
+			Time:     "23:40",
+			Location: "杭州 · 余杭工位",
+			Weather:  "19°C · 秋夜微雨",
+			Mood:     "专注",
+			Category: "thought",
+			Title:    "雨夜、通道阻塞与造轮子的意义",
+			Content:  "窗外下着绵密的秋雨。有人曾问我，为什么开源社区那么多现成的调度器和压测工具，还要花时间一行行写 GoLens 和 Go-Load？亲手排查过一次 GMP 的偷取队列、体会过 Channel 阻塞唤醒时的原子语义，那种心里的笃定是调现成库给不了的。代码不是虚张声势的展品，是一块块自己铺上去的青石板。",
+			Note:     "手冲了一杯耶加雪菲。雨水敲打百叶窗的声音很适合写代码。",
+			ImageURL: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+			Camera:   "Leica Q2 · 28mm f/1.7 · ISO 400",
+			Tags:     "Go,GMP,思考,夜雨",
+			Likes:    14,
+		},
+		{
+			Date:     "2026.10.05",
+			Time:     "17:20",
+			Location: "杭州 · 满觉陇",
+			Weather:  "23°C · 晴朗薄暮",
+			Mood:     "拾光",
+			Category: "film",
+			Title:    "桂花蒸与胶卷里的秋天",
+			Content:  "趁着国庆假期最后两天，骑车去了一趟满觉陇。满山的金桂已经落了一地，空气里全是甜香。随身带了旁轴机拍完了一卷 Kodak 400。阳光透过香樟树叶洒在青石板上，突然觉得不管是写系统架构还是过生活，留白和呼吸感才是最珍贵的底色。",
+			Note:     "Kodak Portra 400 曝光补偿 +0.3EV，光斑很柔和。",
+			ImageURL: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+			Camera:   "Contax T2 · 38mm f/2.8 · Kodak Portra 400",
+			Tags:     "胶片,满觉陇,秋日,骑行",
+			Likes:    28,
+		},
+		{
+			Date:     "2026.10.01",
+			Time:     "15:00",
+			Location: "西湖边 · 树荫下长椅",
+			Weather:  "25°C · 微风",
+			Mood:     "松弛",
+			Category: "reading",
+			Title:    "《禅与摩托车维修艺术》与工程手艺",
+			Content:  "重读波西格的《禅与摩托车维修艺术》。书中写道：‘佛陀或耶稣坐在排气管边，就跟坐在莲花座上一样正常。’ 当你带着真正的良质（Quality）去调试一段并发竞态，或者去调配一杯手冲水粉比时，工具和人就已经融为一体了。少一点功利的目标，多一点对手艺的敬畏。",
+			Note:     "P.142 标注：‘如果你对事情感到厌倦，说明你已经失去了与它的活生生的联结。’",
+			ImageURL: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80",
+			Camera:   "Ricoh GR IIIx · 40mm f/2.8",
+			Tags:     "阅读,手艺,良质,哲学",
+			Likes:    19,
+		},
+		{
+			Date:     "2026.09.28",
+			Time:     "22:15",
+			Location: "杭州 · 迟暮工坊",
+			Weather:  "21°C · 清凉夜风",
+			Mood:     "沉思",
+			Category: "coffee",
+			Title:    "曼特宁手冲笔记与 AST 遍历灵感",
+			Content:  "深烘苏门答腊曼特宁，研磨度偏粗，水温 90°C。前段坚果与黑巧的风味很厚重。在等第二段注水浸润的 40 秒里，突然想通了 ArchCanvas 解析 Go struct tag 时的嵌套循环问题：直接在语义树上做局部剪枝，比正则匹配合适得多。生活中的沉淀，往往会在不经意间反哺工程。",
+			Note:     "咖啡粉 16g，水粉比 1:14，两段注水，总萃取用时 2分15秒。",
+			ImageURL: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80",
+			Camera:   "Fujifilm X100V · Classic Chrome",
+			Tags:     "手冲,咖啡,ArchCanvas,思考",
+			Likes:    22,
+		},
+		{
+			Date:     "2026.09.20",
+			Time:     "01:30",
+			Location: "深夜桌面",
+			Weather:  "18°C · 静谧夜色",
+			Mood:     "沉浸",
+			Category: "music",
+			Title:    "坂本龙一的音符与静默的 Goroutine",
+			Content:  "戴上耳机放坂本龙一的《async》。整座城市好像都睡熟了，只有屏幕上微微发光的代码。把 suseoaa 的一个死锁隐患顺藤摸瓜找了出来——是一个 defer unlock 在条件分支里意外漏掉。修掉的那一刻，世界好像都变宽阔了。这种深夜的纯粹，千金不换。",
+			Note:     "推荐曲目：《solari》与《andata》。空旷而平静。",
+			ImageURL: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
+			Camera:   "Sony A7C · 35mm f/1.4 GM",
+			Tags:     "音乐,坂本龙一,深夜编码,suseoaa",
+			Likes:    31,
+		},
+	}
+	for _, m := range moments {
+		database.Create(&m)
+	}
+
 	database.Model(&models.SiteConfig{}).Count(&count)
 	if count == 0 {
 		config := models.SiteConfig{
@@ -219,5 +303,5 @@ func seedData(database *gorm.DB) {
 		database.Create(&config)
 	}
 
-	log.Println("Database initialized and real repos seeded successfully.")
+	log.Println("Database initialized and real repos and moments seeded successfully.")
 }

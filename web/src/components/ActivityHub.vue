@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import type { Activity } from '../types'
 import { Activity as ActivityIcon, GitCommit, Award, BookOpen, Rocket, Flame, GitFork, BarChart3 } from 'lucide-vue-next'
+import { audio } from '../utils/audio'
 
 const props = defineProps<{
   activities: Activity[]
@@ -53,66 +54,54 @@ const getActivityIcon = (type: string) => {
       return GitCommit
   }
 }
-
-const getActivityColor = (type: string) => {
-  switch (type.toLowerCase()) {
-    case 'release':
-      return 'text-[#7c3aed] bg-[#f5f3ff] border-[#ddd6fe]'
-    case 'milestone':
-      return 'text-[#b45309] bg-[#fef3c7] border-[#fde68a]'
-    case 'study':
-      return 'text-[#047857] bg-[#ecfdf5] border-[#a7f3d0]'
-    default:
-      return 'text-[#14151a] bg-[#faf9f5] border-[#e8e6df]'
-  }
-}
 </script>
 
 <template>
-  <section id="activity" class="py-24 border-t border-[#e8e6df] bg-[#fbfbfa] relative">
-    <div class="max-w-6xl mx-auto px-5 sm:px-8 text-left">
+  <section id="activity" class="py-24 border-t border-[var(--border-color)] bg-[var(--bg-surface-subtle)]/40 relative transition-colors duration-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
+      
       <!-- 刻度分镜标头 -->
       <div class="mb-14">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#edeae1] text-[#716e64] text-xs font-mono mb-3">
-          <ActivityIcon class="w-3.5 h-3.5 text-[#d97706]" />
-          <span>Act IV · Chronological Stream · 时间脉络与活跃刻度</span>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface)] text-[var(--ink-secondary)] text-xs font-mono mb-3 border border-[var(--border-color)] shadow-2xs">
+          <ActivityIcon class="w-3.5 h-3.5 text-[var(--accent-amber)]" />
+          <span>TEMPORAL TRACE · 时间脉络与活跃刻度</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-medium tracking-tight text-[#14151a] font-serif-cinematic">
+        <h2 class="text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ink-primary)] font-serif-cinematic">
           代码动态与工程热力
         </h2>
-        <p class="text-[#525662] text-sm sm:text-base mt-2 max-w-xl font-normal">
+        <p class="text-[var(--ink-secondary)] text-sm sm:text-base mt-2 max-w-xl font-normal">
           保持日常工程节奏。用 52 周连续代码刻度，记录每一次架构迭代、算法攻坚与版本发布。
         </p>
       </div>
 
-      <!-- 🌟 热力图与语言成分卡片 -->
-      <div class="film-card p-7 sm:p-9 bg-white border border-[#e8e6df] mb-9">
+      <!-- 热力图与语言成分卡片 -->
+      <div class="film-card p-6 sm:p-8 bg-[var(--bg-surface)] border border-[var(--border-color)] mb-9">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-7">
           <div class="flex items-center gap-3">
-            <div class="p-2.5 rounded-xl bg-[#edeae1] text-[#716e64]">
-              <Flame class="w-5 h-5 text-[#d97706]" />
+            <div class="p-2.5 rounded-xl bg-[var(--bg-surface-subtle)] text-[var(--ink-secondary)] border border-[var(--border-color)]">
+              <Flame class="w-5 h-5 text-[var(--accent-amber)]" />
             </div>
             <div>
-              <h3 class="text-base font-bold text-[#14151a] font-serif-cinematic flex items-center gap-2">
+              <h3 class="text-base font-bold text-[var(--ink-primary)] font-serif-cinematic flex items-center gap-2">
                 年度贡献与提交热力图
-                <span class="text-xs font-mono text-[#0d766e] bg-[#f0fdf4] px-2 py-0.5 rounded border border-[#bbf7d0]">
+                <span class="text-xs font-mono text-[var(--accent-teal)] bg-[var(--bg-surface-subtle)] px-2 py-0.5 rounded border border-[var(--border-color)]">
                   52 周沉淀
                 </span>
               </h3>
-              <p class="text-xs text-[#8c8f9b] font-mono mt-0.5">
+              <p class="text-xs text-[var(--ink-muted)] font-mono mt-0.5">
                 {{ activeHoverDay ? `${activeHoverDay.date} : ${activeHoverDay.count} 次提交记录` : '共计 642 次有效工程提交与架构演进' }}
               </p>
             </div>
           </div>
 
           <!-- 图例 -->
-          <div class="flex items-center gap-2 text-xs font-mono text-[#8c8f9b]">
+          <div class="flex items-center gap-2 text-xs font-mono text-[var(--ink-muted)]">
             <span class="text-[11px]">Less</span>
-            <span class="w-3.5 h-3.5 rounded-[3px] bg-[#edeae1]"></span>
-            <span class="w-3.5 h-3.5 rounded-[3px] bg-[#a7f3d0]"></span>
-            <span class="w-3.5 h-3.5 rounded-[3px] bg-[#34d399]"></span>
-            <span class="w-3.5 h-3.5 rounded-[3px] bg-[#059669]"></span>
-            <span class="w-3.5 h-3.5 rounded-[3px] bg-[#047857]"></span>
+            <span class="w-3.5 h-3.5 rounded-[3px] bg-[var(--bg-surface-subtle)] border border-[var(--border-color)]"></span>
+            <span class="w-3.5 h-3.5 rounded-[3px] bg-emerald-200 dark:bg-emerald-800"></span>
+            <span class="w-3.5 h-3.5 rounded-[3px] bg-emerald-400 dark:bg-emerald-600"></span>
+            <span class="w-3.5 h-3.5 rounded-[3px] bg-emerald-600 dark:bg-emerald-500"></span>
+            <span class="w-3.5 h-3.5 rounded-[3px] bg-emerald-800 dark:bg-emerald-400"></span>
             <span class="text-[11px]">More</span>
           </div>
         </div>
@@ -120,13 +109,13 @@ const getActivityColor = (type: string) => {
         <!-- 月份与格子容器 -->
         <div class="overflow-x-auto pb-4 scrollbar-thin">
           <div class="min-w-[820px]">
-            <div class="flex justify-between text-[10px] font-mono text-[#8c8f9b] mb-2 pl-7 pr-2">
+            <div class="flex justify-between text-[10px] font-mono text-[var(--ink-muted)] mb-2 pl-7 pr-2">
               <span v-for="(m, idx) in monthLabels" :key="idx">{{ m }}</span>
             </div>
 
             <!-- 热力格子主体 -->
             <div class="flex gap-1.5 items-start">
-              <div class="flex flex-col gap-1.5 text-[9px] font-mono text-[#8c8f9b] pt-1 pr-2">
+              <div class="flex flex-col gap-1.5 text-[9px] font-mono text-[var(--ink-muted)] pt-1 pr-2">
                 <span>周一</span>
                 <span class="opacity-0">周二</span>
                 <span>周三</span>
@@ -145,15 +134,15 @@ const getActivityColor = (type: string) => {
                   <div
                     v-for="(day, dIdx) in week"
                     :key="dIdx"
-                    @mouseenter="activeHoverDay = { date: day.date, count: day.count }"
+                    @mouseenter="activeHoverDay = { date: day.date, count: day.count }; audio.playTink()"
                     @mouseleave="activeHoverDay = null"
                     :class="[
                       'w-3.5 h-3.5 rounded-[3px] transition-all cursor-pointer transform hover:scale-130',
-                      day.level === 0 ? 'bg-[#edeae1] hover:bg-[#dedcd5]' : '',
-                      day.level === 1 ? 'bg-[#a7f3d0] hover:bg-[#6ee7b7]' : '',
-                      day.level === 2 ? 'bg-[#34d399] hover:bg-[#10b981]' : '',
-                      day.level === 3 ? 'bg-[#059669] hover:bg-[#047857]' : '',
-                      day.level === 4 ? 'bg-[#047857] shadow-2xs hover:bg-[#064e3b]' : '',
+                      day.level === 0 ? 'bg-[var(--bg-surface-subtle)] border border-[var(--border-color)]' : '',
+                      day.level === 1 ? 'bg-emerald-200 dark:bg-emerald-900' : '',
+                      day.level === 2 ? 'bg-emerald-400 dark:bg-emerald-700' : '',
+                      day.level === 3 ? 'bg-emerald-600 dark:bg-emerald-500' : '',
+                      day.level === 4 ? 'bg-emerald-800 dark:bg-emerald-400 shadow-2xs' : '',
                     ]"
                   ></div>
                 </div>
@@ -163,34 +152,34 @@ const getActivityColor = (type: string) => {
         </div>
 
         <!-- 代码成分比例条 -->
-        <div class="mt-7 pt-6 border-t border-[#f0ede6]">
-          <div class="flex items-center justify-between text-xs font-mono text-[#525662] mb-2.5">
+        <div class="mt-7 pt-6 border-t border-[var(--border-color)]">
+          <div class="flex items-center justify-between text-xs font-mono text-[var(--ink-secondary)] mb-2.5">
             <span class="flex items-center gap-1.5">
-              <BarChart3 class="w-3.5 h-3.5 text-[#d97706]" />
-              Language Breakdown · 技术栈成分分布
+              <BarChart3 class="w-3.5 h-3.5 text-[var(--accent-amber)]" />
+              <span>Language Breakdown · 技术栈成分分布</span>
             </span>
-            <span class="text-[#8c8f9b]">64.0% Go Dominant</span>
+            <span class="text-[var(--ink-muted)]">64.0% Go Dominant</span>
           </div>
 
-          <div class="h-2 w-full rounded-full bg-[#edeae1] overflow-hidden flex">
-            <div class="h-full bg-[#14151a] w-[64%]" title="Go: 64%"></div>
-            <div class="h-full bg-[#d97706] w-[22%]" title="Vue/TypeScript: 22%"></div>
-            <div class="h-full bg-[#0d766e] w-[8%]" title="Python/Shell: 8%"></div>
-            <div class="h-full bg-[#78716c] w-[6%]" title="SQL/SQLite: 6%"></div>
+          <div class="h-2 w-full rounded-full bg-[var(--bg-surface-subtle)] overflow-hidden flex border border-[var(--border-color)]">
+            <div class="h-full bg-[var(--ink-primary)] w-[64%]" title="Go: 64%"></div>
+            <div class="h-full bg-[var(--accent-amber)] w-[22%]" title="Vue/TypeScript: 22%"></div>
+            <div class="h-full bg-[var(--accent-teal)] w-[8%]" title="Python/Shell: 8%"></div>
+            <div class="h-full bg-stone-500 w-[6%]" title="SQL/SQLite: 6%"></div>
           </div>
 
-          <div class="flex flex-wrap items-center gap-6 mt-3 text-xs font-mono text-[#525662]">
+          <div class="flex flex-wrap items-center gap-6 mt-3 text-xs font-mono text-[var(--ink-secondary)]">
             <span class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-[#14151a]"></span> Go 64.0%
+              <span class="w-2.5 h-2.5 rounded-full bg-[var(--ink-primary)]"></span> Go 64.0%
             </span>
             <span class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-[#d97706]"></span> Vue / TypeScript 22.0%
+              <span class="w-2.5 h-2.5 rounded-full bg-[var(--accent-amber)]"></span> Vue / TypeScript 22.0%
             </span>
             <span class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-[#0d766e]"></span> Python & Shell 8.0%
+              <span class="w-2.5 h-2.5 rounded-full bg-[var(--accent-teal)]"></span> Python & Shell 8.0%
             </span>
             <span class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-[#78716c]"></span> SQLite & SQL 6.0%
+              <span class="w-2.5 h-2.5 rounded-full bg-stone-500"></span> SQLite & SQL 6.0%
             </span>
           </div>
         </div>
@@ -198,40 +187,41 @@ const getActivityColor = (type: string) => {
 
       <!-- 动态流水 Timeline -->
       <div class="text-left">
-        <h3 class="text-xs font-mono uppercase tracking-wider text-[#8c8f9b] mb-5 flex items-center gap-2">
-          <GitFork class="w-4 h-4 text-[#d97706]" />
-          Recent Engineering Changelog · 近期动态切片
+        <h3 class="text-xs font-mono uppercase tracking-wider text-[var(--ink-muted)] mb-5 flex items-center gap-2">
+          <GitFork class="w-4 h-4 text-[var(--accent-amber)]" />
+          <span>Recent Engineering Changelog · 近期动态切片</span>
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div
             v-for="act in activities"
             :key="act.id"
-            class="film-card p-5.5 border border-[#e8e6df] bg-white text-left flex gap-4 items-start"
+            class="film-card p-5.5 border border-[var(--border-color)] bg-[var(--bg-surface)] text-left flex gap-4 items-start"
           >
-            <div :class="['p-2 rounded-xl border shrink-0', getActivityColor(act.type)]">
+            <div class="p-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface-subtle)] text-[var(--accent-amber)] shrink-0">
               <component :is="getActivityIcon(act.type)" class="w-4 h-4" />
             </div>
 
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between gap-2">
-                <span class="text-xs font-mono text-[#92400e] font-medium truncate">
+                <span class="text-xs font-mono text-[var(--accent-amber)] font-medium truncate">
                   {{ act.repo_name }}
                 </span>
-                <span class="text-[11px] font-mono text-[#8c8f9b] shrink-0">
+                <span class="text-[11px] font-mono text-[var(--ink-muted)] shrink-0">
                   {{ act.date }}
                 </span>
               </div>
-              <h4 class="text-sm font-semibold text-[#14151a] font-serif-cinematic mt-1 mb-1 truncate">
+              <h4 class="text-sm font-semibold text-[var(--ink-primary)] font-serif-cinematic mt-1 mb-1 truncate">
                 {{ act.title }}
               </h4>
-              <p class="text-xs text-[#525662] leading-relaxed">
+              <p class="text-xs text-[var(--ink-secondary)] leading-relaxed">
                 {{ act.description }}
               </p>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   </section>
 </template>

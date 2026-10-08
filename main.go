@@ -45,6 +45,8 @@ func main() {
 		api.GET("/activities", handlers.GetActivities)
 		api.GET("/stats", handlers.GetStats)
 		api.GET("/config", handlers.GetConfig)
+		api.GET("/moments", handlers.GetMoments)
+		api.POST("/moments/:id/like", handlers.LikeMoment)
 	}
 
 	// 前端静态文件托管（如果 web/dist 存在）

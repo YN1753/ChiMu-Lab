@@ -3,9 +3,10 @@ import { ref, onMounted } from 'vue'
 import Navbar from './components/Navbar.vue'
 import Hero from './components/Hero.vue'
 import ProjectShowcase from './components/ProjectShowcase.vue'
+import LivingFrames from './components/LivingFrames.vue'
 import ActivityHub from './components/ActivityHub.vue'
 import ComplianceFooter from './components/ComplianceFooter.vue'
-import type { Profile, Project, Activity, Stats, SiteConfig } from './types'
+import type { Profile, Project, Activity, Stats, SiteConfig, LifeMoment } from './types'
 
 const profile = ref<Profile | null>({
   id: 1,
@@ -25,7 +26,7 @@ const stats = ref<Stats | null>({
   active_days: 218,
   uptime_hours: 48,
   uptime_seconds: 172800,
-  last_updated: '2026-10-08 23:00:00',
+  last_updated: '2026-10-08 23:45:00',
   go_version: 'go1.27',
   goroutines: 4,
   memory_alloc_mb: 1.76,
@@ -127,6 +128,89 @@ const projects = ref<Project[]>([
   },
 ])
 
+const moments = ref<LifeMoment[]>([
+  {
+    id: 1,
+    date: '2026.10.08',
+    time: '23:40',
+    location: '杭州 · 余杭工位',
+    weather: '19°C · 秋夜微雨',
+    mood: '专注',
+    category: 'thought',
+    title: '雨夜、通道阻塞与造轮子的意义',
+    content: '窗外下着绵密的秋雨。有人曾问我，为什么开源社区那么多现成的调度器和压测工具，还要花时间一行行写 GoLens 和 Go-Load？亲手排查过一次 GMP 的偷取队列、体会过 Channel 阻塞唤醒时的原子语义，那种心里的笃定是调现成库给不了的。代码不是虚张声势的展品，是一块块自己铺上去的青石板。',
+    note: '手冲了一杯耶加雪菲。雨水敲打百叶窗的声音很适合写代码。',
+    image_url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80',
+    camera: 'Leica Q2 · 28mm f/1.7 · ISO 400',
+    tags: 'Go,GMP,思考,夜雨',
+    likes: 14,
+  },
+  {
+    id: 2,
+    date: '2026.10.05',
+    time: '17:20',
+    location: '杭州 · 满觉陇',
+    weather: '23°C · 晴朗薄暮',
+    mood: '拾光',
+    category: 'film',
+    title: '桂花蒸与胶卷里的秋天',
+    content: '趁着假期最后两天，骑车去了一趟满觉陇。满山的金桂已经落了一地，空气里全是甜香。随身带了旁轴机拍完了一卷 Kodak 400。阳光透过香樟树叶洒在青石板上，突然觉得不管是写系统架构还是过生活，留白和呼吸感才是最珍贵的底色。',
+    note: 'Kodak Portra 400 曝光补偿 +0.3EV，光斑很柔和。',
+    image_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    camera: 'Contax T2 · 38mm f/2.8 · Kodak 400',
+    tags: '胶片,满觉陇,秋日,骑行',
+    likes: 28,
+  },
+  {
+    id: 3,
+    date: '2026.10.01',
+    time: '15:00',
+    location: '西湖边 · 树荫下长椅',
+    weather: '25°C · 微风',
+    mood: '松弛',
+    category: 'reading',
+    title: '《禅与摩托车维修艺术》与工程手艺',
+    content: '重读波西格的《禅与摩托车维修艺术》。书中写道：‘佛陀或耶稣坐在排气管边，就跟坐在莲花座上一样正常。’ 当你带着真正的良质（Quality）去调试一段并发竞态，或者去调配一杯手冲水粉比时，工具和人就已经融为一体了。少一点功利的目标，多一点对手艺的敬畏。',
+    note: 'P.142 标注：‘如果你对事情感到厌倦，说明你已经失去了与它的活生生的联结。’',
+    image_url: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80',
+    camera: 'Ricoh GR IIIx · 40mm f/2.8',
+    tags: '阅读,手艺,良质,哲学',
+    likes: 19,
+  },
+  {
+    id: 4,
+    date: '2026.09.28',
+    time: '22:15',
+    location: '杭州 · 迟暮工坊',
+    weather: '21°C · 清凉夜风',
+    mood: '沉思',
+    category: 'coffee',
+    title: '曼特宁手冲笔记与 AST 遍历灵感',
+    content: '深烘苏门答腊曼特宁，研磨度偏粗，水温 90°C。前段坚果与黑巧的风味很厚重。在等第二段注水浸润的 40 秒里，突然想通了 ArchCanvas 解析 Go struct tag 时的嵌套循环问题：直接在语义树上做局部剪枝，比正则匹配合适得多。生活中的沉淀，往往会在不经意间反哺工程。',
+    note: '咖啡粉 16g，水粉比 1:14，两段注水，总萃取用时 2分15秒。',
+    image_url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80',
+    camera: 'Fujifilm X100V · Classic Chrome',
+    tags: '手冲,咖啡,ArchCanvas,思考',
+    likes: 22,
+  },
+  {
+    id: 5,
+    date: '2026.09.20',
+    time: '01:30',
+    location: '深夜桌面',
+    weather: '18°C · 静谧夜色',
+    mood: '沉浸',
+    category: 'reading',
+    title: '坂本龙一的音符与静默的 Goroutine',
+    content: '戴上耳机放坂本龙一的《async》。整座城市好像都睡熟了，只有屏幕上微微发光的代码。把 suseoaa 的一个死锁隐患顺藤摸瓜找了出来——是一个 defer unlock 在条件分支里意外漏掉。修掉的那一刻，世界好像都变宽阔了。这种深夜的纯粹，千金不换。',
+    note: '推荐曲目：《solari》与《andata》。空旷而平静。',
+    image_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80',
+    camera: 'Sony A7C · 35mm f/1.4 GM',
+    tags: '音乐,坂本龙一,深夜编码,suseoaa',
+    likes: 31,
+  },
+])
+
 const activities = ref<Activity[]>([
   {
     id: 1,
@@ -173,7 +257,7 @@ const activities = ref<Activity[]>([
 const config = ref<SiteConfig | null>({
   id: 1,
   site_name: '迟暮实验室 · ChiMu-Lab',
-  site_desc: '迟暮的个人数字工坊与工程工作台',
+  site_desc: '迟暮的个人数字工坊与生活档案',
   domain: 'codeactivityhub.top',
   icp_number: '浙ICP备2026081664号',
   icp_link: 'https://beian.miit.gov.cn',
@@ -183,12 +267,13 @@ const config = ref<SiteConfig | null>({
 
 onMounted(async () => {
   try {
-    const [profRes, projRes, actRes, statRes, cfgRes] = await Promise.allSettled([
+    const [profRes, projRes, actRes, statRes, cfgRes, momRes] = await Promise.allSettled([
       fetch('/api/profile').then(r => r.ok ? r.json() : null),
       fetch('/api/projects').then(r => r.ok ? r.json() : null),
       fetch('/api/activities').then(r => r.ok ? r.json() : null),
       fetch('/api/stats').then(r => r.ok ? r.json() : null),
       fetch('/api/config').then(r => r.ok ? r.json() : null),
+      fetch('/api/moments').then(r => r.ok ? r.json() : null),
     ])
 
     if (profRes.status === 'fulfilled' && profRes.value) profile.value = profRes.value
@@ -196,6 +281,7 @@ onMounted(async () => {
     if (actRes.status === 'fulfilled' && actRes.value) activities.value = actRes.value
     if (statRes.status === 'fulfilled' && statRes.value) stats.value = statRes.value
     if (cfgRes.status === 'fulfilled' && cfgRes.value) config.value = cfgRes.value
+    if (momRes.status === 'fulfilled' && momRes.value) moments.value = momRes.value
   } catch (err) {
     console.log('Using default local seed data', err)
   }
@@ -203,11 +289,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#f7f6f2] text-[#14151a] flex flex-col justify-between selection:bg-[#d97706]/15 selection:text-[#92400e]">
+  <div class="min-h-screen bg-[var(--bg-page)] text-[var(--ink-primary)] flex flex-col justify-between selection:bg-[var(--accent-amber)]/20 selection:text-[var(--accent-amber)] transition-colors duration-400">
     <Navbar />
     <main class="flex-grow">
       <Hero :profile="profile" :stats="stats" />
       <ProjectShowcase :projects="projects" />
+      <LivingFrames :moments="moments" />
       <ActivityHub :activities="activities" />
     </main>
     <ComplianceFooter :config="config" />

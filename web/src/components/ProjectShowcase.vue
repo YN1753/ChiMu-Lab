@@ -1,308 +1,388 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import type { Project } from '../types'
-import { Github, ArrowUpRight, Eye, BookOpen, Layers, Terminal, Sparkles } from 'lucide-vue-next'
+import { Github, ArrowUpRight, Eye, Layers, Terminal, X, Copy, Check, ExternalLink, ShieldCheck } from 'lucide-vue-next'
+import { audio } from '../utils/audio'
 
-defineProps<{
+const props = defineProps<{
   projects: Project[]
 }>()
+
+// 选中的档案底片抽屉
+const activeModalProject = ref<Project | null>(null)
+const copied = ref(false)
+
+const openProjectModal = (proj: Project) => {
+  activeModalProject.value = proj
+  copied.value = false
+  audio.playShutter()
+}
+
+const closeModal = () => {
+  activeModalProject.value = null
+  audio.playTink()
+}
+
+const copyCloneCommand = (url: string) => {
+  navigator.clipboard.writeText(`git clone ${url}.git`)
+  copied.value = true
+  audio.playTink()
+  setTimeout(() => {
+    copied.value = false
+  }, 2000)
+}
+
+// 对应每个项目的详细架构与初衷档案
+const getProjectDossier = (title: string) => {
+  switch (title) {
+    case 'SUSE-OAA-BACKEND':
+      return {
+        org: '四川轻化工大学开放原子开源协会 (suse-edu-cn)',
+        origin: '为高校开源协会搭建独立自主、高可用、可长期维护的业务后端体系，支撑招新流转、技术协作与校园开源活动。',
+        highlights: [
+          '分层架构：Controller -> Service -> Repository 清晰解耦',
+          '中间件闭环：基于 JWT 的上下文鉴权与动态权限校验',
+          '高内聚领域：活动事件、成员档案、面试流转三位一体',
+        ],
+        codeHint: 'go run main.go --config=configs/config.yaml',
+      }
+    case 'ArchCanvas':
+      return {
+        org: '迟暮个人实验仓库 (YN1753)',
+        origin: '探索 AI 时代软件架构设计的表达方式。摆脱传统孤立的代码编写，从需求语义直接投射到 ER 实体与 Go struct 架构全景。',
+        highlights: [
+          '双向同步：画布节点拖拽与 Go AST 代码 AST 双向保持一致',
+          '自动建模：从对话需求直接输出标准化 GORM / Ent 架构骨架',
+          '架构可视化：将抽象的微服务边界转化为物理拓扑图谱',
+        ],
+        codeHint: 'npm run dev # 启动 AI 架构画布编辑器',
+      }
+    case 'GoLens':
+      return {
+        org: '迟暮个人实验仓库 (YN1753)',
+        origin: 'Go 语言底层机制晦涩抽象。用状态机和交互式动画把 GMP 调度、三色标记 GC 和 Channel 缓冲在浏览器中直观展现。',
+        highlights: [
+          'GMP 真实模拟：偷取队列 (Work Stealing) 与 sysmon 抢占可视化',
+          '三色标记法：灰色工作集遍历与写屏障 (Write Barrier) 动态推演',
+          '通道交互：无缓冲与有缓冲通道的锁竞争与唤醒演示',
+        ],
+        codeHint: 'open index.html # 基于原生状态机的无依赖透视镜',
+      }
+    case 'AstraLink-Desktop':
+      return {
+        org: '迟暮个人实验仓库 (YN1753)',
+        origin: '探索 Go 语言在现代桌面应用上的表现。基于 Wails 2.0 打造双向链接图笔记，数据 100% 留存在本地 SQLite。',
+        highlights: [
+          'Wails 架构：原生 WebKit 视图绑定 Go 核心高性能后端',
+          '本地隐私优先：无任何第三方上云侵入，SQLite 纯本地加密',
+          '图谱联想：知识卡片双向链接的力导向图实时重算',
+        ],
+        codeHint: 'wails build # 打包 macOS / Windows 原生跨平台二进制',
+      }
+    case 'Go-Load':
+      return {
+        org: '迟暮个人实验仓库 (YN1753)',
+        origin: '自制轻量级分布式压测探针。不依赖臃肿的 Java JMeter，用纯粹的 Go 协程池测出高并发下的服务吞吐量。',
+        highlights: [
+          '极低开销：单个工作节点以极低 CPU 占用维持数万并发连接',
+          '实时直方图：P90 / P99 毫秒级延迟窗口滑动采样',
+          '分布式发压：Master-Worker 模式协调多节点流量注入',
+        ],
+        codeHint: 'go run cmd/load/main.go -c 1000 -n 50000 http://target',
+      }
+    default:
+      return {
+        org: '迟暮个人实验仓库 (YN1753)',
+        origin: '记录个人日常工程探索与基础设施工具链，坚持手打每个核心模块。',
+        highlights: [
+          '实战导向：以解决个人或实际协作中的真实痛点为出发点',
+          '代码干净：注重并发安全性、内存开销与日志追踪',
+        ],
+        codeHint: 'git clone https://github.com/YN1753/' + title + '.git',
+      }
+  }
+}
 </script>
 
 <template>
-  <section id="projects" class="py-24 border-t border-[#e8e6df] bg-[#fbfbfa] relative">
-    <div class="max-w-6xl mx-auto px-5 sm:px-8 text-left">
-      <!-- 分镜标头 -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+  <section id="projects" class="py-24 border-t border-[var(--border-color)] bg-[var(--bg-surface-subtle)]/50 relative transition-colors duration-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
+      
+      <!-- 展台分镜标头 -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
         <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#edeae1] text-[#716e64] text-xs font-mono mb-3">
-            <Layers class="w-3.5 h-3.5 text-[#d97706]" />
-            <span>The Workshop · 个人真实仓库与工程陈列</span>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface)] text-[var(--ink-secondary)] text-xs font-mono mb-3 border border-[var(--border-color)] shadow-2xs">
+            <Layers class="w-3.5 h-3.5 text-[var(--accent-amber)]" />
+            <span>THE CRAFT · 真实造物工坊档案</span>
           </div>
-          <h2 class="text-3xl sm:text-4xl font-medium tracking-tight text-[#14151a] font-serif-cinematic">
-            造过的轮子与真实探索
+          <h2 class="text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ink-primary)] font-serif-cinematic">
+            工程造物与核心仓库
           </h2>
-          <p class="text-[#525662] text-sm sm:text-base mt-2 max-w-xl font-normal">
-            全部来自我的 GitHub 真实仓库。不作虚假包装，仅记录自己亲手写下的代码与系统思考。
+          <p class="text-sm text-[var(--ink-secondary)] mt-2 font-mono">
+            来自 GitHub 真实公开仓库 · 点击任意项目查看「蓝图底片档案」
           </p>
         </div>
 
-        <div class="flex items-center gap-2 text-xs font-mono text-[#8c8f9b] bg-white border border-[#e8e6df] px-3.5 py-1.5 rounded-full shadow-2xs">
-          <span>7 Active Repositories</span>
+        <div class="flex items-center gap-3 text-xs font-mono text-[var(--ink-muted)]">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--accent-teal)]">
+            <ShieldCheck class="w-3.5 h-3.5" />
+            <span>SUSE-OAA 首位置顶</span>
+          </span>
+          <span class="px-2 py-1 bg-[var(--bg-surface)] rounded border border-[var(--border-color)]">
+            共 {{ projects.length }} 件展品
+          </span>
         </div>
       </div>
 
-      <!-- 真实项目陈列 -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-7">
-        <!-- 🥇 核心置顶 #1：SUSE-OAA-BACKEND (大分镜 12 栏) -->
-        <div class="md:col-span-12 film-card p-8 sm:p-10 bg-white border border-[#e8e6df]">
+      <!-- 项目卡片矩阵 -->
+      <div class="space-y-8">
+        
+        <!-- 重点置顶 #1：SUSE-OAA-BACKEND 宽银幕电影特刊展卡 -->
+        <div
+          v-if="projects.length > 0 && projects[0].title === 'SUSE-OAA-BACKEND'"
+          class="film-card p-6 sm:p-10 relative overflow-hidden group border-2 border-[var(--accent-amber)]/20 hover:border-[var(--accent-amber)]/50 transition-all"
+        >
+          <!-- 胶卷打孔边缘装饰 -->
+          <div class="flex items-center justify-between pb-6 border-b border-[var(--border-color)] mb-8">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded-md bg-[var(--accent-amber)] text-white text-[11px] font-mono font-semibold">
+                ACT I · 核心置顶 #1
+              </span>
+              <span class="text-xs font-mono text-[var(--ink-muted)]">
+                suse-edu-cn / 四川轻化工大学开放原子开源协会
+              </span>
+            </div>
+            <div class="text-[11px] font-mono text-[var(--accent-teal)] flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-[var(--accent-teal)] animate-ping"></span>
+              <span>生产环境运行中</span>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div class="lg:col-span-7 space-y-4">
-              <div class="flex items-center gap-3">
-                <span class="px-2.5 py-0.5 rounded-full bg-[#fef3c7] text-[#92400e] border border-[#fde68a] text-[11px] font-mono font-medium">
-                  #1 Core Pinned · suse-edu-cn
-                </span>
-                <span class="text-xs text-[#8c8f9b] font-mono">Campus OpenSource</span>
-              </div>
-              <h3 class="text-2xl sm:text-3xl font-bold text-[#14151a] font-serif-cinematic tracking-tight">
-                SUSE-OAA-BACKEND
+              <h3 class="text-2xl sm:text-3xl font-serif-cinematic font-semibold text-[var(--ink-primary)]">
+                {{ projects[0].title }}
               </h3>
-              <p class="text-[#525662] text-sm leading-relaxed max-w-xl">
-                为四川轻化工大学开源协会（suse-edu-cn）量身打造的核心业务后台。基于 Go 语言构建，支撑协会事务协作、组织管理、招新流程与校园数据服务接口。
+              <p class="text-sm font-medium text-[var(--accent-amber)] font-mono">
+                {{ projects[0].subtitle }}
+              </p>
+              <p class="text-sm text-[var(--ink-secondary)] leading-relaxed pt-1">
+                {{ projects[0].description }}
               </p>
 
-              <div class="flex flex-wrap gap-2 pt-1">
-                <span class="px-2.5 py-1 rounded-md bg-[#faf9f5] border border-[#e8e6df] text-xs font-mono text-[#525662]">
-                  #Go
+              <!-- 标签与技术栈 -->
+              <div class="flex flex-wrap gap-2 pt-3">
+                <span
+                  v-for="tag in projects[0].tags.split(',')"
+                  :key="tag"
+                  class="px-2.5 py-1 rounded bg-[var(--bg-surface-subtle)] text-[11px] font-mono text-[var(--ink-secondary)] border border-[var(--border-color)]"
+                >
+                  {{ tag.trim() }}
                 </span>
-                <span class="px-2.5 py-1 rounded-md bg-[#faf9f5] border border-[#e8e6df] text-xs font-mono text-[#525662]">
-                  #Gin
+              </div>
+            </div>
+
+            <!-- 右侧操作与蓝图检视按钮 -->
+            <div class="lg:col-span-5 flex flex-col justify-center items-start lg:items-end gap-3.5 bg-[var(--bg-surface-subtle)]/70 p-6 rounded-2xl border border-[var(--border-color)]">
+              <div class="text-xs font-mono text-[var(--ink-muted)] text-left lg:text-right w-full">
+                <div>仓库归属：四川轻化工大学开源协会</div>
+                <div class="text-[var(--accent-amber)] mt-1 font-semibold">Campus OpenSource Backbone</div>
+              </div>
+
+              <div class="flex flex-wrap gap-3 w-full pt-2">
+                <button
+                  @click="openProjectModal(projects[0])"
+                  class="flex-1 py-2.5 px-4 rounded-xl bg-[var(--ink-primary)] hover:opacity-90 text-[var(--bg-page)] text-xs font-mono font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                >
+                  <Eye class="w-3.5 h-3.5" />
+                  <span>检视架构底片</span>
+                </button>
+
+                <a
+                  :href="projects[0].github_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  @click="audio.playShutter()"
+                  class="py-2.5 px-4 rounded-xl bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-subtle)] border border-[var(--border-color)] text-[var(--ink-primary)] text-xs font-mono font-medium transition-all flex items-center gap-1.5"
+                >
+                  <Github class="w-3.5 h-3.5" />
+                  <span>GitHub</span>
+                  <ArrowUpRight class="w-3 h-3 text-[var(--ink-muted)]" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 其余真实项目卡片网格 (从 #2 ArchCanvas 开始) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            v-for="(project, idx) in projects.slice(1)"
+            :key="project.id"
+            class="film-card p-6 flex flex-col justify-between group hover:border-[var(--accent-amber)]/40"
+          >
+            <div>
+              <!-- 顶部编号与分镜序号 -->
+              <div class="flex items-center justify-between pb-3 border-b border-[var(--border-color)] mb-4 text-[11px] font-mono text-[var(--ink-muted)]">
+                <span class="text-[var(--ink-secondary)] font-semibold">
+                  FRAME 0{{ idx + 2 }} / 0{{ projects.length }}
                 </span>
-                <span class="px-2.5 py-1 rounded-md bg-[#faf9f5] border border-[#e8e6df] text-xs font-mono text-[#525662]">
-                  #suse-edu-cn
-                </span>
-                <span class="px-2.5 py-1 rounded-md bg-[#faf9f5] border border-[#e8e6df] text-xs font-mono text-[#525662]">
-                  #CampusOpenSource
+                <span class="px-2 py-0.5 rounded bg-[var(--bg-surface-subtle)] border border-[var(--border-color)] text-[var(--ink-secondary)]">
+                  {{ project.status }}
                 </span>
               </div>
 
-              <div class="pt-3 flex items-center gap-4">
-                <a
-                  href="https://github.com/suse-edu-cn/SUSE-OAA-BACKEND"
-                  target="_blank"
-                  class="px-5 py-2.5 rounded-xl bg-[#14151a] hover:bg-[#252834] text-white font-medium text-xs flex items-center gap-2 shadow-sm transition-all"
+              <h4 class="text-xl font-serif-cinematic font-semibold text-[var(--ink-primary)] group-hover:text-[var(--accent-amber)] transition-colors">
+                {{ project.title }}
+              </h4>
+              <p class="text-xs font-medium text-[var(--accent-amber)] font-mono mt-1">
+                {{ project.subtitle }}
+              </p>
+              <p class="text-xs text-[var(--ink-secondary)] leading-relaxed mt-3 line-clamp-3">
+                {{ project.description }}
+              </p>
+            </div>
+
+            <div class="pt-6 mt-6 border-t border-[var(--border-color)]">
+              <!-- 标签 -->
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                <span
+                  v-for="tag in project.tags.split(',').slice(0, 3)"
+                  :key="tag"
+                  class="px-2 py-0.5 rounded bg-[var(--bg-surface-subtle)] text-[10px] font-mono text-[var(--ink-muted)] border border-[var(--border-color)]"
                 >
-                  <Github class="w-3.5 h-3.5" />
-                  <span>访问 GitHub 仓库</span>
-                  <ArrowUpRight class="w-4 h-4 text-slate-300" />
+                  {{ tag.trim() }}
+                </span>
+              </div>
+
+              <!-- 交互按钮 -->
+              <div class="flex items-center justify-between pt-1">
+                <button
+                  @click="openProjectModal(project)"
+                  class="text-xs font-mono text-[var(--ink-primary)] hover:text-[var(--accent-amber)] font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  <Eye class="w-3.5 h-3.5" />
+                  <span>蓝图底片</span>
+                </button>
+
+                <a
+                  :href="project.github_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  @click="audio.playShutter()"
+                  class="p-2 rounded-lg bg-[var(--bg-surface-subtle)] hover:bg-[var(--ink-primary)] hover:text-white text-[var(--ink-secondary)] transition-all"
+                  title="在 GitHub 查看"
+                >
+                  <ArrowUpRight class="w-3.5 h-3.5" />
                 </a>
               </div>
             </div>
 
-            <!-- 右侧：组织与技术栈速览卡片 -->
-            <div class="lg:col-span-5">
-              <div class="rounded-xl p-6 bg-[#faf9f5] border border-[#e8e6df] font-mono text-xs space-y-3">
-                <div class="flex items-center justify-between pb-2 border-b border-[#ece8df]">
-                  <span class="text-[#92400e] font-semibold flex items-center gap-1.5">
-                    <Terminal class="w-3.5 h-3.5" /> suse-edu-cn 组织置顶
-                  </span>
-                  <span class="text-[10px] text-[#0d766e] bg-[#f0fdf4] px-1.5 py-0.5 rounded border border-[#bbf7d0]">
-                    Public Repo
-                  </span>
-                </div>
-                <div class="text-[#14151a] font-semibold text-sm">
-                  四川轻化工大学 开放原子开源协会
-                </div>
-                <div class="p-3 rounded-lg bg-white border border-[#e8e6df] text-[#525662] text-[11px] leading-relaxed">
-                  负责协会核心微服务架构设计、数据库实体定义、鉴权中间件编写与生产环境接口部署交付。
-                </div>
-                <div class="flex items-center justify-between text-[10px] text-[#8c8f9b] pt-1">
-                  <span>Language: Go</span>
-                  <span>Team: suse-edu-cn</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
-        <!-- 🥈 核心置顶 #2：ArchCanvas (大分镜 12 栏) -->
-        <div class="md:col-span-12 film-card p-8 sm:p-10 bg-white border border-[#e8e6df]">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div class="lg:col-span-7 space-y-4">
-              <div class="flex items-center gap-3">
-                <span class="px-2.5 py-0.5 rounded-full bg-[#fef3c7] text-[#92400e] border border-[#fde68a] text-[11px] font-mono font-medium">
-                  #2 Active Development · YN1753
-                </span>
-                <span class="text-xs text-[#8c8f9b] font-mono">AI Architecture Tool</span>
-              </div>
-              <h3 class="text-2xl sm:text-3xl font-bold text-[#14151a] font-serif-cinematic tracking-tight">
-                ArchCanvas
-              </h3>
-              <p class="text-[#525662] text-sm leading-relaxed max-w-xl">
-                让 AI 与开发者一起，从需求语义理解、ER 实体关系图到系统架构设计，快速构建与生成可运行的 Go 工程骨架。探索 AI 与现代架构设计工具的深度融合。
-              </p>
+      </div>
 
-              <div class="flex flex-wrap gap-2 pt-1">
-                <span class="px-2.5 py-1 rounded-md bg-[#faf9f5] border border-[#e8e6df] text-xs font-mono text-[#525662]">
-                  #TypeScript
-                </span>
-                <span class="px-2.5 py-1 rounded-md bg-[#faf9f5] border border-[#e8e6df] text-xs font-mono text-[#525662]">
-                  #Go
-                </span>
-                <span class="px-2.5 py-1 rounded-md bg-[#faf9f5] border border-[#e8e6df] text-xs font-mono text-[#525662]">
-                  #Architecture
-                </span>
-                <span class="px-2.5 py-1 rounded-md bg-[#faf9f5] border border-[#e8e6df] text-xs font-mono text-[#525662]">
-                  #AI Canvas
-                </span>
-              </div>
+    </div>
 
-              <div class="pt-3 flex items-center gap-4">
-                <a
-                  href="https://github.com/YN1753/ArchCanvas"
-                  target="_blank"
-                  class="px-5 py-2.5 rounded-xl bg-[#14151a] hover:bg-[#252834] text-white font-medium text-xs flex items-center gap-2 shadow-sm transition-all"
-                >
-                  <Github class="w-3.5 h-3.5" />
-                  <span>访问 GitHub 仓库</span>
-                  <ArrowUpRight class="w-4 h-4 text-slate-300" />
-                </a>
-              </div>
-            </div>
+    <!-- 交互式蓝图底片抽屉 / Dossier Modal -->
+    <div
+      v-if="activeModalProject"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md animate-fade-in"
+      @click.self="closeModal"
+    >
+      <div class="relative w-full max-w-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-2xl p-6 sm:p-8 overflow-hidden text-left">
+        
+        <!-- 蓝图微网格纹理背景 -->
+        <div class="absolute inset-0 blueprint-grid opacity-30 pointer-events-none"></div>
 
-            <!-- 右侧：设计理念切片 -->
-            <div class="lg:col-span-5">
-              <div class="rounded-xl p-6 bg-[#faf9f5] border border-[#e8e6df] font-mono text-xs space-y-3">
-                <div class="flex items-center justify-between pb-2 border-b border-[#ece8df]">
-                  <span class="text-[#92400e] font-semibold flex items-center gap-1.5">
-                    <Sparkles class="w-3.5 h-3.5" /> AI × 架构可视化
-                  </span>
-                  <span class="text-[10px] text-[#0d766e] bg-[#f0fdf4] px-1.5 py-0.5 rounded border border-[#bbf7d0]">
-                    In Active Progress
-                  </span>
-                </div>
-                <div class="text-[#14151a] font-semibold text-sm">
-                  从需求文本 ➔ ER 关系 ➔ 可运行 Go 工程
-                </div>
-                <div class="p-3 rounded-lg bg-white border border-[#e8e6df] text-[#525662] text-[11px] leading-relaxed">
-                  不再手写样板代码。将系统边界、领域模型与数据库关系在画布上即时呈现，实现工程逻辑的可视化推演。
-                </div>
-                <div class="flex items-center justify-between text-[10px] text-[#8c8f9b] pt-1">
-                  <span>Stack: TypeScript + Go</span>
-                  <span>Author: YN1753</span>
-                </div>
-              </div>
-            </div>
+        <!-- 顶部关闭与标头 -->
+        <div class="relative flex items-center justify-between pb-4 border-b border-[var(--border-color)] mb-6">
+          <div class="flex items-center gap-2 text-xs font-mono text-[var(--ink-muted)]">
+            <Terminal class="w-4 h-4 text-[var(--accent-amber)]" />
+            <span>ENGINEERING DOSSIER · {{ activeModalProject.title }}</span>
           </div>
+          <button
+            @click="closeModal"
+            class="p-1.5 rounded-lg text-[var(--ink-muted)] hover:text-[var(--ink-primary)] hover:bg-[var(--bg-surface-subtle)] transition-colors"
+          >
+            <X class="w-5 h-5" />
+          </button>
         </div>
 
-        <!-- 🥉 项目 #3：GoLens (6 栏) -->
-        <div class="md:col-span-6 film-card p-7 sm:p-8 flex flex-col justify-between bg-white border border-[#e8e6df]">
+        <div class="relative space-y-5">
           <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="p-2.5 rounded-xl bg-[#edeae1] text-[#716e64]">
-                <Eye class="w-5 h-5 text-[#d97706]" />
-              </div>
-              <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#f0fdf4] text-[#0d766e] border border-[#bbf7d0]">
-                Go Internals
-              </span>
-            </div>
-            <h3 class="text-xl font-bold text-[#14151a] font-serif-cinematic mb-2">
-              GoLens · Go 底层机制透视镜
+            <h3 class="text-2xl font-serif-cinematic font-semibold text-[var(--ink-primary)]">
+              {{ activeModalProject.title }}
             </h3>
-            <p class="text-sm text-[#525662] leading-relaxed mb-5">
-              基于交互式状态机的 Go 底层机制透视镜。让 GMP 协程调度、三色标记 GC 屏障与 Channel 阻塞状态流转清晰可见，将抽象的运行时原理直观化。
+            <p class="text-xs font-mono text-[var(--accent-amber)] mt-1">
+              {{ getProjectDossier(activeModalProject.title).org }}
             </p>
-            <div class="flex flex-wrap gap-1.5 mb-4">
-              <span class="px-2 py-0.5 rounded bg-[#faf9f5] border border-[#e8e6df] text-[11px] font-mono text-[#525662]">#GMP</span>
-              <span class="px-2 py-0.5 rounded bg-[#faf9f5] border border-[#e8e6df] text-[11px] font-mono text-[#525662]">#GC屏障</span>
-              <span class="px-2 py-0.5 rounded bg-[#faf9f5] border border-[#e8e6df] text-[11px] font-mono text-[#525662]">#Channel</span>
-            </div>
           </div>
-          <div class="pt-4 border-t border-[#f0ede6] flex items-center justify-between">
-            <span class="text-xs font-mono text-[#8c8f9b]">#Visualization</span>
-            <a href="https://github.com/YN1753/GoLens" target="_blank" class="text-xs text-[#14151a] font-semibold hover:underline flex items-center gap-1 font-mono">
-              查看仓库 <ArrowUpRight class="w-3.5 h-3.5" />
+
+          <!-- 初衷与背景 -->
+          <div class="p-4 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-color)]">
+            <h5 class="text-xs font-mono font-semibold text-[var(--ink-primary)] uppercase tracking-wider mb-1.5">
+              Why I Built This · 造物初衷
+            </h5>
+            <p class="text-xs text-[var(--ink-secondary)] leading-relaxed">
+              {{ getProjectDossier(activeModalProject.title).origin }}
+            </p>
+          </div>
+
+          <!-- 核心架构亮点 -->
+          <div>
+            <h5 class="text-xs font-mono font-semibold text-[var(--ink-primary)] uppercase tracking-wider mb-2">
+              Architectural Slices · 架构切片
+            </h5>
+            <ul class="space-y-2 text-xs text-[var(--ink-secondary)] font-mono">
+              <li
+                v-for="(item, i) in getProjectDossier(activeModalProject.title).highlights"
+                :key="i"
+                class="flex items-start gap-2 bg-[var(--bg-surface)] p-2 rounded-lg border border-[var(--border-color)]"
+              >
+                <span class="text-[var(--accent-teal)] font-bold">#0{{ i + 1 }}</span>
+                <span>{{ item }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 快速运行命令与克隆 -->
+          <div class="p-3 rounded-xl bg-[#14151a] text-slate-200 font-mono text-xs flex items-center justify-between">
+            <code class="text-teal-300 truncate pr-2">
+              git clone {{ activeModalProject.github_url }}.git
+            </code>
+            <button
+              @click="copyCloneCommand(activeModalProject.github_url)"
+              class="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[11px] flex items-center gap-1 transition-all cursor-pointer shrink-0"
+            >
+              <Check v-if="copied" class="w-3.5 h-3.5 text-teal-400" />
+              <Copy v-else class="w-3.5 h-3.5" />
+              <span>{{ copied ? '已复制' : '复制命令' }}</span>
+            </button>
+          </div>
+
+          <!-- 底部直达 GitHub -->
+          <div class="pt-4 border-t border-[var(--border-color)] flex items-center justify-between">
+            <span class="text-xs font-mono text-[var(--ink-muted)]">
+              状态：{{ activeModalProject.status }}
+            </span>
+            <a
+              :href="activeModalProject.github_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              @click="audio.playShutter()"
+              class="px-4 py-2 rounded-xl bg-[var(--ink-primary)] hover:opacity-90 text-[var(--bg-page)] text-xs font-mono font-medium transition-all flex items-center gap-1.5"
+            >
+              <span>直达官方仓库</span>
+              <ExternalLink class="w-3.5 h-3.5" />
             </a>
           </div>
+
         </div>
 
-        <!-- 📦 项目 #4：AstraLink-Desktop (6 栏) -->
-        <div class="md:col-span-6 film-card p-7 sm:p-8 flex flex-col justify-between bg-white border border-[#e8e6df]">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="p-2.5 rounded-xl bg-[#edeae1] text-[#716e64]">
-                <BookOpen class="w-5 h-5 text-[#d97706]" />
-              </div>
-              <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#edeae1] text-[#716e64] border border-[#dedcd5]">
-                Wails Desktop
-              </span>
-            </div>
-            <h3 class="text-xl font-bold text-[#14151a] font-serif-cinematic mb-2">
-              AstraLink-Desktop · 星链 2.0
-            </h3>
-            <p class="text-sm text-[#525662] leading-relaxed mb-5">
-              基于 Wails 架构的双链图笔记桌面端应用。探索 Go + 前端混合开发，支持双向链接、知识图谱可视化与本地隐私优先的个人知识库体系。
-            </p>
-            <div class="flex flex-wrap gap-1.5 mb-4">
-              <span class="px-2 py-0.5 rounded bg-[#faf9f5] border border-[#e8e6df] text-[11px] font-mono text-[#525662]">#Go</span>
-              <span class="px-2 py-0.5 rounded bg-[#faf9f5] border border-[#e8e6df] text-[11px] font-mono text-[#525662]">#Wails</span>
-              <span class="px-2 py-0.5 rounded bg-[#faf9f5] border border-[#e8e6df] text-[11px] font-mono text-[#525662]">#Vue</span>
-              <span class="px-2 py-0.5 rounded bg-[#faf9f5] border border-[#e8e6df] text-[11px] font-mono text-[#525662]">#Graph</span>
-            </div>
-          </div>
-          <div class="pt-4 border-t border-[#f0ede6] flex items-center justify-between">
-            <span class="text-xs font-mono text-[#8c8f9b]">#KnowledgeBase</span>
-            <a href="https://github.com/YN1753/AstraLink-Desktop" target="_blank" class="text-xs text-[#14151a] font-semibold hover:underline flex items-center gap-1 font-mono">
-              查看仓库 <ArrowUpRight class="w-3.5 h-3.5" />
-            </a>
-          </div>
-        </div>
-
-        <!-- ⚡ 项目 #5：Go-Load (4 栏) -->
-        <div class="md:col-span-4 film-card p-6 flex flex-col justify-between bg-white border border-[#e8e6df]">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono text-[#92400e] font-semibold">Go-Load</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#f0fdf4] text-[#0d766e]">Stable</span>
-            </div>
-            <h4 class="text-base font-bold text-[#14151a] font-serif-cinematic mb-1.5">
-              轻量高并发压测工具
-            </h4>
-            <p class="text-xs text-[#525662] leading-relaxed mb-4">
-              基于 Go 原生并发模型的高性能 HTTP 压测工具，轻量无依赖，提供精确的时延与吞吐量统计。
-            </p>
-          </div>
-          <div class="pt-3 border-t border-[#f0ede6] flex items-center justify-between">
-            <span class="text-[11px] font-mono text-[#8c8f9b]">#Benchmark #CLI</span>
-            <a href="https://github.com/YN1753/Go-Load" target="_blank" class="text-xs text-[#14151a] font-semibold flex items-center gap-1">
-              Repo <ArrowUpRight class="w-3 h-3" />
-            </a>
-          </div>
-        </div>
-
-        <!-- 🖥️ 项目 #6：nexus (4 栏) -->
-        <div class="md:col-span-4 film-card p-6 flex flex-col justify-between bg-white border border-[#e8e6df]">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono text-[#716e64] font-semibold">nexus</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#faf9f5] text-[#716e64]">Linux Ops</span>
-            </div>
-            <h4 class="text-base font-bold text-[#14151a] font-serif-cinematic mb-1.5">
-              Linux 服务器管理平台
-            </h4>
-            <p class="text-xs text-[#525662] leading-relaxed mb-4">
-              面向开发者的现代化 Linux 服务器管理控制台，用于便捷监控云服务器硬件、容器与核心守护进程。
-            </p>
-          </div>
-          <div class="pt-3 border-t border-[#f0ede6] flex items-center justify-between">
-            <span class="text-[11px] font-mono text-[#8c8f9b]">#Vue #Linux</span>
-            <a href="https://github.com/YN1753/nexus" target="_blank" class="text-xs text-[#14151a] font-semibold flex items-center gap-1">
-              Repo <ArrowUpRight class="w-3 h-3" />
-            </a>
-          </div>
-        </div>
-
-        <!-- 📱 项目 #7：DeviceDaily (4 栏) -->
-        <div class="md:col-span-4 film-card p-6 flex flex-col justify-between bg-white border border-[#e8e6df]">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono text-[#716e64] font-semibold">DeviceDaily</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#f0fdf4] text-[#0d766e]">macOS</span>
-            </div>
-            <h4 class="text-base font-bold text-[#14151a] font-serif-cinematic mb-1.5">
-              设备成本统计原生 App
-            </h4>
-            <p class="text-xs text-[#525662] leading-relaxed mb-4">
-              基于 Swift 原生开发，支持 macOS 桌面原生 Widget 小组件，计算并追踪电子设备的日均使用成本。
-            </p>
-          </div>
-          <div class="pt-3 border-t border-[#f0ede6] flex items-center justify-between">
-            <span class="text-[11px] font-mono text-[#8c8f9b]">#Swift #WidgetKit</span>
-            <a href="https://github.com/YN1753/DeviceDaily" target="_blank" class="text-xs text-[#14151a] font-semibold flex items-center gap-1">
-              Repo <ArrowUpRight class="w-3 h-3" />
-            </a>
-          </div>
-        </div>
       </div>
     </div>
+
   </section>
 </template>

@@ -126,3 +126,31 @@ func HealthCheck(c *gin.Context) {
 		"message":    fmt.Sprintf("ChiMu-Lab Engine running smoothly on %s", runtime.GOARCH),
 	})
 }
+
+// GetMoments 获取生活切片与日常记录
+func GetMoments(c *gin.Context) {
+	category := c.Query("category")
+	var moments []models.LifeMoment
+
+	query := db.DB.Order("id DESC")
+	if category != "" && category != "all" {
+		query = query.Where("category = ?", category)
+	}
+
+	if err := query.Find(&moments).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch moments"})
+		return
+	}
+	c.JSON(http.StatusOK, moments)
+}
+
+// LikeMoment 点赞/标记某个生活切片
+func LikeMoment(c *gin.Context) {
+	id := c.Param("id")
+	if err := db.DB.Model(&models.LifeMoment{}).Where("id = ?", id).UpdateColumn("likes", db.DB.Raw("likes + 1")).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update like"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
