@@ -1,135 +1,127 @@
-# ChiMu-Lab (迟暮实验室) 🧪
+# ChiMu-Lab (迟暮实验室) 🎞️
 
-> **Code Activity Hub · 迟暮的个人极客工坊与代码动态中心**
+> **Digital Atelier & Living Archive · 迟暮的私人数字暗房与生活档案**
 >
-> 🌐 线上站点: [codeactivityhub.top](https://codeactivityhub.top)
-> 🔗 个人主页 / GitHub: [https://github.com/YN1753](https://github.com/YN1753)
+> 🌐 线上站点: [https://codeactivityhub.top](https://codeactivityhub.top)  
+> 🔗 GitHub 个人主页: [https://github.com/YN1753](https://github.com/YN1753)  
+> 📜 ICP 备案号: [浙ICP备2026081664号](https://beian.miit.gov.cn/)
 
 ---
 
-## 📖 项目简介
+## 📖 项目定位与设计哲学
 
-**ChiMu-Lab** 是一个面向全栈开发者的现代化个人实验工坊与作品聚合平台。立足工程美学与极客实践，本站专为技术作品展厅、日常打卡沉淀、代码动态追踪及 ICP / 公安合规备案量身设计。
+**ChiMu-Lab** 摒弃了千篇一律的程序员求职简历模板与商业宣传辞令，立足于**“写给自己看”的诚恳态度**，打造为一个充满呼吸感、电影感与实体触感的**个人数字暗房与生活工坊 (Digital Atelier & Living Archive)**。
 
-### ✨ 核心特性
-
-- **👨‍💻 极客个人名片 (Hero Profile)**：展示个人技术履历、技能栈徽章墙（Go, Vue 3, Docker, Linux, SQLite...）、社交链接与状态指示器。
-- **🚀 实验室作品展厅 (Showcase)**：多分类筛选（核心平台、实验工坊、实用工具），包含高频面试打卡站（Daily Practice Hub）、分布式存储探测等丰富项目。
-- **📊 代码动态与打卡看板 (Code Activity Hub)**：契合域名 `codeactivityhub.top`，展示 GitHub 风格年度活跃度热力图矩阵与近期工程里程碑脉络。
-- **🛡️ 备案合规页脚 (Compliance Ready)**：内置工信部 ICP 备案号直达链接（`https://beian.miit.gov.cn`）与全国公安机关互联网站安全管理服务平台标号槽位，符合网安与工信部审核标准。
-- **⚡ 现代化科技暗黑美学**：采用 Cyber-clean 深色科技质感、玻璃拟态模糊（Glassmorphism）、微交互悬浮动效与全端响应式适配。
+它融合了双轨叙事：
+1. **左手造物（The Craft）**：记录亲手编写的真实工程、底层状态机调度、架构设计画布与踩过的坑。
+2. **右手生活（Living Vignettes）**：收集秋日的桂花、夜雨的咖啡、读书与音乐的手记、胶片相纸与吉光片羽。
 
 ---
 
-## 🛠️ 技术架构
+## ✨ 核心亮点与高阶交互
 
-| 模块 | 技术选型 | 说明 |
+### 1. 📷 3D 拍立得胶卷手记 (`LivingFrames.vue`)
+- **真实生活切片流**：包含夜雨中的通道阻塞思考、满觉陇金桂胶片、手冲曼特宁与 AST 遍历反哺、《禅与摩托车维修艺术》阅读手记、坂本龙一的音符与 Goroutine 死锁排查。
+- **3D 物理翻转 (Flip Card)**：鼠标滑过时呈现 3D 悬浮透视；点击“翻转查看手记”沿 Y 轴 180° 平滑翻转，背面展现复古明信片纹理、手写便签与杭州邮戳。
+- **暖心盖章互动**：点击红心可实时在 SQLite 数据库中完成盖章持久化，伴随机械快门声。
+
+### 2. 🎛️ 电影控制台与 Web Audio 声学生成器 (`Navbar.vue` & `utils/audio.ts`)
+- **三套电影 LUT 调色盘**：
+  - **暖骨白 (Alabaster)**：温润米白 `#f7f6f2`，纸质漫反射光晕。
+  - **琥珀暮 (Sunset Amber)**：柯达 400 暖金黄昏调，落日余晖。
+  - **暗房黑 (Midnight Noir)**：暗房深蓝黑与微荧光，深夜沉浸感。
+- **零外部音频加载的 Web Audio 原生合成**：
+  - **机械快门音**：点击切换主题、翻转卡片或盖章时，合成清脆的相机帘幕快门声。
+  - **秋夜微雨自然白噪音**：432Hz 动态粉红噪声带通滤波器，点击即可开启沉浸细雨声。
+
+### 3. 📐 真实造物工坊 · 架构蓝图底片抽屉 (`ProjectShowcase.vue`)
+- **#1 首位置顶核心**：[`suse-edu-cn/SUSE-OAA-BACKEND`](https://github.com/suse-edu-cn/SUSE-OAA-BACKEND)（四川轻化工大学开放原子开源协会业务后端服务体系）。
+- **#2 架构核心**：[`YN1753/ArchCanvas`](https://github.com/YN1753/ArchCanvas)（AI 辅助 Go 架构设计画布）。
+- **#3 底层透视**：[`YN1753/GoLens`](https://github.com/YN1753/GoLens)（基于状态机的 Go GMP / GC 可视化透视镜）。
+- **后续真实仓库**：`AstraLink-Desktop` (Wails 图笔记)、`Go-Load` (高并发压测)、`nexus` (基础设施)、`DeviceDaily` (Swift 原生小组件)。
+- **蓝图底片抽屉 (Engineering Dossier)**：点击任意项目唤出半透明蓝图网格视窗，展示工程初衷、关键架构切片与一键复制 `git clone` 命令。
+
+### 4. ⏱️ 当下的迟暮 · 实时状态轮盘 (`Hero.vue`)
+- 顶部电影打板横标：`SCENE: CHIMU-ATELIER / TAKE: 2026.FALL / HANGZHOU (30.27° N)` 与秒级流动时钟。
+- 点击状态胶囊可顺畅切换迟暮此时此刻的状态（手冲耶加雪菲 / 排查 suseoaa 协程 / 西湖边夜骑 / 调优 ArchCanvas AST），带有清脆微音。
+
+---
+
+## 🛠️ 技术栈与架构选型
+
+| 模块 | 技术选型 | 优势与说明 |
 | :--- | :--- | :--- |
-| **后端语言** | **Go 1.27** | 高性能、低内存占用 |
-| **Web 框架** | **Gin** (`github.com/gin-gonic/gin`) | 高性能 REST API 路由与中间件 |
-| **数据库** | **SQLite** (`github.com/glebarez/sqlite`) | **纯 Go 实现 (CGO-Free)**，跨平台零编译依赖 |
-| **ORM** | **GORM** (`gorm.io/gorm`) | 自动迁移模型（Profiles, Projects, Activities, SiteConfigs） |
-| **前端框架** | **Vue 3** (Composition API + `<script setup>`) | 现代化响应式前端框架 |
-| **构建工具** | **Vite** | 极速秒级 HMR 与打包构建 |
-| **样式工程** | **Tailwind CSS v4** (`@tailwindcss/vite`) | 原子化 CSS 极客暗黑主题 |
-| **图标库** | **Lucide Icons** (`lucide-vue-next` / `@lucide/vue`) | 统一的高质感极简矢量图标 |
+| **后端语言** | **Go 1.27** | 高性能微架构、毫秒级响应、超低内存开销 (~1.8MB) |
+| **Web 框架** | **Gin** | 高性能 REST API，集成 SPA 静态资源路由 |
+| **数据库** | **SQLite** (`github.com/glebarez/sqlite`) | **纯 Go 实现 (CGO-Free)**，无外部 C 编译器依赖，轻松 cross-compile |
+| **ORM** | **GORM** | 自动迁移模型（Profile, Project, LifeMoment, Activity, SiteConfig） |
+| **前端框架** | **Vue 3** (Composition API) | 现代化响应式前端，极速开发体验 |
+| **构建工具** | **Vite** | 生产打包耗时仅 ~190ms |
+| **样式工程** | **Tailwind CSS v4** | 原子化 CSS，结合电影感自定义主题变量 |
+| **声学引擎** | **Web Audio API** | 纯浏览器端算法合成快门与自然雨声，0KB 外部音效加载 |
+| **字体呈现** | **Newsreader** + **Plus Jakarta Sans** | 电影海报衬线体与现代几何字体的高级混排 |
 
 ---
 
-## 📂 目录结构
+## 📂 项目结构全景
 
 ```text
 ChiMu-Lab/
 ├── main.go                     # Go 后端启动入口（集成 SPA 静态资源分发）
 ├── go.mod / go.sum             # Go 依赖配置
 ├── internal/
-│   ├── models/                 # SQLite 数据库模型 (Profile, Project, Activity, SiteConfig)
-│   ├── db/                     # 数据库连接、AutoMigrate 与自动种子填充 (Seed Data)
-│   └── handlers/               # REST API 处理器 (/api/health, /api/projects, etc.)
+│   ├── models/                 # SQLite 数据库模型 (Profile, Project, LifeMoment, Activity, SiteConfig)
+│   ├── db/                     # 数据库连接、AutoMigrate 与种子数据同步 (seedData)
+│   └── handlers/               # REST API 处理器 (/api/projects, /api/moments, /api/stats, etc.)
 ├── web/                        # Vue 3 前端工程
-│   ├── index.html              # 页面 HTML 模板与 Meta 标签
-│   ├── vite.config.ts          # Vite 配置（Tailwind 插件、路径别名、开发代理）
+│   ├── index.html              # 页面 HTML 模板与 Newsreader 字体加载
+│   ├── vite.config.ts          # Vite 构建配置
 │   ├── package.json            # 前端依赖配置
 │   └── src/
-│       ├── App.vue             # 页面主装配与数据驱动
+│       ├── App.vue             # 页面根组件与全量 API 数据驱动
 │       ├── main.ts             # 前端入口
-│       ├── style.css           # 全局样式与 Tailwind
-│       ├── types/              # TypeScript 接口声明
-│       └── components/         # 模块组件 (Navbar, Hero, ProjectShowcase, ActivityHub, ComplianceFooter)
+│       ├── style.css           # 电影 LUT 调色盘变量、3D 翻转与蓝图网格 CSS
+│       ├── types/              # TypeScript 接口定义 (Project, LifeMoment, etc.)
+│       ├── utils/
+│       │   └── audio.ts        # Web Audio API 机械快门与秋夜微雨合成器
+│       └── components/
+│           ├── Navbar.vue           # 顶部电影控制台（LUT 调色盘 + 雨声/快门开关）
+│           ├── Hero.vue             # 电影打板头图 + 迟暮当下状态切频轮盘
+│           ├── ProjectShowcase.vue  # 造物工坊（suseoaa 置顶 #1 + 蓝图底片抽屉）
+│           ├── LivingFrames.vue     # 生活切片（3D 拍立得翻转卡片 + 盖章互动）
+│           ├── ActivityHub.vue      # 52周代码热力刻度与语言成分条
+│           └── ComplianceFooter.vue # 备案合规页脚（浙ICP备2026081664号直链）
 └── README.md
 ```
 
 ---
 
-## 🚀 本地快速启动
+## 🚀 本地开发与生产部署
 
-### 1. 启动后端 (Go)
-
+### 1. 本地启动
 ```bash
-# 启动 Go 服务 (默认运行在 :8080，支持 PORT=8090 指定端口)
+# 1. 启动 Go 服务 (默认 :8080)
 go run main.go
+
+# 2. 启动前端开发调试 (新终端)
+cd web && npm run dev
 ```
 
-首次运行会自动创建 `data/chimu.db` SQLite 数据库并预置丰富的初始数据。
-
-### 2. 启动前端开发调试 (Vue 3)
-
+### 2. 生产打包与上传部署
 ```bash
-cd web
-npm install
-npm run dev
-```
+# 1. 前端打包
+cd web && npm run build
 
-浏览器打开 `http://localhost:5173` 即可实时预览并热更新。
+# 2. 编译 Linux AMD64 静态无依赖二进制
+cd ..
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o chimu-server-linux main.go
 
----
-
-## 📦 生产打包与部署
-
-### 步骤 1：前端编译构建
-```bash
-cd web
-npm run build
-```
-编译产物将输出至 `web/dist`。
-
-### 步骤 2：后端二进制编译 (Linux CVM 部署)
-```bash
-# 针对 Linux 服务器进行跨平台编译（由于采用纯 Go SQLite，无任何 CGO 依赖）
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o chimu-server main.go
-```
-
-### 步骤 3：部署至服务器并通过 Nginx 反向代理
-在腾讯云服务器上：
-```nginx
-server {
-    listen 80;
-    listen 443 ssl http2;
-    server_name codeactivityhub.top www.codeactivityhub.top;
-
-    # SSL 证书配置
-    ssl_certificate /etc/nginx/ssl/codeactivityhub.top.crt;
-    ssl_certificate_key /etc/nginx/ssl/codeactivityhub.top.key;
-
-    # 反向代理至 Go 服务（或直接指向 web/dist 静态目录）
-    location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-
-    # 兼容原面试题练习站路径
-    location /interview {
-        alias /var/www/interview;
-        index index.html;
-        try_files $uri $uri/ /interview/index.html;
-    }
-}
+# 3. 推送至腾讯云服务器并重启服务
+tar -czf - chimu-server-linux web/dist | ssh ubuntu@101.35.227.224 "tar -xzf - -C /home/ubuntu/chimu-lab && sudo systemctl restart chimu-lab"
 ```
 
 ---
 
-## 📄 License
+## 📄 执照与版权
 
-MIT © [迟暮 (ChiMu)](https://github.com/YN1753)
+MIT License © 2026 [迟暮 (ChiMu)](https://github.com/YN1753)
