@@ -1,0 +1,23 @@
+# Binaries
+chimu-server
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+data/*.db
+data/*.db-journal
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build artifacts
+dist/
+web/dist/
+
+# OS and IDE files
+.DS_Store
+.idea/
+.vscode/
+*.log

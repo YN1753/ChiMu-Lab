@@ -1,0 +1,102 @@
+package handlers
+
+import (
+	"net/http"
+	"time"
+
+	"chimu-lab/internal/db"
+	"chimu-lab/internal/models"
+
+	"github.com/gin-gonic/gin"
+)
+
+var startTime = time.Now()
+
+// GetProfile 获取个人资料及技能
+func GetProfile(c *gin.Context) {
+	var profile models.Profile
+	if err := db.DB.First(&profile).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load profile"})
+		return
+	}
+	c.JSON(http.StatusOK, profile)
+}
+
+// GetProjects 获取实验室项目列表
+func GetProjects(c *gin.Context) {
+	category := c.Query("category")
+	var projects []models.Project
+
+	query := db.DB.Order("`order` ASC, id DESC")
+	if category != "" && category != "all" {
+		query = query.Where("category = ?", category)
+	}
+
+	if err := query.Find(&projects).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch projects"})
+		return
+	}
+	c.JSON(http.StatusOK, projects)
+}
+
+// GetActivities 获取代码动态和每日打卡记录
+func GetActivities(c *gin.Context) {
+	var activities []models.Activity
+	if err := db.DB.Order("date DESC, id DESC").Limit(50).Find(&activities).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch activities"})
+		return
+	}
+	c.JSON(http.StatusOK, activities)
+}
+
+// StatsResponse 实验室统计数据
+type StatsResponse struct {
+	TotalProjects   int64  `json:"total_projects"`
+	TotalActivities int64  `json:"total_activities"`
+	ActiveDays      int    `json:"active_days"`
+	UptimeHours     int    `json:"uptime_hours"`
+	LastUpdated     string `json:"last_updated"`
+}
+
+// GetStats 获取概览统计数据
+func GetStats(c *gin.Context) {
+	var projectCount int64
+	var activityCount int64
+
+	db.DB.Model(&models.Project{}).Count(&projectCount)
+	db.DB.Model(&models.Activity{}).Count(&activityCount)
+
+	uptimeHours := int(time.Since(startTime).Hours())
+	if uptimeHours < 1 {
+		uptimeHours = 1
+	}
+
+	res := StatsResponse{
+		TotalProjects:   projectCount,
+		TotalActivities: activityCount,
+		ActiveDays:      180, // 沉淀打卡天数
+		UptimeHours:     uptimeHours,
+		LastUpdated:     time.Now().Format("2006-01-02 15:04"),
+	}
+	c.JSON(http.StatusOK, res)
+}
+
+// GetConfig 获取网站信息与备案信息
+func GetConfig(c *gin.Context) {
+	var config models.SiteConfig
+	if err := db.DB.First(&config).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch site config"})
+		return
+	}
+	c.JSON(http.StatusOK, config)
+}
+
+// HealthCheck 健康探测接口
+func HealthCheck(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "operational",
+		"service": "ChiMu-Lab Core API",
+		"version": "1.0.0",
+		"time":    time.Now().Unix(),
+	})
+}
