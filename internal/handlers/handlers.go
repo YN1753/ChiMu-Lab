@@ -14,25 +14,52 @@ import (
 
 var startTime = time.Now()
 
-// GetProfile 获取个人资料及技能
-func GetProfile(c *gin.Context) {
-	var profile models.Profile
-	if err := db.DB.First(&profile).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load profile"})
+// GetLifeEntries 获取统一生活时间线档案
+func GetLifeEntries(c *gin.Context) {
+	entryType := c.Query("type")
+	year := c.Query("year")
+
+	var entries []models.LifeEntry
+	query := db.DB.Order("date DESC, id DESC")
+
+	if entryType != "" && entryType != "all" {
+		query = query.Where("type = ?", entryType)
+	}
+	if year != "" && year != "all" {
+		query = query.Where("year = ?", year)
+	}
+
+	if err := query.Find(&entries).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch life entries"})
 		return
 	}
-	c.JSON(http.StatusOK, profile)
+	c.JSON(http.StatusOK, entries)
 }
 
-// GetProjects 获取实验室项目列表
-func GetProjects(c *gin.Context) {
-	category := c.Query("category")
-	var projects []models.Project
-
-	query := db.DB.Order("`order` ASC, id DESC")
-	if category != "" && category != "all" {
-		query = query.Where("category = ?", category)
+// GetNowStatus 获取「此刻的我」状态
+func GetNowStatus(c *gin.Context) {
+	var now models.NowStatus
+	if err := db.DB.First(&now).Error; err != nil {
+		c.JSON(http.StatusOK, models.NowStatus{
+			Building:    "ChiMu Life Archive & Campus Map",
+			Learning:    "Compiler internals, Film photography, Pour-over methods",
+			Playing:     "Black Myth: Wukong, Zelda",
+			Listening:   "Ryuichi Sakamoto - async",
+			Reading:     "Zen and the Art of Motorcycle Maintenance",
+			Thinking:    "How to live with quiet certainty and honest observation",
+			Using:       "MacBook Pro 14, Leica Q2, Midori MD notebook",
+			Location:    "Hangzhou, China (30.27° N, 120.15° E)",
+			LastUpdated: "2026.10.09",
+		})
+		return
 	}
+	c.JSON(http.StatusOK, now)
+}
+
+// GetProjects 获取我做过的项目 (Things I made)
+func GetProjects(c *gin.Context) {
+	var projects []models.Project
+	query := db.DB.Order("`order` ASC, id DESC")
 
 	if err := query.Find(&projects).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch projects"})
@@ -41,116 +68,70 @@ func GetProjects(c *gin.Context) {
 	c.JSON(http.StatusOK, projects)
 }
 
-// GetActivities 获取代码动态和每日打卡记录
-func GetActivities(c *gin.Context) {
-	var activities []models.Activity
-	if err := db.DB.Order("date DESC, id DESC").Limit(50).Find(&activities).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch activities"})
-		return
-	}
-	c.JSON(http.StatusOK, activities)
+// YearArchiveStat 年度生活统计元数据
+type YearArchiveStat struct {
+	Year        string         `json:"year"`
+	TotalCount  int64          `json:"total_count"`
+	TypeCounts  map[string]int `json:"type_counts"`
+	Months      []string       `json:"months"`
 }
 
-// StatsResponse 实验室统计数据与运行时 HUD
-type StatsResponse struct {
-	TotalProjects   int64   `json:"total_projects"`
-	TotalActivities int64   `json:"total_activities"`
-	ActiveDays      int     `json:"active_days"`
-	UptimeHours     int     `json:"uptime_hours"`
-	UptimeSeconds   int64   `json:"uptime_seconds"`
-	LastUpdated     string  `json:"last_updated"`
-	GoVersion       string  `json:"go_version"`
-	Goroutines      int     `json:"goroutines"`
-	MemoryAllocMB   float64 `json:"memory_alloc_mb"`
-	DatabaseType    string  `json:"database_type"`
-	QueryLatencyMs  float64 `json:"query_latency_ms"`
-}
+// GetArchiveStats 获取年度归档概览
+func GetArchiveStats(c *gin.Context) {
+	var entries []models.LifeEntry
+	db.DB.Find(&entries)
 
-// GetStats 获取概览统计数据
-func GetStats(c *gin.Context) {
-	startQuery := time.Now()
+	yearMap := make(map[string]*YearArchiveStat)
 
-	var projectCount int64
-	var activityCount int64
-
-	db.DB.Model(&models.Project{}).Count(&projectCount)
-	db.DB.Model(&models.Activity{}).Count(&activityCount)
-
-	queryLatency := float64(time.Since(startQuery).Microseconds()) / 1000.0
-
-	var m runtime.MemStats
-	runtime.ReadMemStats(&m)
-	memAllocMB := float64(m.Alloc) / 1024.0 / 1024.0
-
-	uptimeSec := int64(time.Since(startTime).Seconds())
-	uptimeHours := int(uptimeSec / 3600)
-	if uptimeHours < 1 {
-		uptimeHours = 1
+	for _, e := range entries {
+		y := e.Year
+		if y == "" {
+			y = "2026"
+		}
+		stat, exists := yearMap[y]
+		if !exists {
+			stat = &YearArchiveStat{
+				Year:       y,
+				TotalCount: 0,
+				TypeCounts: make(map[string]int),
+				Months:     []string{},
+			}
+			yearMap[y] = stat
+		}
+		stat.TotalCount++
+		stat.TypeCounts[e.Type]++
 	}
 
-	res := StatsResponse{
-		TotalProjects:   projectCount,
-		TotalActivities: activityCount,
-		ActiveDays:      218,
-		UptimeHours:     uptimeHours,
-		UptimeSeconds:   uptimeSec,
-		LastUpdated:     time.Now().Format("2006-01-02 15:04:05"),
-		GoVersion:       runtime.Version(),
-		Goroutines:      runtime.NumGoroutine(),
-		MemoryAllocMB:   float64(int(memAllocMB*100)) / 100.0,
-		DatabaseType:    "Pure-Go SQLite (CGO-Free)",
-		QueryLatencyMs:  float64(int(queryLatency*100)) / 100.0,
+	var res []*YearArchiveStat
+	for _, v := range yearMap {
+		res = append(res, v)
 	}
+
 	c.JSON(http.StatusOK, res)
 }
 
-// GetConfig 获取网站信息与备案信息
+// GetConfig 获取网站与备案信息
 func GetConfig(c *gin.Context) {
 	var config models.SiteConfig
 	if err := db.DB.First(&config).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch site config"})
+		c.JSON(http.StatusOK, models.SiteConfig{
+			SiteName:  "ChiMu Archive",
+			Domain:    "codeactivityhub.top",
+			ICPNumber: "浙ICP备2026081664号",
+			ICPLink:   "https://beian.miit.gov.cn",
+		})
 		return
 	}
 	c.JSON(http.StatusOK, config)
 }
 
-// HealthCheck 健康探测接口
+// HealthCheck 健康状态
 func HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"status":     "operational",
-		"service":    "ChiMu-Lab Core API",
-		"version":    "2.0.0",
-		"runtime":    runtime.Version(),
-		"goroutines": runtime.NumGoroutine(),
-		"time":       time.Now().Unix(),
-		"message":    fmt.Sprintf("ChiMu-Lab Engine running smoothly on %s", runtime.GOARCH),
+		"status":  "operational",
+		"service": "ChiMu Life Archive Core",
+		"runtime": runtime.Version(),
+		"time":    time.Now().Unix(),
+		"message": fmt.Sprintf("Archive engine running quietly on %s", runtime.GOARCH),
 	})
 }
-
-// GetMoments 获取生活切片与日常记录
-func GetMoments(c *gin.Context) {
-	category := c.Query("category")
-	var moments []models.LifeMoment
-
-	query := db.DB.Order("id DESC")
-	if category != "" && category != "all" {
-		query = query.Where("category = ?", category)
-	}
-
-	if err := query.Find(&moments).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch moments"})
-		return
-	}
-	c.JSON(http.StatusOK, moments)
-}
-
-// LikeMoment 点赞/标记某个生活切片
-func LikeMoment(c *gin.Context) {
-	id := c.Param("id")
-	if err := db.DB.Model(&models.LifeMoment{}).Where("id = ?", id).UpdateColumn("likes", db.DB.Raw("likes + 1")).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update like"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"success": true})
-}
-

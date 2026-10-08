@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 
 	"chimu-lab/internal/models"
 
@@ -27,7 +26,7 @@ func InitDB(dbPath string) (*gorm.DB, error) {
 	}
 
 	database, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(logger.Warn),
 	})
 	if err != nil {
 		return nil, err
@@ -35,11 +34,10 @@ func InitDB(dbPath string) (*gorm.DB, error) {
 
 	// 自动迁移表结构
 	err = database.AutoMigrate(
-		&models.Profile{},
+		&models.LifeEntry{},
+		&models.NowStatus{},
 		&models.Project{},
-		&models.Activity{},
 		&models.SiteConfig{},
-		&models.LifeMoment{},
 	)
 	if err != nil {
 		return nil, err
@@ -50,34 +48,36 @@ func InitDB(dbPath string) (*gorm.DB, error) {
 	return database, nil
 }
 
-// seedData 填充迟暮真实的个人项目与仓库数据
+// seedData 填充生活档案与造物项目
 func seedData(database *gorm.DB) {
-	var count int64
-	database.Model(&models.Profile{}).Count(&count)
-	if count == 0 {
-		profile := models.Profile{
-			Name:     "迟暮",
-			Title:    "Gopher / 全栈开发者",
-			Bio:      "迟暮的个人数字工坊。不迎合外界，只记录自己造过的轮子、踩过的坑与真实的工程探索。",
-			Avatar:   "https://avatars.githubusercontent.com/u/108920146?v=4",
-			Github:   "https://github.com/YN1753",
-			Email:    "chimu@codeactivityhub.top",
-			Location: "中国 · 杭州",
-			Skills:   "Go,Wails,Vue 3,TypeScript,Docker,Linux,Swift,SQLite,Gin,Tailwind CSS",
+	// 1. 初始化「此刻的我」状态 (Now)
+	var nowCount int64
+	database.Model(&models.NowStatus{}).Count(&nowCount)
+	if nowCount == 0 {
+		now := models.NowStatus{
+			Building:    "生活自留地 · 真正记录生活的数字档案馆",
+			Learning:    "编译器机制、胶片摄影、手冲烘焙萃取",
+			Playing:     "黑神话：悟空、塞尔达传说、Steam 联机",
+			Listening:   "坂本龙一 - 《async》/《BTTB》",
+			Reading:     "罗伯特·波西格 - 《禅与摩托车维修艺术》",
+			Thinking:    "如何在快节奏的喧嚣中保持诚恳、安静且有确定性的生活",
+			Using:       "MacBook Pro 14, Contax T2, 纯白陶瓷滤杯, Midori MD 手账",
+			Location:    "中国 · 杭州 (西湖区 / 余杭)",
+			LastUpdated: "2026.10.09",
 		}
-		database.Create(&profile)
+		database.Create(&now)
 	}
 
-	// 每次更新时重新同步真实项目
+	// 2. 初始化项目（作为生活经历的一章：Things I Made）
 	database.Exec("DELETE FROM projects")
 	projects := []models.Project{
 		{
 			Title:       "SUSE-OAA-BACKEND",
-			Subtitle:    "四川轻化工大学开放原子开源协会 · 核心业务后端",
-			Description: "为四川轻化工大学开源协会研发的 Go 后端服务体系，支撑协会事务协作、招新管理与数据接口。",
-			Category:    "core",
-			Tags:        "Go,Gin,suse-edu-cn,Campus OpenSource",
-			DemoURL:     "",
+			Subtitle:    "四川轻化工大学开放原子开源协会 · 业务后端",
+			Description: "为高校开源协会搭建的高可用业务后端体系，支撑协会事务流转、招新管理与校园开源数据接口。",
+			Story:       "大二时参与协会建设，发现校园组织的招新和事务常散落在群聊里。于是和同伴一起用 Go 搭建了这套业务核心。也是我第一次深入将分层架构与领域逻辑应用到实际生产场景中。",
+			Category:    "Campus OpenSource",
+			Tags:        "Go,Gin,Campus OpenSource",
 			GithubURL:   "https://github.com/suse-edu-cn/SUSE-OAA-BACKEND",
 			Status:      "Active",
 			Featured:    true,
@@ -87,9 +87,9 @@ func seedData(database *gorm.DB) {
 			Title:       "ArchCanvas",
 			Subtitle:    "AI 辅助 Go 架构设计画布",
 			Description: "让 AI 与开发者一起，从需求语义理解、ER 实体建模到架构设计，快速生成与构建可运行的 Go 工程骨架。",
-			Category:    "core",
-			Tags:        "TypeScript,Go,Architecture,AI Canvas",
-			DemoURL:     "",
+			Story:       "在画系统架构图时常常觉得图与代码是割裂的。我想做一个直观的画板，把拖拽出来的实体和微服务边界实时映射为干净的 Go struct 代码。也是探索 AI 与工程设计工具融合的小实验。",
+			Category:    "AI & Architecture",
+			Tags:        "TypeScript,Go,Architecture",
 			GithubURL:   "https://github.com/YN1753/ArchCanvas",
 			Status:      "Active",
 			Featured:    true,
@@ -99,9 +99,9 @@ func seedData(database *gorm.DB) {
 			Title:       "GoLens",
 			Subtitle:    "基于交互式状态机的 Go 底层机制透视镜",
 			Description: "让 GMP 协程调度、三色标记 GC 屏障与 Channel 阻塞机制清晰可见的高交互度运行时可视化工具。",
-			Category:    "tool",
-			Tags:        "JavaScript,Go Internals,GMP,Visualization",
-			DemoURL:     "",
+			Story:       "学 Go 底层时被各种纸上谈兵的图解绕晕了。既然理解不了抽象，就手写一套状态机把它像电影放映机一样在浏览器里跑起来。做完之后，GMP 的工作偷取机制就像齿轮一样印在脑子里了。",
+			Category:    "Visualization",
+			Tags:        "JavaScript,Go Internals,GMP",
 			GithubURL:   "https://github.com/YN1753/GoLens",
 			Status:      "Stable",
 			Featured:    true,
@@ -111,9 +111,9 @@ func seedData(database *gorm.DB) {
 			Title:       "AstraLink-Desktop",
 			Subtitle:    "基于 Wails 的图笔记桌面端应用",
 			Description: "星链 2.0。探索 Go + 前端混合桌面开发（Wails 架构），支持双向链接、图谱可视化与本地隐私优先的知识管理。",
-			Category:    "tool",
-			Tags:        "Go,Wails,Vue,Desktop,Graph",
-			DemoURL:     "",
+			Story:       "一直渴望一款数据 100% 留在本地硬盘、不依赖云端账户的个人笔记。用 Wails 把 WebKit 前端和 Go 核心绑在一起，启动轻快，内存只占几十兆。",
+			Category:    "Desktop App",
+			Tags:        "Go,Wails,Vue,Desktop",
 			GithubURL:   "https://github.com/YN1753/AstraLink-Desktop",
 			Status:      "Active",
 			Featured:    false,
@@ -121,11 +121,11 @@ func seedData(database *gorm.DB) {
 		},
 		{
 			Title:       "Go-Load",
-			Subtitle:    "轻量级高并发 HTTP 压测工具",
-			Description: "基于 Go 语言原生并发模型编写的高性能压测工具，轻巧无外部依赖，具备低资源开销与精确的时延吞吐量统计。",
-			Category:    "tool",
-			Tags:        "Go,Benchmark,High Concurrency,CLI",
-			DemoURL:     "",
+			Subtitle:    "轻量分布式 HTTP 压测探针",
+			Description: "自制轻量级高并发压测工具，毫秒级统计 P90 / P99 延迟直方图。",
+			Story:       "觉得现成压测工具安装繁琐，就用 Go 原生协程池手打了一个发压器。小巧单文件，丢到服务器上就能测。",
+			Category:    "CLI Tool",
+			Tags:        "Go,Benchmark,CLI",
 			GithubURL:   "https://github.com/YN1753/Go-Load",
 			Status:      "Stable",
 			Featured:    false,
@@ -133,11 +133,11 @@ func seedData(database *gorm.DB) {
 		},
 		{
 			Title:       "nexus",
-			Subtitle:    "面向开发者的现代化 Linux 服务器管理平台",
-			Description: "轻量化 Linux 运维控制台，用于打理自己的云服务器，监控基础硬件性能、容器与服务状态。",
-			Category:    "tool",
-			Tags:        "Vue,Linux,DevOps,System",
-			DemoURL:     "",
+			Subtitle:    "轻量 Linux 服务器管理控制台",
+			Description: "个人云服务器状态监控与容器服务守护面板。",
+			Story:       "管理自己的轻量云服务器时写的工具，随时扫一眼内存、磁盘和守护进程。",
+			Category:    "DevOps",
+			Tags:        "Vue,Linux,DevOps",
 			GithubURL:   "https://github.com/YN1753/nexus",
 			Status:      "WIP",
 			Featured:    false,
@@ -145,11 +145,11 @@ func seedData(database *gorm.DB) {
 		},
 		{
 			Title:       "DeviceDaily",
-			Subtitle:    "支持 Mac 原生小组件的设备成本统计 App",
-			Description: "用 Swift 原生开发的实用记账与设备折旧折算工具，支持 macOS 原生 Widget 小组件常驻桌面。",
-			Category:    "tool",
-			Tags:        "Swift,macOS,WidgetKit,Utility",
-			DemoURL:     "",
+			Subtitle:    "支持 Mac 小组件的设备成本统计 App",
+			Description: "基于 Swift 原生开发，支持 macOS WidgetKit，记录电子产品日均使用成本。",
+			Story:       "想看看手里买了三年的相机和电脑到底均摊到了多少钱一天。写了个简洁的 macOS 桌面 Widget。",
+			Category:    "macOS App",
+			Tags:        "Swift,macOS,WidgetKit",
 			GithubURL:   "https://github.com/YN1753/DeviceDaily",
 			Status:      "Active",
 			Featured:    false,
@@ -160,185 +160,183 @@ func seedData(database *gorm.DB) {
 		database.Create(&p)
 	}
 
-	database.Model(&models.Activity{}).Count(&count)
-	if count == 0 {
-		now := time.Now()
-		activities := []models.Activity{
-			{
-				Date:        now.Format("2006-01-02"),
-				Type:        "commit",
-				Title:       "SUSE-OAA-BACKEND 架构优化与接口梳理",
-				Description: "重构业务逻辑层与中间件鉴权，提升校园协会服务响应性能。",
-				RepoName:    "suse-edu-cn/SUSE-OAA-BACKEND",
-				Count:       8,
-				Link:        "https://github.com/suse-edu-cn/SUSE-OAA-BACKEND",
-			},
-			{
-				Date:        now.AddDate(0, 0, -1).Format("2006-01-02"),
-				Type:        "commit",
-				Title:       "ArchCanvas AI 画布核心状态机与实体生成测试",
-				Description: "打通从需求文本解析到 Go struct 及 GORM 实体定义代码生成链条。",
-				RepoName:    "YN1753/ArchCanvas",
-				Count:       12,
-				Link:        "https://github.com/YN1753/ArchCanvas",
-			},
-			{
-				Date:        now.AddDate(0, 0, -4).Format("2006-01-02"),
-				Type:        "release",
-				Title:       "GoLens 运行时可视化透视镜初版调试",
-				Description: "完成 GMP 调度状态转移与 Channel 缓冲队列的可视化逻辑。",
-				RepoName:    "YN1753/GoLens",
-				Count:       5,
-				Link:        "https://github.com/YN1753/GoLens",
-			},
-			{
-				Date:        now.AddDate(0, 0, -8).Format("2006-01-02"),
-				Type:        "milestone",
-				Title:       "AstraLink-Desktop Wails 桌面端跨平台打包",
-				Description: "验证 macOS / Windows 双平台打包产物与 SQLite 本地数据存储。",
-				RepoName:    "YN1753/AstraLink-Desktop",
-				Count:       6,
-				Link:        "https://github.com/YN1753/AstraLink-Desktop",
-			},
-		}
-		for _, a := range activities {
-			database.Create(&a)
-		}
+	// 3. 初始化生活时间线（Life Stream）：自然混合日常、想法、照片、游戏、音乐、地点、造物
+	database.Exec("DELETE FROM life_entries")
+	entries := []models.LifeEntry{
+		{
+			Date:      "2026.10.09",
+			Year:      "2026",
+			Month:     "10",
+			Day:       "09",
+			Time:      "00:30",
+			Type:      "thought",
+			Title:     "做一个真正记录生活的网站",
+			Content:   "深夜突然想到：我不想再把自己的网络主页做成一份展示给招聘者或甲方的技术简历了。生活不只有编译、部署和代码架构。下班后迎面吹来的夜风、清晨手冲咖啡的香气、拍下的胶卷、听了整夜的唱片、和朋友玩过的游戏……这些所有具体琐碎的事物，才构成了我真实活着的样子。这里应当是一本安静的个人生活档案馆。",
+			Meta:      "深夜书房随笔",
+			Tags:      "想法,生活志,初心",
+			Featured:  true,
+		},
+		{
+			Date:      "2026.10.08",
+			Year:      "2026",
+			Month:     "10",
+			Day:       "08",
+			Time:      "21:40",
+			Type:      "photo",
+			Title:     "满觉陇的桂花蒸与旁轴底片",
+			Content:   "假期最后几天去了一趟满觉陇。沿山的村落都在做糖桂花，青石板路上落了一层薄薄的金黄，空气甜得发稠。下午四点半的夕阳斜斜穿过樟树叶，光斑在青石砖上摇曳。带了老胶片机拍完了一卷 Kodak 400。阳光晒在皮肤上的温热感，大概就是秋天最好的注脚。",
+			Images:    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+			Location:  "杭州 · 满觉陇",
+			Meta:      "Contax T2 · 38mm f/2.8 · Kodak Portra 400",
+			Tags:      "摄影,胶片,满觉陇,秋天",
+			Featured:  true,
+		},
+		{
+			Date:      "2026.10.08",
+			Year:      "2026",
+			Month:     "10",
+			Day:       "08",
+			Time:      "15:20",
+			Type:      "coffee",
+			Title:     "浅烘埃塞古吉：92°C 细水慢萃",
+			Content:   "磨了 15g 埃塞俄比亚古吉日晒花魁豆。磨齿带出的干香满是草莓和茉莉花气息。92°C 纯净水，三段式注水萃取。第一段闷蒸 35 秒看咖啡粉像面包一样膨胀，白桃与柑橘酸感明亮。每天看着水柱在滤杯里画同心圆，是让人最沉静的日常仪式。",
+			Images:    "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1000&q=80",
+			Location:  "书房窗台前",
+			Meta:      "埃塞古吉花魁 · 15g粉 / 225g水 · 2分18秒",
+			Tags:      "咖啡,手冲,慢生活",
+			Featured:  false,
+		},
+		{
+			Date:      "2026.10.07",
+			Year:      "2026",
+			Month:     "10",
+			Day:       "07",
+			Time:      "23:15",
+			Type:      "music",
+			Title:     "最近开始反复听坂本龙一的《async》",
+			Content:   "深夜关掉大灯，只留一盏暖黄的书桌灯。戴上耳机放《async》。空旷而平静的钢琴琴键、风吹过树梢的采样，整个城市好像都睡熟了。在这样的底噪里看几页书、记几笔日记，心底有一种极其踏实的宁静。",
+			Images:    "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1000&q=80",
+			Meta:      "Ryuichi Sakamoto - async (2017) · 推荐曲目：《andata》《solari》",
+			Tags:      "音乐,坂本龙一,深夜",
+			Featured:  true,
+		},
+		{
+			Date:      "2026.10.06",
+			Year:      "2026",
+			Month:     "10",
+			Day:       "06",
+			Time:      "22:30",
+			Type:      "game",
+			Title:     "和朋友玩了一整晚游戏",
+			Content:   "假期倒数第二天，叫上几个好友连麦打了一整晚游戏。从《黑神话：悟空》讨论到 Steam 合作通关，中间点了一大桶冰镇可乐和炸鸡。好久没有这样毫无目的地和朋友大笑、打打闹闹到深夜了。生活需要这样的留白和放空。",
+			Images:    "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1000&q=80",
+			Meta:      "Steam & PS5 连麦联机 · 快乐放空",
+			Tags:      "游戏,朋友,放空",
+			Featured:  false,
+		},
+		{
+			Date:      "2026.10.03",
+			Year:      "2026",
+			Month:     "10",
+			Day:       "03",
+			Time:      "20:10",
+			Type:      "place",
+			Title:     "杨公堤夜骑：风从荷叶上吹过来的温度",
+			Content:   "傍晚换了身衣服去西湖夜骑。从曲院风荷出发，沿着杨公堤一路穿行到南山路。两侧高大的水杉在路灯下投下斑驳长影，秋夜的风穿过枯荷拂在脸上，带着微凉的水汽。把白天的信息和杂念全抛在脑后，出了一身薄汗，整个人仿佛被晚风洗涤过一遍。",
+			Images:    "https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=1200&q=80",
+			Location:  "杭州 · 西湖杨公堤",
+			Meta:      "公路车巡航 · 里程 21.4 km · 均速 22 km/h",
+			Tags:      "骑行,西湖,夜风,行迹",
+			Featured:  true,
+		},
+		{
+			Date:      "2026.09.30",
+			Year:      "2026",
+			Month:     "09",
+			Day:       "30",
+			Time:      "18:00",
+			Type:      "project",
+			Title:     "校园开源协会业务后端 (SUSE-OAA-BACKEND)",
+			Content:   "为四川轻化工大学开源协会重构了核心业务架构。抽离鉴权拦截器与事务层，让新一届协会学弟学妹在举办活动和技术招新时能有一个稳定干净的后端服务。造轮子最开心的瞬间，莫过于亲手写的逻辑真正跑在校园生活里。",
+			Images:    "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1000&q=80",
+			Meta:      "Go / Gin / GORM / Campus OpenSource Backbone",
+			Link:      "https://github.com/suse-edu-cn/SUSE-OAA-BACKEND",
+			Tags:      "造物,Go,校园开源",
+			Featured:  false,
+		},
+		{
+			Date:      "2026.09.24",
+			Year:      "2026",
+			Month:     "09",
+			Day:       "24",
+			Time:      "16:30",
+			Type:      "book",
+			Title:     "重读《禅与摩托车维修艺术》：手艺与良质",
+			Content:   "坐在长椅上吹着风读波西格。书中写：‘佛陀或耶稣坐在排气管边，就跟坐在莲花座上一样正常。’ 当你带着真正的良质（Quality）去对待手头的事物——无论是调校一辆自行车、手冲一杯咖啡，还是雕琢一段逻辑——人与工具就合一了。少一点向外张望的功利，多一点对手艺与生活的敬畏。",
+			Images:    "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1000&q=80",
+			Meta:      "罗伯特·M·波西格 著 · 哲学与手艺书摘",
+			Tags:      "阅读,书摘,良质,手艺",
+			Featured:  true,
+		},
+		{
+			Date:      "2026.09.15",
+			Year:      "2026",
+			Month:     "09",
+			Day:       "15",
+			Time:      "14:00",
+			Type:      "purchase",
+			Title:     "陪伴三年的旧物：无刻机械键盘、钢笔与手账",
+			Content:   "擦拭这把用了三年的无刻机械键盘，键帽表面泛出了温润的光泽。旁边是一支百乐钢笔和一个牛皮纸手账。这些天天陪伴我的物件，沉默却忠诚。‘日用即道’，善待身边的每一件物，日子也会变得更踏实有温度。",
+			Images:    "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1000&q=80",
+			Meta:      "Custom Mechanical Keyboard + Pilot 78G + Midori MD",
+			Tags:      "好物,文具,旧物,陪伴",
+			Featured:  false,
+		},
+		{
+			Date:      "2026.09.05",
+			Year:      "2026",
+			Month:     "09",
+			Day:       "05",
+			Time:      "21:00",
+			Type:      "project",
+			Title:     "ArchCanvas：AI 辅助 Go 架构设计画布",
+			Content:   "想让 AI 辅助开发不只停留在单文件的补全上，而是从全局需求语义直观生成整套可运行的 Go 架构拓扑。开始构建 ArchCanvas 的 AST 双向同步引擎。",
+			Meta:      "TypeScript / Go AST / Architecture Canvas",
+			Link:      "https://github.com/YN1753/ArchCanvas",
+			Tags:      "造物,AI架构,实验",
+			Featured:  false,
+		},
+		{
+			Date:      "2026.08.20",
+			Year:      "2026",
+			Month:     "08",
+			Day:       "20",
+			Time:      "19:30",
+			Type:      "project",
+			Title:     "GoLens：交互式状态机下的运行时透视镜",
+			Content:   "把 Go 复杂的 GMP 协程调度、三色标记 GC 写屏障做成交互式状态机动画。亲手敲完一套调度流转，才算真正摸到了并发系统的齿轮。",
+			Meta:      "Go Internals Visualization / GMP / GC Barrier",
+			Link:      "https://github.com/YN1753/GoLens",
+			Tags:      "造物,Go底层,状态机",
+			Featured:  false,
+		},
+	}
+	for _, e := range entries {
+		database.Create(&e)
 	}
 
-	// 真实生活方方面面记录 (Life Chronicles & Facets)
-	database.Exec("DELETE FROM life_moments")
-	moments := []models.LifeMoment{
-		{
-			Date:     "2026.10.08",
-			Time:     "21:30",
-			Location: "杭州 · 西湖杨公堤",
-			Weather:  "20°C · 暮秋凉风",
-			Mood:     "放空",
-			Category: "cycling",
-			Title:    "杨公堤夜骑：风从荷叶上吹过来的温度",
-			Content:  "下班后没有直接回书房，换了身衣服去西湖夜骑。从曲院风荷出发，沿着杨公堤一直骑到南山路。路两侧是高大的水杉，秋天的晚风穿过荷叶扑在脸上，带着微凉的水汽。把城市的喇叭声和屏幕的蓝光全抛在身后，出了一身薄汗，整个人好像被这阵风重新洗刷了一遍。",
-			Quote:    "“骑车的时候，世界退居到两侧，心跳是唯一的节拍器。”",
-			Note:     "路线：曲院风荷 -> 杨公堤 -> 虎跑路 -> 钱塘江绿道，总里程 21.4 km。速度 22km/h。",
-			ImageURL: "https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=800&q=80",
-			MetaInfo: "公路车巡航 · 21.4km · 爬升 85m",
-			Tags:     "夜骑,西湖,生活行迹,松弛",
-			Likes:    34,
-		},
-		{
-			Date:     "2026.10.05",
-			Time:     "16:40",
-			Location: "杭州 · 满觉陇青石板路",
-			Weather:  "23°C · 金桂初放",
-			Mood:     "拾光",
-			Category: "photo",
-			Title:    "满觉陇的桂花蒸与旁轴底片",
-			Content:  "赶在假期的尾巴，带了老胶片机去满觉陇。沿山的村落都在做糖桂花，青石板路上落了一层薄薄的金黄，空气甜得发稠。下午四点半的夕阳斜斜穿过樟树叶，光斑在墙面上摇曳。按下快门的那一瞬，时间好像被装进了小小的暗盒里。",
-			Quote:    "“光线是时间的影印件，而胶卷留下了温度。”",
-			Note:     "Contax T2 · 38mm f/2.8 Carl Zeiss，Kodak Portra 400，光圈 f/4，曝光补偿 +0.3EV。",
-			ImageURL: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
-			MetaInfo: "Contax T2 · Kodak Portra 400 · 38mm",
-			Tags:     "胶片,满觉陇,桂花,摄影",
-			Likes:    42,
-		},
-		{
-			Date:     "2026.10.03",
-			Time:     "10:15",
-			Location: "书房窗前木桌",
-			Weather:  "22°C · 晨光微熹",
-			Mood:     "惬意",
-			Category: "coffee",
-			Title:    "浅烘埃塞古吉与 92°C 细水慢萃",
-			Content:  "清晨的书房很安静。磨了 15g 埃塞俄比亚古吉产区的花魁日晒豆，磨齿带出的干香满是草莓和茉莉花气息。92°C 纯净水，三段式注水萃取。第一段闷蒸 35 秒看咖啡粉像面包一样膨胀，看着水柱在滤杯里画同心圆，是每天最让人沉静下来的仪式。",
-			Quote:    "“把水注入咖啡粉的过程，就像把耐心倾注给生活。”",
-			Note:     "水粉比 1:15，粉量 15g，注水总量 225g，总萃取耗时 2分18秒。白桃与柑橘酸感明亮。",
-			ImageURL: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80",
-			MetaInfo: "埃塞俄比亚 古吉花魁 · 92°C · V60 滤杯",
-			Tags:     "手冲,咖啡,日常仪式,慢生活",
-			Likes:    29,
-		},
-		{
-			Date:     "2026.09.30",
-			Time:     "14:20",
-			Location: "西湖边 · 树荫下长椅",
-			Weather:  "24°C · 微风拂面",
-			Mood:     "沉思",
-			Category: "reading",
-			Title:    "重读《禅与摩托车维修艺术》：手艺与良质",
-			Content:  "坐在长椅上吹着湖风读波西格。书中写：‘佛陀或耶稣坐在排气管边，就跟坐在莲花座上一样正常。’ 当你带着真正的良质（Quality）去面对一件具体的事物——无论是调校一辆自行车的刹车皮、手冲一杯咖啡，抑或是雕琢一行 Go 代码——工具和人就合二为一了。少一点向外张望的功利，多一点对手艺本身的敬畏。",
-			Quote:    "“如果你对事情感到厌倦，说明你已经失去了与它的活生生的联结。”",
-			Note:     "罗伯特·M·波西格 著，重庆出版社。随手在 P.168 折了角，记下了关于专注的感悟。",
-			ImageURL: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80",
-			MetaInfo: "《禅与摩托车维修艺术》· 案头书摘",
-			Tags:     "读书,手艺,良质,哲学",
-			Likes:    36,
-		},
-		{
-			Date:     "2026.09.25",
-			Time:     "23:00",
-			Location: "深夜工位 · 暖光台灯下",
-			Weather:  "19°C · 秋夜微凉",
-			Mood:     "专注",
-			Category: "music",
-			Title:    "黑胶唱片与坂本龙一的音符",
-			Content:  "深夜十一点，把房间大灯关掉，只留一盏暖黄的台灯。戴上耳机放坂本龙一的《async》。空旷而平静的钢琴音、风吹过树梢的采样，整个世界好像都睡着了。在这样的底噪里写两行字，看看书，心里非常踏实。音乐是精神的庇护所。",
-			Quote:    "“生命是脆弱的，但音乐能把那一瞬的真实凝固成永恒。”",
-			Note:     "推荐循环曲目：《andata》与《solari》。静谧、克制、富有呼吸感。",
-			ImageURL: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
-			MetaInfo: "坂本龙一 · 《async》· 24bit/96kHz 无损",
-			Tags:     "音乐,坂本龙一,深夜,治愈",
-			Likes:    45,
-		},
-		{
-			Date:     "2026.09.18",
-			Time:     "22:30",
-			Location: "杭州 · 窗台前",
-			Weather:  "21°C · 夜雨敲窗",
-			Mood:     "自洽",
-			Category: "thought",
-			Title:    "写给自己：在喧嚣时代认认真真生活",
-			Content:  "窗外下着绵绵的秋雨。很多人把生活过成了一场给别人看的展览，急着证明自己掌握了什么技术、走到了什么高度。可日子终究是自己过的：饭要一口一口吃，觉要踏踏实实睡。代码也好，爱好也罢，都只是人生长河里的浪花。认认真真生活，诚恳对待每一顿饭、每一趟骑行、每一个念头，足矣。",
-			Quote:    "“不向外界讨要意义，生活的意义就在生活的每一个具体细节里。”",
-			Note:     "深夜随笔。泡了一杯温热的陈皮老白茶，听雨声入睡。",
-			ImageURL: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
-			MetaInfo: "雨夜随想 · 杭州生活手记",
-			Tags:     "随想,自洽,内心平宁,夜雨",
-			Likes:    58,
-		},
-		{
-			Date:     "2026.09.10",
-			Time:     "15:00",
-			Location: "书房桌面",
-			Weather:  "26°C · 晴朗",
-			Mood:     "爱物",
-			Category: "gear",
-			Title:    "陪伴三年的旧物：机械键盘、钢笔与手账",
-			Content:  "清理桌面时擦拭这把用了三年的无刻机械键盘。键帽表面已经泛出了温润的光泽，青轴的手感依旧干脆。旁边是一支用了很久的百乐钢笔和一个牛皮纸手账。这些天天陪伴我的物件，沉默却忠诚。人与器物之间的相处，时间久了也会生出情谊。",
-			Quote:    "“日用即道。善待陪伴你的每一件工具。”",
-			Note:     "桌面好物：定制无刻键盘、百乐 78G 钢笔、Midori MD 方格本。简约耐看。",
-			ImageURL: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80",
-			MetaInfo: "EDC 好物 · 桌面日常 · 物与心",
-			Tags:     "好物,桌面,文具,陪伴",
-			Likes:    27,
-		},
-	}
-	for _, m := range moments {
-		database.Create(&m)
-	}
-
-	database.Model(&models.SiteConfig{}).Count(&count)
-	if count == 0 {
+	// 4. 站点合规配置
+	database.Model(&models.SiteConfig{}).Count(&nowCount)
+	if nowCount == 0 {
 		config := models.SiteConfig{
-			SiteName:     "迟暮实验室 · ChiMu-Lab",
-			SiteDesc:     "迟暮的个人数字工坊与工程工作台",
-			Domain:       "codeactivityhub.top",
-			ICPNumber:    "浙ICP备2026081664号",
-			ICPLink:      "https://beian.miit.gov.cn",
-			PoliceNumber: "公网安备 待审核",
-			PoliceCode:   "",
+			SiteName:  "ChiMu · 迟暮的数字生活档案馆",
+			SiteDesc:  "A personal archive of things I've done, seen, thought about, and don't want to forget.",
+			Domain:    "codeactivityhub.top",
+			ICPNumber: "浙ICP备2026081664号",
+			ICPLink:   "https://beian.miit.gov.cn",
 		}
 		database.Create(&config)
 	}
 
-	log.Println("Database initialized and real repos and moments seeded successfully.")
+	log.Println("Database initialized with unified life stream entries and craft projects.")
 }

@@ -2,138 +2,85 @@
 
 @layer base {
   :root {
-    --bg-page: #f7f6f2;
-    --bg-surface: #ffffff;
-    --bg-surface-subtle: #f1eee7;
-    --border-color: rgba(20, 21, 26, 0.08);
-    --border-hover: rgba(20, 21, 26, 0.16);
-    --ink-primary: #14151a;
-    --ink-secondary: #525662;
-    --ink-muted: #8c8f9b;
-    --accent-amber: #d97706;
-    --accent-teal: #0d766e;
-    --card-shadow: 0 4px 20px -4px rgba(20, 21, 26, 0.04), 0 1px 3px rgba(20, 21, 26, 0.02);
-    --card-shadow-hover: 0 24px 48px -12px rgba(20, 21, 26, 0.08), 0 4px 12px -2px rgba(20, 21, 26, 0.03);
-  }
-
-  body.theme-amber {
-    --bg-page: #f3ede2;
-    --bg-surface: #fcf9f2;
-    --bg-surface-subtle: #eae1d1;
-    --border-color: rgba(74, 53, 34, 0.1);
-    --border-hover: rgba(74, 53, 34, 0.22);
-    --ink-primary: #2c2016;
-    --ink-secondary: #634d3b;
-    --ink-muted: #9c8470;
-    --accent-amber: #b45309;
-    --accent-teal: #115e59;
-  }
-
-  body.theme-noir {
-    --bg-page: #0f1115;
-    --bg-surface: #171920;
-    --bg-surface-subtle: #21242e;
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(255, 255, 255, 0.18);
-    --ink-primary: #f0f0f3;
-    --ink-secondary: #a0a4b0;
-    --ink-muted: #666a78;
-    --accent-amber: #fbbf24;
-    --accent-teal: #2dd4bf;
-    --card-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.5);
-    --card-shadow-hover: 0 20px 48px -10px rgba(0, 0, 0, 0.7);
+    --bg-archive: #f9f8f5;
+    --bg-subtle: #f2f0eb;
+    --ink-primary: #181716;
+    --ink-secondary: #57544e;
+    --ink-muted: #8c8880;
+    --border-subtle: rgba(24, 23, 22, 0.08);
+    --border-divider: rgba(24, 23, 22, 0.12);
+    --accent-warm: #a24f2b;
+    --accent-moss: #3f5a4a;
   }
 
   body {
-    background-color: var(--bg-page);
+    background-color: var(--bg-archive);
     color: var(--ink-primary);
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background-color 0.4s ease, color 0.4s ease;
+    line-height: 1.7;
+    letter-spacing: -0.01em;
   }
 
-  .font-serif-cinematic {
-    font-family: 'Newsreader', Georgia, 'Songti SC', 'Source Han Serif SC', serif;
+  /* 优雅衬线排版字体 (Serif Editorial) */
+  .font-serif-editorial {
+    font-family: 'Newsreader', 'Songti SC', 'Source Han Serif SC', Georgia, serif;
+    font-feature-settings: "kern", "liga", "dlig", "calt";
   }
 
-  code, pre, .font-mono {
-    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* 等宽排版字体 (Monospace Timestamp) */
+  .font-mono-archive {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    letter-spacing: 0.02em;
   }
 }
 
-/* 电影级微漫射暖调光晕与暗角 */
-.cinematic-canvas {
-  background-image: 
-    radial-gradient(circle at 50% 0%, rgba(217, 119, 6, 0.04) 0%, transparent 60%),
-    radial-gradient(circle at 100% 100%, rgba(13, 118, 110, 0.03) 0%, transparent 50%),
-    linear-gradient(to right, var(--border-color) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--border-color) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 64px 64px, 64px 64px;
-  background-position: 0 0, 0 0, -1px -1px, -1px -1px;
+/* 极其克制的图片悬停质感 */
+.editorial-image {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
 }
 
-/* 电影胶片感分镜卡片 (Filmic Paper Card) */
-.film-card {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 1.25rem;
-  box-shadow: var(--card-shadow);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
+.editorial-image:hover {
+  transform: scale(1.012);
 }
 
-.film-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--border-hover);
-  box-shadow: var(--card-shadow-hover);
-}
-
-/* 3D 翻转卡片核心类 */
-.perspective-1000 {
-  perspective: 1000px;
-}
-
-.transform-style-3d {
-  transform-style: preserve-3d;
-}
-
-.backface-hidden {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.rotate-y-180 {
-  transform: rotateY(180deg);
-}
-
-/* 蓝图网格 */
-.blueprint-grid {
-  background-image: 
-    linear-gradient(to right, rgba(13, 118, 110, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(13, 118, 110, 0.08) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
-/* 斯坦尼康柔滑阻尼 */
-.smooth-transition {
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* 暖调极简滚动条 */
+/* 极简纸张质感滚动条 */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-page);
+  background: var(--bg-archive);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
+  background: rgba(24, 23, 22, 0.15);
+  border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-hover);
+  background: rgba(24, 23, 22, 0.3);
+}
+
+/* 链接下划线微动效 */
+.hover-underline {
+  position: relative;
+  text-decoration: none;
+}
+.hover-underline::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 1px;
+  bottom: -2px;
+  left: 0;
+  background-color: currentColor;
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
+}
+.hover-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
 }

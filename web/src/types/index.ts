@@ -1,13 +1,46 @@
-export interface Profile {
+export type EntryType =
+  | 'thought'
+  | 'photo'
+  | 'moment'
+  | 'place'
+  | 'music'
+  | 'book'
+  | 'game'
+  | 'project'
+  | 'purchase'
+  | 'coffee'
+  | 'gear'
+
+export interface LifeEntry {
   id: number
-  name: string
+  date: string
+  year: string
+  month: string
+  day: string
+  time: string
+  type: EntryType | string
   title: string
-  bio: string
-  avatar: string
-  github: string
-  email: string
+  content: string
+  images?: string
+  location?: string
+  meta?: string
+  tags?: string
+  link?: string
+  related_project?: string
+  featured?: boolean
+}
+
+export interface NowStatus {
+  id?: number
+  building: string
+  learning: string
+  playing: string
+  listening: string
+  reading: string
+  thinking: string
+  using: string
   location: string
-  skills: string
+  last_updated: string
 }
 
 export interface Project {
@@ -15,68 +48,27 @@ export interface Project {
   title: string
   subtitle: string
   description: string
-  category: 'core' | 'lab' | 'tool' | 'study' | string
+  story: string
+  category: string
   tags: string
-  demo_url: string
+  demo_url?: string
   github_url: string
-  status: 'Active' | 'Stable' | 'WIP' | 'Archived' | string
+  status: string
   featured: boolean
   order: number
 }
 
-export interface Activity {
-  id: number
-  date: string
-  type: 'commit' | 'release' | 'study' | 'milestone' | string
-  title: string
-  description: string
-  repo_name: string
-  count: number
-  link: string
-}
-
-export interface Stats {
-  total_projects: number
-  total_activities: number
-  active_days: number
-  uptime_hours: number
-  uptime_seconds?: number
-  last_updated: string
-  go_version?: string
-  goroutines?: number
-  memory_alloc_mb?: number
-  database_type?: string
-  query_latency_ms?: number
+export interface YearArchiveStat {
+  year: string
+  total_count: number
+  type_counts: Record<string, number>
+  months: string[]
 }
 
 export interface SiteConfig {
-  id: number
   site_name: string
   site_desc: string
   domain: string
   icp_number: string
   icp_link: string
-  police_number: string
-  police_code: string
 }
-
-export interface LifeMoment {
-  id: number
-  date: string
-  time: string
-  location: string
-  weather: string
-  mood: string
-  category: 'thought' | 'photo' | 'coffee' | 'reading' | 'music' | 'cycling' | 'gear' | string
-  title: string
-  content: string
-  quote?: string
-  note: string
-  image_url: string
-  meta_info?: string
-  camera?: string
-  tags: string
-  likes: number
-}
-
-
