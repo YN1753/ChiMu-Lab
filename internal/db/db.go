@@ -176,7 +176,7 @@ func seedData(database *gorm.DB) {
 			SiteName:     "迟暮实验室 · ChiMu-Lab",
 			SiteDesc:     "Code Activity Hub · 迟暮的个人极客工坊与代码动态中心",
 			Domain:       "codeactivityhub.top",
-			ICPNumber:    "苏ICP备2024000000号-1", // 用户可在配置或环境变量中覆盖为真实备案号
+			ICPNumber:    "浙ICP备2026081664号",
 			ICPLink:      "https://beian.miit.gov.cn",
 			PoliceNumber: "公网安备 待审核",
 			PoliceCode:   "",

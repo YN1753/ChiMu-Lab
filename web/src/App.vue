@@ -130,7 +130,7 @@ const config = ref<SiteConfig | null>({
   site_name: '迟暮实验室 · ChiMu-Lab',
   site_desc: 'Code Activity Hub · 迟暮的个人极客工坊与代码动态中心',
   domain: 'codeactivityhub.top',
-  icp_number: '苏ICP备2024000000号-1',
+  icp_number: '浙ICP备2026081664号',
   icp_link: 'https://beian.miit.gov.cn',
   police_number: '全国公安联网备案审核中',
   police_code: '',

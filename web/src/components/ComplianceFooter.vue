@@ -36,7 +36,7 @@ defineProps<{
             class="flex items-center gap-1.5 text-slate-300 hover:text-cyan-400 transition-colors py-1 px-2.5 rounded bg-slate-900 border border-slate-800 hover:border-cyan-500/40"
           >
             <Shield class="w-3.5 h-3.5 text-cyan-400" />
-            <span>{{ config?.icp_number || '苏ICP备2024000000号-1' }}</span>
+            <span>{{ config?.icp_number || '浙ICP备2026081664号' }}</span>
             <ExternalLink class="w-3 h-3 text-slate-500" />
           </a>
 
