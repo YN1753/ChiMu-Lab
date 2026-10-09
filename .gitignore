@@ -21,4 +21,8 @@ web/dist/
 .DS_Store
 .idea/
 .vscode/
+# Environment files
+.env
+.env.local
+
 *.log
