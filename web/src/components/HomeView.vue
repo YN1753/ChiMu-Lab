@@ -14,6 +14,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'navigate', view: string): void
   (e: 'changeCategory', category: ArchiveCategory): void
+  (e: 'selectEntry', entry: LifeEntry): void
+  (e: 'openAdd'): void
 }>()
 
 const selectedDate = ref<string>('')
@@ -186,6 +188,8 @@ const currentCategoryInfo = computed(() => {
         :currentCategory="currentCategory"
         @clearDateFilter="selectedDate = ''"
         @changeCategory="emit('changeCategory', $event)"
+        @selectEntry="emit('selectEntry', $event)"
+        @openAdd="emit('openAdd')"
       />
 
       <!-- 底部探索更多 -->

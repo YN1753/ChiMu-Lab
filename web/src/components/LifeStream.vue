@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import type { LifeEntry, ArchiveCategory } from '../types'
-import { getEntryCategory } from '../types'
+import { getEntryCategory, entryMatchesCategory } from '../types'
 import { ArrowUpRight } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -15,6 +15,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'clearDateFilter'): void
   (e: 'changeCategory', category: ArchiveCategory): void
+  (e: 'selectEntry', entry: LifeEntry): void
+  (e: 'openAdd'): void
 }>()
 
 const activeCategory = ref<ArchiveCategory>(props.currentCategory || 'all')
@@ -40,12 +42,12 @@ const filteredEntries = computed(() => {
   // 1. 日期筛选 (来自生活刻度点击)
   if (props.dateFilter) {
     const target = props.dateFilter.replace(/-/g, '.').trim()
-    list = list.filter(e => e.date.replace(/-/g, '.').trim() === target)
+    list = list.filter(e => (e.date ? e.date.replace(/-/g, '.').trim() === target : true))
   }
 
-  // 2. 核心 5 重分类视图筛选
+  // 2. 核心 5 重/照片分类视图筛选
   if (activeCategory.value !== 'all') {
-    list = list.filter(e => getEntryCategory(e) === activeCategory.value)
+    list = list.filter(e => entryMatchesCategory(e, activeCategory.value))
   }
 
   // 3. 数量限制
@@ -61,7 +63,7 @@ const handleCategoryClick = (cat: ArchiveCategory) => {
   emit('changeCategory', cat)
 }
 
-// 归一化条目显示归属 (日常 / 想法 / 项目 / 收藏)
+// 归一化条目显示归属 (日常 / 想法 / 项目 / 收藏 / 照片)
 const getCategoryName = (entry: LifeEntry) => {
   const cat = getEntryCategory(entry)
   const map: Record<ArchiveCategory, string> = {
@@ -70,6 +72,7 @@ const getCategoryName = (entry: LifeEntry) => {
     thought: '想法',
     project: '项目',
     collection: '收藏',
+    photo: '照片',
   }
   return map[cat] || '日常'
 }
@@ -106,27 +109,42 @@ const getCategoryName = (entry: LifeEntry) => {
       </button>
     </div>
 
-    <!-- 空状态 -->
-    <div v-if="filteredEntries.length === 0" class="py-16 text-center text-sm font-serif-editorial text-[var(--ink-muted)]">
-      该观察视角下暂无生活记录。
+    <!-- 空状态 (Editorial 典雅中文，无冷冰冰的 No Data) -->
+    <div v-if="filteredEntries.length === 0" class="py-20 text-center space-y-4">
+      <div class="space-y-1.5 font-serif-editorial">
+        <h3 class="text-lg text-[var(--ink-primary)]">
+          {{ activeCategory === 'photo' ? '还没有照片' : '还没有记录' }}
+        </h3>
+        <p class="text-xs text-[var(--ink-muted)] leading-relaxed">
+          从今天开始，<br />
+          记录一些你不想忘记的事情。
+        </p>
+      </div>
+      <button
+        @click="emit('openAdd')"
+        class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-mono-archive border border-[var(--border-subtle)] hover:border-[var(--ink-primary)] rounded-xs cursor-pointer transition-colors"
+      >
+        <span>＋ 添加第一条记录</span>
+      </button>
     </div>
 
-    <!-- 时间流列表：无 Card UI，纯粹的独立出版物杂志排版，无任何 emoji，无杂乱 Tag 标签 -->
+    <!-- 时间流列表：无 Card UI，纯粹的独立出版物杂志排版，支持点击进入详情 -->
     <div v-else class="divide-y divide-[var(--border-subtle)]">
       
       <article
         v-for="entry in filteredEntries"
         :key="entry.id"
-        class="py-12 sm:py-16 first:pt-4"
+        @click="emit('selectEntry', entry)"
+        class="py-12 sm:py-16 first:pt-4 group cursor-pointer transition-colors"
       >
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 items-start">
           
           <!-- 左侧：时间锚点与生活归属 (纯文字注脚) -->
           <div class="md:col-span-3 space-y-2">
             <div class="font-mono-archive text-xs tracking-wider text-[var(--ink-muted)]">
-              <span class="text-[var(--ink-secondary)] font-semibold block text-sm">{{ entry.year }}年</span>
+              <span class="text-[var(--ink-secondary)] font-semibold block text-sm">{{ entry.year || '2026' }}年</span>
               <span class="text-base text-[var(--ink-primary)] font-serif-editorial block mt-0.5">
-                {{ entry.month }}月{{ entry.day }}日
+                {{ entry.month || '10' }}月{{ entry.day || '09' }}日
               </span>
               <span v-if="entry.time" class="block text-[11px] text-[var(--ink-muted)] mt-1">
                 {{ entry.time }}
@@ -150,7 +168,7 @@ const getCategoryName = (entry: LifeEntry) => {
           <div class="md:col-span-9 space-y-5">
             
             <!-- 标题 -->
-            <h3 class="text-xl sm:text-2xl font-serif-editorial font-medium tracking-tight text-[var(--ink-primary)] leading-snug">
+            <h3 class="text-xl sm:text-2xl font-serif-editorial font-medium tracking-tight text-[var(--ink-primary)] leading-snug group-hover:text-[var(--accent-warm)] transition-colors">
               {{ entry.title }}
             </h3>
 
@@ -180,17 +198,26 @@ const getCategoryName = (entry: LifeEntry) => {
               <span>— {{ entry.meta }}</span>
             </div>
 
-            <!-- 项目/造物链接 (克制细线，无按钮卡片) -->
-            <div v-if="entry.link" class="pt-2">
-              <a
-                :href="entry.link"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-1.5 text-xs text-[var(--ink-primary)] hover-underline pb-0.5 font-mono-archive"
-              >
-                <span>查看项目与代码仓库</span>
-                <ArrowUpRight class="w-3.5 h-3.5" />
-              </a>
+            <!-- 底部行：项目链接与查看详情提示 -->
+            <div class="pt-2 flex items-center justify-between">
+              <!-- 项目/造物链接 (克制细线，无按钮卡片) -->
+              <div v-if="entry.link">
+                <a
+                  :href="entry.link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  @click.stop
+                  class="inline-flex items-center gap-1.5 text-xs text-[var(--ink-primary)] hover-underline pb-0.5 font-mono-archive"
+                >
+                  <span>查看项目与代码仓库</span>
+                  <ArrowUpRight class="w-3.5 h-3.5" />
+                </a>
+              </div>
+              <div v-else></div>
+
+              <span class="text-[11px] font-mono-archive text-[var(--ink-muted)] opacity-0 group-hover:opacity-100 transition-opacity">
+                查看详情 / 编辑 →
+              </span>
             </div>
 
           </div>

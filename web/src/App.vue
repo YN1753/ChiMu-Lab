@@ -8,8 +8,29 @@ import NowView from './components/NowView.vue'
 import ProjectsView from './components/ProjectsView.vue'
 import AboutView from './components/AboutView.vue'
 import FooterArchive from './components/FooterArchive.vue'
-import type { LifeEntry, NowStatus, Project, ArchiveCategory } from './types'
-import { getEntryCategory } from './types'
+import TransactionsView from './components/TransactionsView.vue'
+import NewEntryModal from './components/NewEntryModal.vue'
+import EntryDetailModal from './components/EntryDetailModal.vue'
+import StorageModal from './components/StorageModal.vue'
+import StatsModal from './components/StatsModal.vue'
+import FloatingActionButton from './components/FloatingActionButton.vue'
+import type {
+  LifeEntry,
+  NowStatus,
+  Project,
+  ArchiveCategory,
+  StorageStatus,
+  GlobalStats,
+  Transaction,
+} from './types'
+import { entryMatchesCategory } from './types'
+import {
+  fetchEntries,
+  fetchEntryById,
+  fetchStorageStatus,
+  fetchGlobalStats,
+  fetchProjects,
+} from './utils/api'
 
 const currentView = ref<string>('home')
 
@@ -401,11 +422,20 @@ const projects = ref<Project[]>([
 
 const currentCategory = ref<ArchiveCategory>('all')
 
+const selectedEntry = ref<LifeEntry | null>(null)
+const isNewEntryOpen = ref(false)
+const isStorageOpen = ref(false)
+const isStatsOpen = ref(false)
+const storageStatus = ref<StorageStatus | null>(null)
+const globalStats = ref<GlobalStats | null>(null)
+
+const storageConfigured = computed(() => Boolean(storageStatus.value?.configured))
+
 const filteredEntriesByCategory = computed(() => {
   if (currentCategory.value === 'all') {
     return entries.value
   }
-  return entries.value.filter(e => getEntryCategory(e) === currentCategory.value)
+  return entries.value.filter((e) => entryMatchesCategory(e, currentCategory.value))
 })
 
 const handleCategoryChange = (cat: ArchiveCategory) => {
@@ -421,31 +451,143 @@ const navigateTo = (view: string) => {
   window.location.hash = view
 }
 
-// 监听 hash 路由
-onMounted(async () => {
+const openEntryDetail = (entry: LifeEntry) => {
+  selectedEntry.value = entry
+  window.location.hash = `entry/${entry.id}`
+}
+
+const closeEntryDetail = () => {
+  selectedEntry.value = null
+  if (window.location.hash.startsWith('#entry/')) {
+    window.location.hash = currentView.value
+  }
+}
+
+const openStatsModal = async () => {
+  isStatsOpen.value = true
+  try {
+    globalStats.value = await fetchGlobalStats()
+  } catch {
+    // ignore
+  }
+}
+
+const openStorageModal = async () => {
+  isStorageOpen.value = true
+  try {
+    storageStatus.value = await fetchStorageStatus()
+  } catch {
+    // ignore
+  }
+}
+
+const handleEntryCreated = (newEntry: LifeEntry) => {
+  entries.value = [newEntry, ...entries.value.filter((e) => e.id !== newEntry.id)]
+  refreshData()
+  if (currentView.value !== 'home' && currentView.value !== 'life') {
+    navigateTo('home')
+  }
+}
+
+const handleEntryUpdated = (updated: LifeEntry) => {
+  const idx = entries.value.findIndex((e) => e.id === updated.id)
+  if (idx !== -1) {
+    entries.value[idx] = updated
+  }
+  selectedEntry.value = updated
+  refreshData()
+}
+
+const handleEntryDeleted = (id: number) => {
+  entries.value = entries.value.filter((e) => e.id !== id)
+  if (selectedEntry.value?.id === id) {
+    selectedEntry.value = null
+  }
+  if (window.location.hash.startsWith('#entry/')) {
+    window.location.hash = currentView.value
+  }
+  refreshData()
+}
+
+const handleTxCreated = (_tx: Transaction) => {
+  refreshData()
+}
+
+const handleTxUpdated = (_tx: Transaction) => {
+  refreshData()
+}
+
+const handleTxDeleted = (_id: number) => {
+  refreshData()
+}
+
+const handleProjectCreated = (newProj: Project) => {
+  projects.value = [newProj, ...projects.value]
+  refreshData()
+}
+
+const refreshData = async () => {
+  try {
+    const [entriesData, statsData, statusData] = await Promise.allSettled([
+      fetchEntries({ page: 1, page_size: 50 }),
+      fetchGlobalStats(),
+      fetchStorageStatus(),
+    ])
+    if (entriesData.status === 'fulfilled' && entriesData.value && entriesData.value.length > 0) {
+      entries.value = entriesData.value
+    }
+    if (statsData.status === 'fulfilled' && statsData.value) {
+      globalStats.value = statsData.value
+    }
+    if (statusData.status === 'fulfilled' && statusData.value) {
+      storageStatus.value = statusData.value
+    }
+  } catch {
+    // ignore
+  }
+}
+
+const handleHashChange = async () => {
   const hash = window.location.hash.replace('#', '')
-  if (['home', 'life', 'archive', 'now', 'projects', 'about'].includes(hash)) {
-    currentView.value = hash
+  if (hash.startsWith('entry/')) {
+    const idStr = hash.replace('entry/', '')
+    const id = parseInt(idStr, 10)
+    if (!isNaN(id)) {
+      const found = entries.value.find((e) => e.id === id)
+      if (found) {
+        selectedEntry.value = found
+      } else {
+        try {
+          const fetched = await fetchEntryById(id)
+          if (fetched) selectedEntry.value = fetched
+        } catch {
+          // ignore
+        }
+      }
+    }
+    return
   }
 
-  window.addEventListener('hashchange', () => {
-    const h = window.location.hash.replace('#', '')
-    if (['home', 'life', 'archive', 'now', 'projects', 'about'].includes(h)) {
-      currentView.value = h
-    }
-  })
+  if (['home', 'life', 'transactions', 'archive', 'now', 'projects', 'about'].includes(hash)) {
+    currentView.value = hash
+    selectedEntry.value = null
+  }
+}
 
-  // 从后端实时拉取生活档案与状态
+// 监听 hash 路由与拉取数据
+onMounted(async () => {
+  await handleHashChange()
+  window.addEventListener('hashchange', handleHashChange)
+
+  // 初始拉取
+  await refreshData()
+
   try {
-    const [entriesRes, nowRes, projRes] = await Promise.allSettled([
-      fetch('/api/entries').then(r => r.ok ? r.json() : null),
-      fetch('/api/now').then(r => r.ok ? r.json() : null),
-      fetch('/api/projects').then(r => r.ok ? r.json() : null),
+    const [nowRes, projRes] = await Promise.allSettled([
+      fetch('/api/now').then((r) => (r.ok ? r.json() : null)),
+      fetchProjects(),
     ])
 
-    if (entriesRes.status === 'fulfilled' && entriesRes.value && entriesRes.value.length > 0) {
-      entries.value = entriesRes.value
-    }
     if (nowRes.status === 'fulfilled' && nowRes.value) {
       nowStatus.value = nowRes.value
     }
@@ -458,25 +600,30 @@ onMounted(async () => {
 })
 
 watch(currentView, (newV) => {
-  window.location.hash = newV
+  if (!window.location.hash.startsWith('#entry/')) {
+    window.location.hash = newV
+  }
 })
 </script>
 
 <template>
   <div class="min-h-screen bg-[var(--bg-archive)] text-[var(--ink-primary)] flex flex-col justify-between selection:bg-[var(--accent-warm)]/15 selection:text-[var(--accent-warm)] transition-colors duration-300">
     
-    <!-- 极简克制顶部导航（集成右上角五重视角切换浮层：全部记录⌄） -->
+    <!-- 极简克制顶部导航（集成右上角「＋」与「我的生活⌄」） -->
     <HeaderNav
       :currentView="currentView"
       :currentCategory="currentCategory"
       @navigate="navigateTo"
       @changeCategory="handleCategoryChange"
+      @openAdd="isNewEntryOpen = true"
+      @openStats="openStatsModal"
+      @openStorage="openStorageModal"
     />
 
     <!-- 主视图区 -->
     <main class="flex-grow">
       
-      <!-- 1. HOME 视图：克制开篇封面 + 2026生活刻度热力图 + 当下剪影 + 近况生活流 (响应五重视角) -->
+      <!-- 1. HOME 视图：克制开篇封面 + 2026生活刻度热力图 + 当下剪影 + 近况生活流 -->
       <HomeView
         v-if="currentView === 'home'"
         :entries="filteredEntriesByCategory"
@@ -484,6 +631,8 @@ watch(currentView, (newV) => {
         :currentCategory="currentCategory"
         @navigate="navigateTo"
         @changeCategory="handleCategoryChange"
+        @selectEntry="openEntryDetail"
+        @openAdd="isNewEntryOpen = true"
       />
 
       <!-- 2. LIFE 视图：完整的生活时间线档案 -->
@@ -506,28 +655,38 @@ watch(currentView, (newV) => {
           :showFilters="true"
           :currentCategory="currentCategory"
           @changeCategory="handleCategoryChange"
+          @selectEntry="openEntryDetail"
+          @openAdd="isNewEntryOpen = true"
         />
       </div>
 
-      <!-- 3. ARCHIVE 视图：按年/按月索引 -->
+      <!-- 3. TRANSACTIONS 视图：独立记账模块 -->
+      <TransactionsView
+        v-else-if="currentView === 'transactions'"
+        @openAdd="isNewEntryOpen = true"
+        @transactionDeleted="handleTxDeleted"
+        @transactionUpdated="handleTxUpdated"
+      />
+
+      <!-- 4. ARCHIVE 视图：按年/按月索引 -->
       <ArchiveView
         v-else-if="currentView === 'archive'"
         :entries="entries"
       />
 
-      <!-- 4. NOW 视图：「此刻的我」 -->
+      <!-- 5. NOW 视图：「此刻的我」 -->
       <NowView
         v-else-if="currentView === 'now'"
         :now="nowStatus"
       />
 
-      <!-- 5. PROJECTS 视图：作为人生经历的一章 (造物 / Things I Made) -->
+      <!-- 6. PROJECTS 视图：作为人生经历的一章 (造物 / Things I Made) -->
       <ProjectsView
         v-else-if="currentView === 'projects'"
         :projects="projects"
       />
 
-      <!-- 6. ABOUT 视图：自然真诚的个人自白与档案馆初衷 -->
+      <!-- 7. ABOUT 视图：自然真诚的个人自白与档案馆初衷 -->
       <AboutView
         v-else-if="currentView === 'about'"
       />
@@ -536,6 +695,44 @@ watch(currentView, (newV) => {
 
     <!-- 极简合规页脚（保留工信部合规备案直链） -->
     <FooterArchive />
+
+    <!-- 全局快捷新增浮动操作按钮 (桌面端 + 移动端右下角) -->
+    <FloatingActionButton @click="isNewEntryOpen = true" />
+
+    <!-- 1. 新增生活记录/记账 弹窗 -->
+    <NewEntryModal
+      :isOpen="isNewEntryOpen"
+      :storageConfigured="storageConfigured"
+      :projects="projects"
+      @close="isNewEntryOpen = false"
+      @entryCreated="handleEntryCreated"
+      @transactionCreated="handleTxCreated"
+      @projectCreated="handleProjectCreated"
+    />
+
+    <!-- 2. 生活记录详情 / 编辑 / 删除 弹窗 -->
+    <EntryDetailModal
+      :entry="selectedEntry"
+      :storageConfigured="storageConfigured"
+      :projects="projects"
+      @close="closeEntryDetail"
+      @updated="handleEntryUpdated"
+      @deleted="handleEntryDeleted"
+    />
+
+    <!-- 3. 对象存储状态 弹窗 -->
+    <StorageModal
+      :isOpen="isStorageOpen"
+      :status="storageStatus"
+      @close="isStorageOpen = false"
+    />
+
+    <!-- 4. 统计指标 弹窗 -->
+    <StatsModal
+      :isOpen="isStatsOpen"
+      :stats="globalStats"
+      @close="isStatsOpen = false"
+    />
 
   </div>
 </template>

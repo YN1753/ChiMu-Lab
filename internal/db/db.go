@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"chimu-lab/internal/models"
 
@@ -35,8 +36,10 @@ func InitDB(dbPath string) (*gorm.DB, error) {
 	// 自动迁移表结构
 	err = database.AutoMigrate(
 		&models.LifeEntry{},
-		&models.NowStatus{},
+		&models.Attachment{},
 		&models.Project{},
+		&models.Transaction{},
+		&models.NowStatus{},
 		&models.SiteConfig{},
 	)
 	if err != nil {
@@ -69,8 +72,10 @@ func seedData(database *gorm.DB) {
 	}
 
 	// 2. 初始化项目（作为生活经历的一章：Things I Made）
-	database.Exec("DELETE FROM projects")
-	projects := []models.Project{
+	var projCount int64
+	database.Model(&models.Project{}).Count(&projCount)
+	if projCount == 0 {
+		projects := []models.Project{
 		{
 			Title:       "SUSE-OAA-BACKEND",
 			Subtitle:    "四川轻化工大学开放原子开源协会 · 业务后端",
@@ -159,9 +164,12 @@ func seedData(database *gorm.DB) {
 	for _, p := range projects {
 		database.Create(&p)
 	}
+	}
 
 	// 3. 初始化生活时间线（Life Stream）：自然混合日常、想法、照片、游戏、音乐、地点、造物
-	database.Exec("DELETE FROM life_entries")
+	var entryCount int64
+	database.Model(&models.LifeEntry{}).Count(&entryCount)
+	if entryCount == 0 {
 	entries := []models.LifeEntry{
 		{
 			Date:      "2026.10.09",
@@ -420,11 +428,89 @@ func seedData(database *gorm.DB) {
 			Featured:  true,
 		},
 	}
-	for _, e := range entries {
-		database.Create(&e)
+		for _, e := range entries {
+			if e.OccurredAt.IsZero() && e.Date != "" {
+				tStr := e.Time
+				if tStr == "" {
+					tStr = "12:00"
+				}
+				pTime, err := time.Parse("2006.01.02 15:04", e.Date+" "+tStr)
+				if err == nil {
+					e.OccurredAt = pTime
+				}
+			}
+			database.Create(&e)
+		}
 	}
 
-	// 4. 站点合规配置
+	// 4. 回填历史数据中缺失的 OccurredAt 字段
+	var zeroEntries []models.LifeEntry
+	database.Where("occurred_at = ? OR occurred_at IS NULL", time.Time{}).Find(&zeroEntries)
+	for _, ze := range zeroEntries {
+		if ze.Date != "" {
+			tStr := ze.Time
+			if tStr == "" {
+				tStr = "12:00"
+			}
+			parsed, err := time.Parse("2006.01.02 15:04", ze.Date+" "+tStr)
+			if err == nil {
+				database.Model(&ze).Update("occurred_at", parsed)
+			}
+		}
+	}
+
+	// 5. 初始化基础记账记录 (Transactions)
+	var txCount int64
+	database.Model(&models.Transaction{}).Count(&txCount)
+	if txCount == 0 {
+		t1, _ := time.Parse("2006.01.02 15:04", "2026.10.09 14:20")
+		t2, _ := time.Parse("2006.01.02 15:04", "2026.10.09 12:15")
+		t3, _ := time.Parse("2006.01.02 15:04", "2026.10.08 16:30")
+		t4, _ := time.Parse("2006.01.02 15:04", "2026.10.07 10:00")
+		sampleTxs := []models.Transaction{
+			{
+				Amount:        12900, // 129.00
+				Type:          "expense",
+				Category:      "购物",
+				Title:         "MCHOSE A7 无线鼠标",
+				Note:          "替换用了四年的旧鼠标",
+				PaymentMethod: "微信支付",
+				OccurredAt:    t1,
+			},
+			{
+				Amount:        1800, // 18.00
+				Type:          "expense",
+				Category:      "餐饮",
+				Title:         "午饭面条",
+				Note:          "公司楼下片儿川",
+				PaymentMethod: "支付宝",
+				OccurredAt:    t2,
+			},
+			{
+				Amount:        6800, // 68.00
+				Type:          "expense",
+				Category:      "餐饮",
+				Title:         "埃塞俄比亚咖啡生豆",
+				Note:          "浅烘花魁 250g",
+				PaymentMethod: "微信支付",
+				OccurredAt:    t3,
+			},
+			{
+				Amount:        500000, // 5000.00
+				Type:          "income",
+				Category:      "其他",
+				Title:         "稿酬与项目结项",
+				Note:          "校园开源平台二期补贴",
+				PaymentMethod: "银行转账",
+				OccurredAt:    t4,
+			},
+		}
+		for _, tx := range sampleTxs {
+			database.Create(&tx)
+		}
+	}
+
+	// 6. 站点合规配置
 	database.Model(&models.SiteConfig{}).Count(&nowCount)
 	if nowCount == 0 {
 		config := models.SiteConfig{
@@ -437,5 +523,5 @@ func seedData(database *gorm.DB) {
 		database.Create(&config)
 	}
 
-	log.Println("Database initialized with unified life stream entries and craft projects.")
+	log.Println("Database initialized with life stream entries, craft projects, and transactions.")
 }

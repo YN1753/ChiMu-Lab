@@ -27,7 +27,9 @@ const normalizeDate = (d: string) => {
 const entryMap = computed(() => {
   const map = new Map<string, LifeEntry[]>()
   props.entries.forEach(e => {
-    const key = normalizeDate(e.date)
+    const rawDate = e.date || (e.occurred_at ? e.occurred_at.slice(0, 10) : '')
+    if (!rawDate) return
+    const key = normalizeDate(rawDate)
     const list = map.get(key) || []
     list.push(e)
     map.set(key, list)
