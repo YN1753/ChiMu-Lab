@@ -22,6 +22,7 @@ const emit = defineEmits<{
   (e: 'openAdd'): void
   (e: 'openStats'): void
   (e: 'openStorage'): void
+  (e: 'openAuth'): void
 }>()
 
 const mobileMenuOpen = ref(false)
@@ -41,6 +42,12 @@ const navItems = [
 
 // 辅助工具与设置
 const toolOptions = computed(() => [
+  {
+    key: 'auth',
+    label: '暗房钥匙',
+    desc: '管理员写操作密钥',
+    action: () => emit('openAuth'),
+  },
   {
     key: 'stats',
     label: '生活统计',

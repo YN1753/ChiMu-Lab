@@ -14,7 +14,7 @@ const emit = defineEmits<{
   (e: 'transactionUpdated', tx: Transaction): void
 }>()
 
-const currentDate = ref(new Date(2026, 9, 1)) // 默认 2026年10月
+const currentDate = ref(new Date())
 const transactionsList = ref<Transaction[]>([])
 const summary = ref<TransactionSummary | null>(null)
 const isLoading = ref(false)

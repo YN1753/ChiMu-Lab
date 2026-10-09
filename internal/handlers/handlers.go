@@ -40,6 +40,30 @@ func Error(c *gin.Context, status int, message string) {
 	})
 }
 
+// ParseFlexTime 弹性解析前端传入的各种时间格式 (含 HTML5 datetime-local 标准格式 YYYY-MM-DDTHH:mm)
+func ParseFlexTime(s string) (time.Time, error) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return time.Now(), nil
+	}
+	layouts := []string{
+		time.RFC3339,
+		"2006-01-02T15:04:05",
+		"2006-01-02T15:04",
+		"2006-01-02 15:04:05",
+		"2006-01-02 15:04",
+		"2006-01-02",
+		"2006.01.02 15:04",
+		"2006.01.02",
+	}
+	for _, l := range layouts {
+		if t, err := time.ParseInLocation(l, s, time.Local); err == nil {
+			return t, nil
+		}
+	}
+	return time.Now(), fmt.Errorf("unable to parse time string: %s", s)
+}
+
 // formatDatesFromTime 根据 OccurredAt 自动格式化旧版兼容字段
 func formatDatesFromTime(e *models.LifeEntry) {
 	if e.OccurredAt.IsZero() {
@@ -69,7 +93,7 @@ type CreateEntryRequest struct {
 	Type          string    `json:"type" binding:"required"` // life, thought, photo, project, collection
 	Title         string    `json:"title"`
 	Content       string    `json:"content" binding:"required"`
-	OccurredAt    string    `json:"occurred_at"` // ISO8601 或 "2006-01-02 15:04" 或 "2006.01.02"
+	OccurredAt    string    `json:"occurred_at"` // ISO8601 或 "2006-01-02T15:04" 或 "2006-01-02 15:04" 或 "2006.01.02"
 	Location      string    `json:"location"`
 	ProjectID     *uint     `json:"project_id"`
 	AttachmentIDs []uint    `json:"attachment_ids"`
@@ -83,20 +107,7 @@ func CreateLifeEntry(c *gin.Context) {
 		return
 	}
 
-	occurred := time.Now()
-	if req.OccurredAt != "" {
-		if t, err := time.Parse(time.RFC3339, req.OccurredAt); err == nil {
-			occurred = t
-		} else if t, err := time.Parse("2006-01-02 15:04:05", req.OccurredAt); err == nil {
-			occurred = t
-		} else if t, err := time.Parse("2006-01-02 15:04", req.OccurredAt); err == nil {
-			occurred = t
-		} else if t, err := time.Parse("2006-01-02", req.OccurredAt); err == nil {
-			occurred = t
-		} else if t, err := time.Parse("2006.01.02", req.OccurredAt); err == nil {
-			occurred = t
-		}
-	}
+	occurred, _ := ParseFlexTime(req.OccurredAt)
 
 	entry := models.LifeEntry{
 		Type:       req.Type,
@@ -167,17 +178,21 @@ func GetLifeEntriesV1(c *gin.Context) {
 		query = query.Where("year = ?", year)
 	}
 
-	// 核心五大视角动态映射
+	// 核心视角动态映射
 	if category != "" && category != "all" {
 		switch category {
 		case "daily":
-			query = query.Where("type IN ('daily', 'life', 'photo', 'coffee', 'place', 'moment')")
+			query = query.Where("type IN ('daily', 'life', 'coffee', 'place', 'moment')")
 		case "thought":
 			query = query.Where("type IN ('thought', 'idea', 'note', 'essay')")
 		case "project":
 			query = query.Where("type IN ('project', 'code', 'craft')")
 		case "collection":
 			query = query.Where("type IN ('collection', 'music', 'book', 'game', 'purchase', 'gear', 'movie')")
+		case "photo":
+			query = query.Where("type = 'photo' OR images != ''")
+		case "transaction":
+			query = query.Where("type = 'transaction'")
 		}
 	}
 
@@ -263,15 +278,7 @@ func UpdateLifeEntry(c *gin.Context) {
 	entry.ProjectID = req.ProjectID
 
 	if req.OccurredAt != "" {
-		if t, err := time.Parse(time.RFC3339, req.OccurredAt); err == nil {
-			entry.OccurredAt = t
-		} else if t, err := time.Parse("2006-01-02 15:04:05", req.OccurredAt); err == nil {
-			entry.OccurredAt = t
-		} else if t, err := time.Parse("2006-01-02 15:04", req.OccurredAt); err == nil {
-			entry.OccurredAt = t
-		} else if t, err := time.Parse("2006-01-02", req.OccurredAt); err == nil {
-			entry.OccurredAt = t
-		} else if t, err := time.Parse("2006.01.02", req.OccurredAt); err == nil {
+		if t, err := ParseFlexTime(req.OccurredAt); err == nil {
 			entry.OccurredAt = t
 		}
 		formatDatesFromTime(&entry)
@@ -440,9 +447,13 @@ func CleanupUpload(c *gin.Context) {
 	cleaned := 0
 	for _, key := range req.ObjectKeys {
 		if key != "" {
-			_ = storage.DeleteObject(key)
-			db.DB.Where("object_key = ? AND entry_id IS NULL", key).Delete(&models.Attachment{})
-			cleaned++
+			var att models.Attachment
+			// 仅允许清理在数据库中且未关联生活条目的孤立附件，防止越权传入他人 ObjectKey 随意删除
+			if err := db.DB.Where("object_key = ? AND entry_id IS NULL", key).First(&att).Error; err == nil {
+				_ = storage.DeleteObject(key)
+				db.DB.Delete(&att)
+				cleaned++
+			}
 		}
 	}
 
@@ -476,16 +487,7 @@ func CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	occurred := time.Now()
-	if req.OccurredAt != "" {
-		if t, err := time.Parse(time.RFC3339, req.OccurredAt); err == nil {
-			occurred = t
-		} else if t, err := time.Parse("2006-01-02 15:04", req.OccurredAt); err == nil {
-			occurred = t
-		} else if t, err := time.Parse("2006-01-02", req.OccurredAt); err == nil {
-			occurred = t
-		}
-	}
+	occurred, _ := ParseFlexTime(req.OccurredAt)
 
 	tx := models.Transaction{
 		Amount:        req.Amount,
@@ -600,9 +602,7 @@ func UpdateTransaction(c *gin.Context) {
 	tx.PaymentMethod = strings.TrimSpace(req.PaymentMethod)
 
 	if req.OccurredAt != "" {
-		if t, err := time.Parse(time.RFC3339, req.OccurredAt); err == nil {
-			tx.OccurredAt = t
-		} else if t, err := time.Parse("2006-01-02 15:04", req.OccurredAt); err == nil {
+		if t, err := ParseFlexTime(req.OccurredAt); err == nil {
 			tx.OccurredAt = t
 		}
 	}
@@ -740,6 +740,9 @@ func GetGlobalStats(c *gin.Context) {
 
 	var totalPhotos int64
 	db.DB.Model(&models.Attachment{}).Count(&totalPhotos)
+	if totalPhotos == 0 {
+		db.DB.Model(&models.LifeEntry{}).Where("type = 'photo' OR images != ''").Count(&totalPhotos)
+	}
 
 	var totalProjects int64
 	db.DB.Model(&models.Project{}).Count(&totalProjects)

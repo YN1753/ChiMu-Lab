@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"chimu-lab/internal/config"
 	"chimu-lab/internal/db"
 	"chimu-lab/internal/handlers"
+	"chimu-lab/internal/middleware"
 	"chimu-lab/internal/storage"
 
 	"github.com/gin-contrib/cors"
@@ -15,7 +20,7 @@ import (
 )
 
 func main() {
-	// 1. 加载配置并初始化 R2 存储
+	// 1. 加载配置并初始化 R2 存储 (支持 .env 自动读取)
 	cfg := config.LoadConfig()
 	if err := storage.InitR2(cfg.R2); err != nil {
 		log.Printf("Notice: R2 storage initialization: %v", err)
@@ -25,7 +30,13 @@ func main() {
 		log.Println("Notice: Cloudflare R2 storage credentials not configured. Text entries & transactions will work normally.")
 	}
 
-	// 2. 初始化 SQLite 数据库
+	if cfg.AdminAPIKey != "" {
+		log.Println("Admin write protection enabled (ADMIN_API_KEY configured).")
+	} else {
+		log.Println("Notice: ADMIN_API_KEY not set. Write endpoints are open (suitable for local dev). Set ADMIN_API_KEY in .env for production.")
+	}
+
+	// 2. 初始化 SQLite 数据库 (已启用 WAL 模式与连接池优化)
 	_, err := db.InitDB(cfg.DBPath)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
@@ -41,45 +52,50 @@ func main() {
 	// 4. CORS 跨域配置
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
-	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-Admin-Key"}
 	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	r.Use(cors.New(corsConfig))
 
 	// 5. API v1 路由组 (标准结构化数据与持久化服务)
 	v1 := r.Group("/api/v1")
 	{
-		// Life Entries (生活档案)
+		// === 公开只读接口 ===
 		v1.GET("/entries", handlers.GetLifeEntriesV1)
-		v1.POST("/entries", handlers.CreateLifeEntry)
 		v1.GET("/entries/:id", handlers.GetLifeEntryByID)
-		v1.PUT("/entries/:id", handlers.UpdateLifeEntry)
-		v1.DELETE("/entries/:id", handlers.DeleteLifeEntry)
-
-		// Uploads & Storage (R2 预签名直传与完成)
-		v1.POST("/uploads/presign", handlers.PresignUpload)
-		v1.POST("/uploads/complete", handlers.CompleteUpload)
-		v1.POST("/uploads/cleanup", handlers.CleanupUpload)
 		v1.GET("/storage/status", handlers.GetStorageStatus)
-
-		// Transactions (记账独立体系)
 		v1.GET("/transactions", handlers.GetTransactions)
-		v1.POST("/transactions", handlers.CreateTransaction)
 		v1.GET("/transactions/summary", handlers.GetTransactionSummary)
-		v1.PUT("/transactions/:id", handlers.UpdateTransaction)
-		v1.DELETE("/transactions/:id", handlers.DeleteTransaction)
-
-		// Projects (项目与造物)
 		v1.GET("/projects", handlers.GetProjectsV1)
-		v1.POST("/projects", handlers.CreateProject)
 		v1.GET("/projects/:id", handlers.GetProjectByID)
-		v1.PUT("/projects/:id", handlers.UpdateProject)
-		v1.DELETE("/projects/:id", handlers.DeleteProject)
-
-		// Stats (生活统计)
 		v1.GET("/stats", handlers.GetGlobalStats)
+
+		// === 管理员写权限受保护接口 ===
+		write := v1.Group("")
+		write.Use(middleware.AdminAuthRequired())
+		{
+			// Life Entries (生活档案)
+			write.POST("/entries", handlers.CreateLifeEntry)
+			write.PUT("/entries/:id", handlers.UpdateLifeEntry)
+			write.DELETE("/entries/:id", handlers.DeleteLifeEntry)
+
+			// Uploads & Storage (R2 预签名直传与完成)
+			write.POST("/uploads/presign", handlers.PresignUpload)
+			write.POST("/uploads/complete", handlers.CompleteUpload)
+			write.POST("/uploads/cleanup", handlers.CleanupUpload)
+
+			// Transactions (记账独立体系)
+			write.POST("/transactions", handlers.CreateTransaction)
+			write.PUT("/transactions/:id", handlers.UpdateTransaction)
+			write.DELETE("/transactions/:id", handlers.DeleteTransaction)
+
+			// Projects (项目与造物)
+			write.POST("/projects", handlers.CreateProject)
+			write.PUT("/projects/:id", handlers.UpdateProject)
+			write.DELETE("/projects/:id", handlers.DeleteProject)
+		}
 	}
 
-	// 6. 兼容原有旧版路由
+	// 6. 兼容原有旧版只读路由
 	api := r.Group("/api")
 	{
 		api.GET("/health", handlers.HealthCheck)
@@ -94,6 +110,8 @@ func main() {
 	if stat, err := os.Stat("web/dist"); err == nil && stat.IsDir() {
 		r.Static("/assets", "web/dist/assets")
 		r.StaticFile("/favicon.ico", "web/dist/favicon.ico")
+		r.StaticFile("/favicon.svg", "web/dist/favicon.svg")
+		r.StaticFile("/icons.svg", "web/dist/icons.svg")
 		r.StaticFile("/robots.txt", "web/dist/robots.txt")
 
 		// SPA 单页应用回退到 index.html
@@ -110,8 +128,30 @@ func main() {
 	}
 
 	port := cfg.Port
-	log.Printf("ChiMu-Lab Server starting on :%s ...", port)
-	if err := r.Run(":" + port); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: r,
 	}
+
+	// 启动 HTTP 服务协程
+	go func() {
+		log.Printf("ChiMu-Lab Server starting on :%s ...", port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server failed to start: %v", err)
+		}
+	}()
+
+	// 8. 优雅停机 (Graceful Shutdown)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down ChiMu-Lab server gracefully...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Server forced to shutdown: %v", err)
+	}
+
+	log.Println("ChiMu-Lab server exited cleanly.")
 }

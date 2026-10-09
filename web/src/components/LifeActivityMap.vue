@@ -62,8 +62,9 @@ const calendarWeeks = computed(() => {
   const startDate = new Date(2025, 11, 29) // 2025-12-29 (周一)
   const finalDate = new Date(2027, 0, 3)
 
-  // 基准今天设定为 2026.10.09
-  const todayStr = '2026.10.09'
+  const realNow = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const todayStr = `${realNow.getFullYear()}.${pad(realNow.getMonth() + 1)}.${pad(realNow.getDate())}`
 
   let current = new Date(startDate)
   let currentWeek: DayCell[] = []

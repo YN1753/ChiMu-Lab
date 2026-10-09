@@ -9,12 +9,40 @@ import type {
 } from '../types'
 
 const API_BASE = '/api/v1'
+const ADMIN_TOKEN_KEY = 'chimu_admin_token'
+
+export function getAdminToken(): string {
+  try {
+    return localStorage.getItem(ADMIN_TOKEN_KEY) || ''
+  } catch {
+    return ''
+  }
+}
+
+export function setAdminToken(token: string): void {
+  try {
+    localStorage.setItem(ADMIN_TOKEN_KEY, token.trim())
+  } catch {}
+}
+
+export function removeAdminToken(): void {
+  try {
+    localStorage.removeItem(ADMIN_TOKEN_KEY)
+  } catch {}
+}
 
 // 通用请求处理
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
+  const token = getAdminToken()
+  const authHeaders: Record<string, string> = {}
+  if (token) {
+    authHeaders['Authorization'] = `Bearer ${token}`
+  }
+
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
+      ...authHeaders,
       ...options?.headers,
     },
     ...options,

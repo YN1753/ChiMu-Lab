@@ -7,6 +7,7 @@ import { ArrowRight } from 'lucide-vue-next'
 
 const props = defineProps<{
   entries: LifeEntry[]
+  allEntries?: LifeEntry[]
   now?: NowStatus | null
   currentCategory?: ArchiveCategory
 }>()
@@ -19,6 +20,14 @@ const emit = defineEmits<{
 }>()
 
 const selectedDate = ref<string>('')
+
+const todayDisplay = computed(() => {
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}`
+})
+
+const heatmapEntries = computed(() => props.allEntries || props.entries)
 
 const handleDateSelect = (date: string) => {
   selectedDate.value = date
@@ -78,7 +87,7 @@ const showHeatmap = ref(false)
             迟暮
           </h1>
           <span class="font-mono-archive text-xs text-[var(--ink-muted)]">
-            杭州 · 2026.10.09
+            杭州 · {{ todayDisplay }}
           </span>
         </div>
 
@@ -108,12 +117,12 @@ const showHeatmap = ref(false)
       </div>
     </section>
 
-    <!-- 可选折叠的 2026 生活刻度热力图 -->
+    <!-- 可选折叠的生活刻度热力图 -->
     <section class="py-4 border-b border-[var(--border-subtle)]">
       <div class="flex items-center justify-between text-xs font-mono-archive text-[var(--ink-muted)]">
         <div class="flex items-center gap-2">
           <span class="text-[var(--ink-secondary)] font-medium">生活刻度 // 2026</span>
-          <span>全年在册 {{ entries.length }} 条印记</span>
+          <span>全年在册 {{ heatmapEntries.length }} 条印记</span>
         </div>
         <button
           @click="showHeatmap = !showHeatmap"
@@ -125,7 +134,7 @@ const showHeatmap = ref(false)
 
       <div v-if="showHeatmap" class="pt-4 animate-in fade-in duration-200">
         <LifeActivityMap
-          :entries="entries"
+          :entries="heatmapEntries"
           :selectedDate="selectedDate"
           @selectDate="handleDateSelect"
         />

@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"chimu-lab/internal/models"
@@ -26,11 +27,24 @@ func InitDB(dbPath string) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	database, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+	// 启用 WAL 模式、5秒忙碌重试与普通同步模式，避免并发写锁死
+	dsn := dbPath
+	if !strings.Contains(dsn, "?") {
+		dsn += "?_journal_mode=WAL&_busy_timeout=5000&_synchronous=NORMAL"
+	}
+
+	database, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Warn),
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	// 调优连接池，SQLite 单文件写连接数限制为 1 彻底规避并发争锁
+	if sqlDB, err := database.DB(); err == nil {
+		sqlDB.SetMaxOpenConns(1)
+		sqlDB.SetMaxIdleConns(1)
+		sqlDB.SetConnMaxLifetime(time.Hour)
 	}
 
 	// 自动迁移表结构

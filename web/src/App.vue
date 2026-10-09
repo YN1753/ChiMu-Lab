@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import HeaderNav from './components/HeaderNav.vue'
 import HomeView from './components/HomeView.vue'
-import LifeStream from './components/LifeStream.vue'
 import ArchiveView from './components/ArchiveView.vue'
 import NowView from './components/NowView.vue'
 import ProjectsView from './components/ProjectsView.vue'
@@ -13,6 +12,7 @@ import NewEntryModal from './components/NewEntryModal.vue'
 import EntryDetailModal from './components/EntryDetailModal.vue'
 import StorageModal from './components/StorageModal.vue'
 import StatsModal from './components/StatsModal.vue'
+import AdminAuthModal from './components/AdminAuthModal.vue'
 import FloatingActionButton from './components/FloatingActionButton.vue'
 import type {
   LifeEntry,
@@ -427,6 +427,7 @@ const selectedEntry = ref<LifeEntry | null>(null)
 const isNewEntryOpen = ref(false)
 const isStorageOpen = ref(false)
 const isStatsOpen = ref(false)
+const isAdminAuthOpen = ref(false)
 const storageStatus = ref<StorageStatus | null>(null)
 const globalStats = ref<GlobalStats | null>(null)
 
@@ -718,6 +719,7 @@ watch(currentView, (newV) => {
       @openAdd="isNewEntryOpen = true"
       @openStats="openStatsModal"
       @openStorage="openStorageModal"
+      @openAuth="isAdminAuthOpen = true"
     />
 
     <!-- 主视图区 -->
@@ -727,6 +729,7 @@ watch(currentView, (newV) => {
       <HomeView
         v-if="currentView === 'home'"
         :entries="filteredEntriesByCategory"
+        :allEntries="allTimelineEntries"
         :now="nowStatus"
         :currentCategory="currentCategory"
         @navigate="navigateTo"
@@ -735,32 +738,7 @@ watch(currentView, (newV) => {
         @openAdd="isNewEntryOpen = true"
       />
 
-      <!-- 2. LIFE 视图：完整的生活时间线档案 -->
-      <div v-else-if="currentView === 'life'" class="max-w-5xl mx-auto px-5 sm:px-8 py-20 sm:py-28 text-left">
-        <header class="pb-10 border-b border-[var(--border-subtle)] mb-12 space-y-3">
-          <div class="flex items-center gap-3">
-            <h1 class="font-serif-editorial text-4xl sm:text-5xl font-normal text-[var(--ink-primary)]">
-              生活时间流
-            </h1>
-            <span class="font-mono-archive text-xs uppercase tracking-widest text-[var(--ink-muted)]">
-              // LIFE STREAM
-            </span>
-          </div>
-          <p class="font-serif-editorial text-sm sm:text-base text-[var(--ink-secondary)]">
-            时间按顺序流淌的真实印记：随想、摄影、听音、造物与行迹。
-          </p>
-        </header>
-        <LifeStream
-          :entries="filteredEntriesByCategory"
-          :showFilters="true"
-          :currentCategory="currentCategory"
-          @changeCategory="handleCategoryChange"
-          @selectEntry="openEntryDetail"
-          @openAdd="isNewEntryOpen = true"
-        />
-      </div>
-
-      <!-- 3. TRANSACTIONS 视图：独立记账模块 -->
+      <!-- 2. TRANSACTIONS 视图：独立记账模块 -->
       <TransactionsView
         v-else-if="currentView === 'transactions'"
         @openAdd="isNewEntryOpen = true"
@@ -832,6 +810,12 @@ watch(currentView, (newV) => {
       :isOpen="isStatsOpen"
       :stats="globalStats"
       @close="isStatsOpen = false"
+    />
+
+    <!-- 5. 暗房管理员钥匙 弹窗 -->
+    <AdminAuthModal
+      :isOpen="isAdminAuthOpen"
+      @close="isAdminAuthOpen = false"
     />
 
   </div>

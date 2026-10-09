@@ -1,4 +1,4 @@
-# ChiMu-Lab (迟暮实验室) 🎞️
+# ChiMu-Lab (迟暮生活档案馆) 🎞️
 
 > **Digital Atelier & Living Archive · 迟暮的私人数字暗房与生活档案**
 >
@@ -10,56 +10,61 @@
 
 ## 📖 项目定位与设计哲学
 
-**ChiMu-Lab** 摒弃了千篇一律的程序员求职简历模板与商业宣传辞令，立足于**“写给自己看”的诚恳态度**，打造为一个充满呼吸感、电影感与实体触感的**个人数字暗房与生活工坊 (Digital Atelier & Living Archive)**。
+**ChiMu-Lab** 摒弃了千篇一律的程序员技能简历模板与商业宣传辞令，立足于**“写给自己看”的诚恳态度**，打造为一个充满呼吸感、出版物美感与时间沉淀质感的**个人数字生活档案馆 (Digital Atelier & Living Archive)**。
 
-它融合了双轨叙事：
-1. **左手造物（The Craft）**：记录亲手编写的真实工程、底层状态机调度、架构设计画布与踩过的坑。
-2. **右手生活（Living Vignettes）**：收集秋日的桂花、夜雨的咖啡、读书与音乐的手记、胶片相纸与吉光片羽。
+核心理念：**生活大于项目，真实大于表演**。
+- **时间按顺序流淌的真实印记**：收集秋日的桂花、夜雨的咖啡、读书与音乐的手记、胶片相纸与吉光片羽。
+- **造物作为人生经历的一章**：记录亲手编写的真实工程、底层状态机调度、架构设计画布与踩过的坑。
+- **柴米油盐融入生活流**：独立记账模块，把握日常真实开销与生活步调。
 
 ---
 
-## ✨ 核心亮点与高阶交互
+## ✨ 核心亮点与交互设计
 
-### 1. 📷 3D 拍立得胶卷手记 (`LivingFrames.vue`)
-- **真实生活切片流**：包含夜雨中的通道阻塞思考、满觉陇金桂胶片、手冲曼特宁与 AST 遍历反哺、《禅与摩托车维修艺术》阅读手记、坂本龙一的音符与 Goroutine 死锁排查。
-- **3D 物理翻转 (Flip Card)**：鼠标滑过时呈现 3D 悬浮透视；点击“翻转查看手记”沿 Y 轴 180° 平滑翻转，背面展现复古明信片纹理、手写便签与杭州邮戳。
-- **暖心盖章互动**：点击红心可实时在 SQLite 数据库中完成盖章持久化，伴随机械快门声。
+### 1. 📜 纵向脊柱时间线 (`LifeStream.vue`)
+- **多态内容排版 (Polymorphic Layouts)**：
+  - **想法 / 随笔 (Thought)**：免标题，舒适大字号引言体与轻盈随手记。
+  - **记账微卡 (Transaction)**：单行账本微卡片，收支自然融于时间流。
+  - **胶卷相纸 (Photo)**：全幅大图与胶卷参数注脚。
+  - **造物手艺 (Project)**：工程初衷、关键技术切片与源码直链。
+  - **日常生活 (Daily)**：咖啡慢萃、黑胶听音、西湖夜骑与好友联机。
+- **七重視角灵活切换**：全部记录、日常、想法、照片、记账、项目、收藏一键筛选。
 
-### 2. 🎛️ 电影控制台与 Web Audio 声学生成器 (`Navbar.vue` & `utils/audio.ts`)
-- **三套电影 LUT 调色盘**：
-  - **暖骨白 (Alabaster)**：温润米白 `#f7f6f2`，纸质漫反射光晕。
-  - **琥珀暮 (Sunset Amber)**：柯达 400 暖金黄昏调，落日余晖。
-  - **暗房黑 (Midnight Noir)**：暗房深蓝黑与微荧光，深夜沉浸感。
-- **零外部音频加载的 Web Audio 原生合成**：
-  - **机械快门音**：点击切换主题、翻转卡片或盖章时，合成清脆的相机帘幕快门声。
-  - **秋夜微雨自然白噪音**：432Hz 动态粉红噪声带通滤波器，点击即可开启沉浸细雨声。
+### 2. 📅 2026 生活刻度热力图 (`LifeActivityMap.vue`)
+- **全年 52 周刻度网格**：每一格都是真实度过的一天，支持悬浮浏览当日生活印记。
+- **一键点击日期穿透**：点击任意有记录的刻度格，无缝联动定位并聚焦当天时间线。
 
-### 3. 📐 真实造物工坊 · 架构蓝图底片抽屉 (`ProjectShowcase.vue`)
-- **#1 首位置顶核心**：[`suse-edu-cn/SUSE-OAA-BACKEND`](https://github.com/suse-edu-cn/SUSE-OAA-BACKEND)（四川轻化工大学开放原子开源协会业务后端服务体系）。
-- **#2 架构核心**：[`YN1753/ArchCanvas`](https://github.com/YN1753/ArchCanvas)（AI 辅助 Go 架构设计画布）。
-- **#3 底层透视**：[`YN1753/GoLens`](https://github.com/YN1753/GoLens)（基于状态机的 Go GMP / GC 可视化透视镜）。
-- **后续真实仓库**：`AstraLink-Desktop` (Wails 图笔记)、`Go-Load` (高并发压测)、`nexus` (基础设施)、`DeviceDaily` (Swift 原生小组件)。
-- **蓝图底片抽屉 (Engineering Dossier)**：点击任意项目唤出半透明蓝图网格视窗，展示工程初衷、关键架构切片与一键复制 `git clone` 命令。
+### 3. 💳 独立记账体系 (`TransactionsView.vue`)
+- **月度核心指标**：本月总支出、总收入与结余实时核算。
+- **按日汇聚流水**：自动按自然日汇聚账目列表，支持内联编辑与分类管理。
+- **金额采用整型“分”存储**：避免浮点数精度截断误差。
 
-### 4. ⏱️ 当下的迟暮 · 实时状态轮盘 (`Hero.vue`)
-- 顶部电影打板横标：`SCENE: CHIMU-ATELIER / TAKE: 2026.FALL / HANGZHOU (30.27° N)` 与秒级流动时钟。
-- 点击状态胶囊可顺畅切换迟暮此时此刻的状态（手冲耶加雪菲 / 排查 suseoaa 协程 / 西湖边夜骑 / 调优 ArchCanvas AST），带有清脆微音。
+### 4. 🔒 管理员暗房钥匙 (`AdminAuthModal.vue` & `middleware/auth.go`)
+- **写接口安全防护**：通过 `ADMIN_API_KEY` 保护所有新建、编辑、删除与存储上传接口。
+- **极简本地暗房钥匙**：前端提供密码弹窗，输入一次自动存入本地浏览器，长期静默免密畅享记录。
+
+### 5. ☁️ 对象存储直传 (`ImageUploader.vue` & `storage/r2.go`)
+- **Cloudflare R2 预签名 PUT 直传**：浏览器直接将媒体文件上传至对象存储，不消耗云主机中转带宽。
+- **零配置优雅降级**：未配置 R2 时纯文字记录与记账 100% 正常运行，弹窗清晰呈现存储状态。
+
+### 6. 🌧️ Web Audio 自然声学生成器 (`utils/audio.ts`)
+- **零外部音频加载**：432Hz 动态粉红噪声带通滤波器，算法实时合成沉浸式秋夜微雨白噪音。
+- **按钮微触感**：高频晶莹微音效，营造机械键盘般的实体操控触感。
 
 ---
 
 ## 🛠️ 技术栈与架构选型
 
-| 模块 | 技术选型 | 优势与说明 |
+| 模块 | 技术选型 | 说明 |
 | :--- | :--- | :--- |
-| **后端语言** | **Go 1.27** | 高性能微架构、毫秒级响应、超低内存开销 (~1.8MB) |
-| **Web 框架** | **Gin** | 高性能 REST API，集成 SPA 静态资源路由 |
-| **数据库** | **SQLite** (`github.com/glebarez/sqlite`) | **纯 Go 实现 (CGO-Free)**，无外部 C 编译器依赖，轻松 cross-compile |
-| **ORM** | **GORM** | 自动迁移模型（Profile, Project, LifeMoment, Activity, SiteConfig） |
-| **前端框架** | **Vue 3** (Composition API) | 现代化响应式前端，极速开发体验 |
-| **构建工具** | **Vite** | 生产打包耗时仅 ~190ms |
-| **样式工程** | **Tailwind CSS v4** | 原子化 CSS，结合电影感自定义主题变量 |
-| **声学引擎** | **Web Audio API** | 纯浏览器端算法合成快门与自然雨声，0KB 外部音效加载 |
-| **字体呈现** | **Newsreader** + **Plus Jakarta Sans** | 电影海报衬线体与现代几何字体的高级混排 |
+| **后端语言** | **Go 1.24+** | 极速响应、内存占用低 (~1.8MB) |
+| **Web 框架** | **Gin** | 高性能 REST API，内置优雅停机与 SPA 静态文件托管 |
+| **数据库** | **SQLite** (`github.com/glebarez/sqlite`) | 纯 Go 实现 (CGO-Free)，开启 **WAL 模式**与连接池调优 |
+| **ORM** | **GORM** | 自动迁移模型（LifeEntry, Attachment, Project, Transaction, NowStatus, SiteConfig） |
+| **前端框架** | **Vue 3** (Composition API) | 响应式组件化开发 |
+| **构建工具** | **Vite** | 极速热更新，生产打包构建耗时 ~250ms |
+| **样式工程** | **Tailwind CSS v4** | 现代原子化 CSS，出版物纸质漫反射色彩变量 |
+| **声学引擎** | **Web Audio API** | 纯浏览器端算法实时合成雨声，0KB 外部音效文件 |
 
 ---
 
@@ -67,30 +72,48 @@
 
 ```text
 ChiMu-Lab/
-├── main.go                     # Go 后端启动入口（集成 SPA 静态资源分发）
+├── main.go                     # Go 后端启动入口（集成鉴权、SPA 托管与优雅停机）
+├── Dockerfile                  # 多阶段轻量生产容器构建
+├── docker-compose.yml          # Docker 一键编排配置
 ├── go.mod / go.sum             # Go 依赖配置
+├── .env.example                # 环境变量配置模板
 ├── internal/
-│   ├── models/                 # SQLite 数据库模型 (Profile, Project, LifeMoment, Activity, SiteConfig)
-│   ├── db/                     # 数据库连接、AutoMigrate 与种子数据同步 (seedData)
-│   └── handlers/               # REST API 处理器 (/api/projects, /api/moments, /api/stats, etc.)
+│   ├── config/                 # 配置中心（支持 .env 自动加载与 R2/Admin 配置）
+│   ├── db/                     # SQLite 数据库连接（WAL 模式）、迁移与种子数据
+│   ├── middleware/             # 中间件（AdminAuthRequired 管理员鉴权）
+│   ├── models/                 # 数据模型 (LifeEntry, Attachment, Project, Transaction, etc.)
+│   ├── storage/                # Cloudflare R2 S3 预签名直传客户端
+│   └── handlers/               # RESTful API 处理器与弹性时间解析器
 ├── web/                        # Vue 3 前端工程
-│   ├── index.html              # 页面 HTML 模板与 Newsreader 字体加载
+│   ├── index.html              # 页面 HTML 模板与字体加载
 │   ├── vite.config.ts          # Vite 构建配置
 │   ├── package.json            # 前端依赖配置
 │   └── src/
-│       ├── App.vue             # 页面根组件与全量 API 数据驱动
+│       ├── App.vue             # 页面根组件与统一弹窗分发
 │       ├── main.ts             # 前端入口
-│       ├── style.css           # 电影 LUT 调色盘变量、3D 翻转与蓝图网格 CSS
-│       ├── types/              # TypeScript 接口定义 (Project, LifeMoment, etc.)
+│       ├── style.css           # 纸质色调、Newsreader 衬线字体与等宽排版变量
+│       ├── types/              # TypeScript 核心类型定义
 │       ├── utils/
-│       │   └── audio.ts        # Web Audio API 机械快门与秋夜微雨合成器
+│       │   ├── api.ts          # 统一 API 请求封装（自动附加 Bearer 鉴权）
+│       │   └── audio.ts        # Web Audio API 微音效与秋夜微雨合成器
 │       └── components/
-│           ├── Navbar.vue           # 顶部电影控制台（LUT 调色盘 + 雨声/快门开关）
-│           ├── Hero.vue             # 电影打板头图 + 迟暮当下状态切频轮盘
-│           ├── ProjectShowcase.vue  # 造物工坊（suseoaa 置顶 #1 + 蓝图底片抽屉）
-│           ├── LivingFrames.vue     # 生活切片（3D 拍立得翻转卡片 + 盖章互动）
-│           ├── ActivityHub.vue      # 52周代码热力刻度与语言成分条
-│           └── ComplianceFooter.vue # 备案合规页脚（浙ICP备2026081664号直链）
+│           ├── HeaderNav.vue        # 顶部极简导航（单轨栏目 + 设置浮层 + 雨声）
+│           ├── HomeView.vue         # 首页视图（自白开篇 + 52周生活刻度 + 时间流）
+│           ├── LifeStream.vue       # 纵向脊柱时间线（多态排版与7重视角筛选）
+│           ├── LifeActivityMap.vue  # 2026 生活刻度热力图（52周动态刻度与日期穿透）
+│           ├── TransactionsView.vue # 独立记账视图（月度收支指标与按日流水）
+│           ├── ProjectsView.vue     # 造物视图（作为经历一章的项目故事与源码）
+│           ├── NowView.vue          # 此刻视图（Now Page 个人状态切片）
+│           ├── ArchiveView.vue      # 归档视图（按年回溯与月份清单）
+│           ├── AboutView.vue        # 关于视图（生活自白与档案馆初衷）
+│           ├── NewEntryModal.vue    # 新增记录/记账弹窗
+│           ├── EntryDetailModal.vue # 记录详情与编辑/删除弹窗
+│           ├── AdminAuthModal.vue   # 暗房管理员钥匙配置弹窗
+│           ├── StorageModal.vue     # 对象存储连接状态弹窗
+│           ├── StatsModal.vue       # 生活刻度统计指标弹窗
+│           ├── ImageUploader.vue    # R2 预签名媒体直传与多图上传器
+│           ├── FloatingActionButton.vue # 右下角极简新增浮动按钮
+│           └── FooterArchive.vue    # 备案合规页脚（浙ICP备2026081664号直链）
 └── README.md
 ```
 
@@ -98,26 +121,47 @@ ChiMu-Lab/
 
 ## 🚀 本地开发与生产部署
 
-### 1. 本地启动
+### 1. 本地启动开发
+
 ```bash
-# 1. 启动 Go 服务 (默认 :8080)
+# 1. 复制配置文件 (可选)
+cp .env.example .env
+
+# 2. 启动 Go 后端服务 (默认 :8080)
 go run main.go
 
-# 2. 启动前端开发调试 (新终端)
+# 3. 启动前端开发调试 (打开新终端)
 cd web && npm run dev
 ```
 
-### 2. 生产打包与上传部署
-```bash
-# 1. 前端打包
-cd web && npm run build
+### 2. 运行单元测试
 
-# 2. 编译 Linux AMD64 静态无依赖二进制
+```bash
+go test -v ./...
+```
+
+### 3. Docker 容器化部署 (推荐)
+
+```bash
+# 构建并后台启动
+docker compose up -d --build
+
+# 查看运行日志
+docker compose logs -f
+```
+
+### 4. 传统静态编译与主机部署
+
+```bash
+# 1. 前端生产打包
+cd web && npm run build
 cd ..
+
+# 2. 编译 Linux AMD64 静态二进制
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o chimu-server-linux main.go
 
-# 3. 推送至腾讯云服务器并重启服务
-tar -czf - chimu-server-linux web/dist | ssh ubuntu@101.35.227.224 "tar -xzf - -C /home/ubuntu/chimu-lab && sudo systemctl restart chimu-lab"
+# 3. 推送至远程服务器并平滑重启服务
+tar -czf - chimu-server-linux web/dist | ssh user@<your-server-ip> "tar -xzf - -C /home/ubuntu/chimu-lab && sudo systemctl restart chimu-lab"
 ```
 
 ---

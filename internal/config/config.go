@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bufio"
 	"os"
 	"strings"
 )
@@ -15,14 +16,45 @@ type R2Config struct {
 }
 
 type Config struct {
-	DBPath string
-	Port   string
-	R2     R2Config
+	DBPath      string
+	Port        string
+	AdminAPIKey string
+	R2          R2Config
 }
 
 var AppConfig Config
 
+// loadDotEnv 轻量读取当前工作目录下的 .env 文件
+func loadDotEnv() {
+	file, err := os.Open(".env")
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		key := strings.TrimSpace(parts[0])
+		val := strings.TrimSpace(parts[1])
+		val = strings.Trim(val, `"'`)
+		// 仅在环境变量未显式设置时填充
+		if os.Getenv(key) == "" {
+			_ = os.Setenv(key, val)
+		}
+	}
+}
+
 func LoadConfig() Config {
+	loadDotEnv()
+
 	dbPath := os.Getenv("DB_PATH")
 	if dbPath == "" {
 		dbPath = "data/chimu.db"
@@ -32,6 +64,8 @@ func LoadConfig() Config {
 	if port == "" {
 		port = "8080"
 	}
+
+	adminKey := strings.TrimSpace(os.Getenv("ADMIN_API_KEY"))
 
 	accountID := strings.TrimSpace(os.Getenv("R2_ACCOUNT_ID"))
 	endpoint := strings.TrimSpace(os.Getenv("R2_ENDPOINT"))
@@ -49,9 +83,10 @@ func LoadConfig() Config {
 	}
 
 	AppConfig = Config{
-		DBPath: dbPath,
-		Port:   port,
-		R2:     r2Cfg,
+		DBPath:      dbPath,
+		Port:        port,
+		AdminAPIKey: adminKey,
+		R2:          r2Cfg,
 	}
 
 	return AppConfig
