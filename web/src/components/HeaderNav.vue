@@ -29,81 +29,29 @@ const isRainPlaying = ref(false)
 const isDropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 
-// 页面导航（极简克制，中文编排）
+// 核心导航栏目（单轨统一，消除双重导航冲突）
 const navItems = [
-  { key: 'home', label: '首页' },
-  { key: 'archive', label: '归档' },
+  { key: 'home', label: '时间流' },
+  { key: 'transactions', label: '记账' },
+  { key: 'projects', label: '项目' },
   { key: 'now', label: '当下' },
+  { key: 'archive', label: '归档' },
   { key: 'about', label: '关于' },
 ]
 
-// 我的生活功能视图选项
-interface LifeViewOption {
-  key: string
-  label: string
-  desc: string
-  action: () => void
-}
-
-const lifeViewOptions = computed<LifeViewOption[]>(() => [
-  {
-    key: 'timeline',
-    label: '时间线',
-    desc: '完整生活时间流',
-    action: () => {
-      emit('changeCategory', 'all')
-      emit('navigate', 'home')
-    },
-  },
-  {
-    key: 'transactions',
-    label: '记账',
-    desc: '日常收支与月度记录',
-    action: () => {
-      emit('navigate', 'transactions')
-    },
-  },
-  {
-    key: 'projects',
-    label: '项目',
-    desc: '造物、代码与长期项目',
-    action: () => {
-      emit('navigate', 'projects')
-    },
-  },
-  {
-    key: 'collection',
-    label: '收藏',
-    desc: '唱片、书籍、游戏与好物',
-    action: () => {
-      emit('changeCategory', 'collection')
-      emit('navigate', 'home')
-    },
-  },
-  {
-    key: 'photo',
-    label: '照片',
-    desc: '定格光影与胶卷瞬间',
-    action: () => {
-      emit('changeCategory', 'photo')
-      emit('navigate', 'home')
-    },
-  },
+// 辅助工具与设置
+const toolOptions = computed(() => [
   {
     key: 'stats',
-    label: '统计',
-    desc: '生活刻度与聚合指标',
-    action: () => {
-      emit('openStats')
-    },
+    label: '生活统计',
+    desc: '印记总数与年度概览',
+    action: () => emit('openStats'),
   },
   {
     key: 'storage',
     label: '存储设置',
-    desc: 'Cloudflare R2 连接状态',
-    action: () => {
-      emit('openStorage')
-    },
+    desc: 'Cloudflare R2 对象存储',
+    action: () => emit('openStorage'),
   },
 ])
 
@@ -114,7 +62,7 @@ const setView = (view: string) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const handleLifeViewClick = (opt: LifeViewOption) => {
+const handleToolClick = (opt: { action: () => void }) => {
   audio.playTink()
   opt.action()
   isDropdownOpen.value = false
@@ -193,62 +141,38 @@ onUnmounted(() => {
           <span class="font-serif-editorial text-[13px]">记录</span>
         </button>
 
-        <!-- 我的生活⌄ 二级功能视图切换入口 (负责查看东西) -->
+        <!-- 设置/工具 ⌄ 二级轻量浮层 (生活统计 / 存储设置) -->
         <div class="relative" ref="dropdownRef">
           <button
             @click.stop="isDropdownOpen = !isDropdownOpen"
-            class="flex items-center gap-1.5 text-xs tracking-wider transition-colors cursor-pointer py-1 px-2.5 rounded-xs border border-[var(--border-subtle)] hover:border-[var(--border-divider)] bg-[var(--bg-archive)]"
-            :class="[
-              isDropdownOpen || currentView === 'transactions' || currentCategory !== 'all'
-                ? 'text-[var(--ink-primary)] font-medium border-[var(--border-divider)]' 
-                : 'text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
-            ]"
-            title="查看我的生活维度"
+            class="flex items-center gap-1 text-xs tracking-wider transition-colors cursor-pointer py-1 px-2 rounded-xs border border-[var(--border-subtle)] hover:border-[var(--border-divider)] bg-[var(--bg-archive)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]"
+            title="生活统计与设置"
           >
-            <span class="font-serif-editorial text-[13px]">我的生活</span>
+            <span class="font-serif-editorial text-[13px]">设置</span>
             <ChevronDown class="w-3 h-3 opacity-60 transition-transform duration-200" :class="{ 'rotate-180': isDropdownOpen }" />
           </button>
 
-          <!-- 简洁、精致、克制的二级浮层菜单 (Editorial 风格) -->
+          <!-- 简洁、精致、克制的二级浮层菜单 -->
           <div
             v-if="isDropdownOpen"
-            class="absolute right-0 top-full mt-2 w-48 bg-[var(--bg-archive)] border border-[var(--border-subtle)] shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-2 z-50 rounded-xs animate-in fade-in duration-150"
+            class="absolute right-0 top-full mt-2 w-44 bg-[var(--bg-archive)] border border-[var(--border-subtle)] shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-1.5 z-50 rounded-xs animate-in fade-in duration-150"
             @click.stop
           >
-            <div class="px-3 pb-1.5 mb-1 text-[10px] font-mono-archive tracking-widest text-[var(--ink-muted)] border-b border-[var(--border-subtle)]/60">
-              生活视图 // VIEWS
+            <div class="px-3 pb-1 mb-1 text-[10px] font-mono-archive tracking-widest text-[var(--ink-muted)] border-b border-[var(--border-subtle)]/60">
+              设置 // TOOLS
             </div>
 
             <div class="space-y-0.5">
               <button
-                v-for="opt in lifeViewOptions"
+                v-for="opt in toolOptions"
                 :key="opt.key"
-                @click="handleLifeViewClick(opt)"
-                class="w-full text-left px-3 py-2 text-xs font-serif-editorial transition-colors flex items-center justify-between cursor-pointer group hover:bg-[var(--bg-subtle)]/60"
-                :class="[
-                  (opt.key === 'transactions' && currentView === 'transactions') ||
-                  (opt.key === 'projects' && currentView === 'projects') ||
-                  (opt.key === 'collection' && currentCategory === 'collection') ||
-                  (opt.key === 'photo' && currentCategory === 'photo') ||
-                  (opt.key === 'timeline' && currentView === 'home' && currentCategory === 'all')
-                    ? 'text-[var(--ink-primary)] font-semibold' 
-                    : 'text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
-                ]"
+                @click="handleToolClick(opt)"
+                class="w-full text-left px-3 py-1.5 text-xs font-serif-editorial transition-colors flex items-center justify-between cursor-pointer group hover:bg-[var(--bg-subtle)]/60 text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]"
               >
                 <div>
                   <div class="text-xs">{{ opt.label }}</div>
                   <div class="text-[10px] text-[var(--ink-muted)] font-mono-archive mt-0.5">{{ opt.desc }}</div>
                 </div>
-                <span
-                  v-if="
-                    (opt.key === 'transactions' && currentView === 'transactions') ||
-                    (opt.key === 'projects' && currentView === 'projects') ||
-                    (opt.key === 'collection' && currentCategory === 'collection') ||
-                    (opt.key === 'photo' && currentCategory === 'photo') ||
-                    (opt.key === 'timeline' && currentView === 'home' && currentCategory === 'all')
-                  "
-                  class="w-1.5 h-1.5 rounded-full bg-[var(--ink-primary)] shrink-0 ml-2"
-                />
               </button>
             </div>
           </div>
@@ -317,46 +241,39 @@ onUnmounted(() => {
         </button>
       </div>
 
-      <!-- 我的生活视图 -->
+      <!-- 导航栏目 -->
       <div class="space-y-2">
-        <span class="text-[11px] font-mono-archive tracking-widest text-[var(--ink-muted)] block">
-          我的生活 //
-        </span>
-        <div class="grid grid-cols-2 gap-2 text-sm font-serif-editorial">
-          <button
-            v-for="opt in lifeViewOptions"
-            :key="opt.key"
-            @click="handleLifeViewClick(opt)"
-            class="text-left py-2 px-2.5 rounded-xs border text-xs flex items-center justify-between"
-            :class="[
-              (opt.key === 'transactions' && currentView === 'transactions') ||
-              (opt.key === 'projects' && currentView === 'projects') ||
-              (opt.key === 'collection' && currentCategory === 'collection') ||
-              (opt.key === 'photo' && currentCategory === 'photo') ||
-              (opt.key === 'timeline' && currentView === 'home' && currentCategory === 'all')
-                ? 'border-[var(--ink-primary)] text-[var(--ink-primary)] font-bold' 
-                : 'border-[var(--border-subtle)] text-[var(--ink-muted)]'
-            ]"
-          >
-            <span>{{ opt.label }}</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 栏目导航 -->
-      <div class="space-y-2 pt-2 border-t border-[var(--border-subtle)]">
         <span class="text-[11px] font-mono-archive tracking-widest text-[var(--ink-muted)] block">
           页面导航 //
         </span>
-        <div class="space-y-2 text-sm">
+        <div class="grid grid-cols-2 gap-2 text-sm font-serif-editorial">
           <button
             v-for="item in navItems"
             :key="item.key"
             @click="setView(item.key)"
-            class="block w-full text-left py-1 text-[var(--ink-primary)]"
-            :class="{ 'font-bold': currentView === item.key }"
+            class="text-left py-2 px-2.5 rounded-xs border text-xs flex items-center justify-between"
+            :class="currentView === item.key 
+              ? 'border-[var(--ink-primary)] text-[var(--ink-primary)] font-bold' 
+              : 'border-[var(--border-subtle)] text-[var(--ink-muted)]'"
           >
-            {{ item.label }}
+            <span>{{ item.label }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 工具选项 -->
+      <div class="space-y-2 pt-2 border-t border-[var(--border-subtle)]">
+        <span class="text-[11px] font-mono-archive tracking-widest text-[var(--ink-muted)] block">
+          设置与工具 //
+        </span>
+        <div class="grid grid-cols-2 gap-2 text-xs font-serif-editorial">
+          <button
+            v-for="opt in toolOptions"
+            :key="opt.key"
+            @click="handleToolClick(opt)"
+            class="text-left py-1.5 px-2 rounded-xs border border-[var(--border-subtle)] text-[var(--ink-secondary)]"
+          >
+            {{ opt.label }}
           </button>
         </div>
       </div>

@@ -30,6 +30,7 @@ import {
   fetchStorageStatus,
   fetchGlobalStats,
   fetchProjects,
+  fetchTransactions,
 } from './utils/api'
 
 const currentView = ref<string>('home')
@@ -429,13 +430,104 @@ const isStatsOpen = ref(false)
 const storageStatus = ref<StorageStatus | null>(null)
 const globalStats = ref<GlobalStats | null>(null)
 
+// 记账列表 (与生活流交融)
+const transactionsList = ref<Transaction[]>([
+  {
+    id: 1,
+    amount: 12900,
+    type: 'expense',
+    category: '购物',
+    title: 'MCHOSE A7 无线鼠标',
+    note: '替换用了四年的旧鼠标',
+    payment_method: '微信支付',
+    occurred_at: '2026-10-09T14:20:00Z',
+  },
+  {
+    id: 2,
+    amount: 1800,
+    type: 'expense',
+    category: '餐饮',
+    title: '午饭面条',
+    note: '公司楼下片儿川',
+    payment_method: '支付宝',
+    occurred_at: '2026-10-09T12:15:00Z',
+  },
+  {
+    id: 3,
+    amount: 6800,
+    type: 'expense',
+    category: '餐饮',
+    title: '埃塞俄比亚咖啡生豆',
+    note: '浅烘花魁 250g',
+    payment_method: '微信支付',
+    occurred_at: '2026-10-08T16:30:00Z',
+  },
+  {
+    id: 4,
+    amount: 500000,
+    type: 'income',
+    category: '其他',
+    title: '稿酬与项目结项',
+    note: '校园开源平台二期补贴',
+    payment_method: '银行转账',
+    occurred_at: '2026-10-07T10:00:00Z',
+  },
+])
+
 const storageConfigured = computed(() => Boolean(storageStatus.value?.configured))
+
+const txToEntry = (tx: Transaction): LifeEntry => {
+  const d = new Date(tx.occurred_at)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const year = !isNaN(d.getTime()) ? String(d.getFullYear()) : '2026'
+  const month = !isNaN(d.getTime()) ? pad(d.getMonth() + 1) : '10'
+  const day = !isNaN(d.getTime()) ? pad(d.getDate()) : '09'
+  const time = !isNaN(d.getTime()) ? `${pad(d.getHours())}:${pad(d.getMinutes())}` : ''
+
+  return {
+    id: 100000 + tx.id,
+    type: 'transaction',
+    title: tx.title || tx.category || '记账',
+    content: tx.note || '',
+    occurred_at: tx.occurred_at,
+    date: `${year}.${month}.${day}`,
+    year,
+    month,
+    day,
+    time,
+    amount: tx.amount,
+    tx_type: tx.type,
+    category: tx.category,
+    payment_method: tx.payment_method,
+    is_transaction: true,
+  }
+}
+
+// 融合了生活记录与记账的完整时间流
+const allTimelineEntries = computed(() => {
+  const txEntries = transactionsList.value.map(txToEntry)
+  const combined = [...entries.value, ...txEntries]
+  combined.sort((a, b) => {
+    const timeA = a.occurred_at
+      ? new Date(a.occurred_at).getTime()
+      : a.date
+      ? new Date(a.date.replace(/\./g, '-')).getTime()
+      : 0
+    const timeB = b.occurred_at
+      ? new Date(b.occurred_at).getTime()
+      : b.date
+      ? new Date(b.date.replace(/\./g, '-')).getTime()
+      : 0
+    return timeB - timeA
+  })
+  return combined
+})
 
 const filteredEntriesByCategory = computed(() => {
   if (currentCategory.value === 'all') {
-    return entries.value
+    return allTimelineEntries.value
   }
-  return entries.value.filter((e) => entryMatchesCategory(e, currentCategory.value))
+  return allTimelineEntries.value.filter((e) => entryMatchesCategory(e, currentCategory.value))
 })
 
 const handleCategoryChange = (cat: ArchiveCategory) => {
@@ -452,6 +544,10 @@ const navigateTo = (view: string) => {
 }
 
 const openEntryDetail = (entry: LifeEntry) => {
+  if (entry.is_transaction) {
+    navigateTo('transactions')
+    return
+  }
   selectedEntry.value = entry
   window.location.hash = `entry/${entry.id}`
 }
@@ -528,10 +624,11 @@ const handleProjectCreated = (newProj: Project) => {
 
 const refreshData = async () => {
   try {
-    const [entriesData, statsData, statusData] = await Promise.allSettled([
+    const [entriesData, statsData, statusData, txData] = await Promise.allSettled([
       fetchEntries({ page: 1, page_size: 50 }),
       fetchGlobalStats(),
       fetchStorageStatus(),
+      fetchTransactions(),
     ])
     if (entriesData.status === 'fulfilled' && entriesData.value && entriesData.value.length > 0) {
       entries.value = entriesData.value
@@ -541,6 +638,9 @@ const refreshData = async () => {
     }
     if (statusData.status === 'fulfilled' && statusData.value) {
       storageStatus.value = statusData.value
+    }
+    if (txData.status === 'fulfilled' && txData.value && txData.value.length > 0) {
+      transactionsList.value = txData.value
     }
   } catch {
     // ignore

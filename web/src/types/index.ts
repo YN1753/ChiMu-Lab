@@ -11,10 +11,20 @@ export type EntryType =
   | 'purchase'
   | 'coffee'
 
-export type ArchiveCategory = 'all' | 'daily' | 'thought' | 'project' | 'collection' | 'photo'
+export type ArchiveCategory =
+  | 'all'
+  | 'daily'
+  | 'thought'
+  | 'project'
+  | 'collection'
+  | 'photo'
+  | 'transaction'
 
 export const getEntryCategory = (entry: LifeEntry): ArchiveCategory => {
   const t = (entry.type || '').toLowerCase()
+  if (t === 'transaction' || entry.is_transaction) {
+    return 'transaction'
+  }
   if (t === 'thought' || t === 'idea' || t === 'note' || t === 'essay') {
     return 'thought'
   }
@@ -33,6 +43,9 @@ export const getEntryCategory = (entry: LifeEntry): ArchiveCategory => {
 export const entryMatchesCategory = (entry: LifeEntry, category: ArchiveCategory): boolean => {
   if (category === 'all') return true
   const cat = getEntryCategory(entry)
+  if (category === 'transaction') {
+    return cat === 'transaction' || entry.type === 'transaction' || Boolean(entry.is_transaction)
+  }
   if (category === 'photo') {
     return cat === 'photo' || Boolean(entry.images) || Boolean(entry.attachments && entry.attachments.length > 0)
   }
@@ -50,6 +63,7 @@ export const getCategoryDisplayName = (cat: ArchiveCategory): string => {
     project: '项目',
     collection: '收藏',
     photo: '照片',
+    transaction: '记账',
   }
   return map[cat] || '全部记录'
 }
@@ -90,6 +104,14 @@ export interface LifeEntry {
   link?: string
   related_project?: string
   featured?: boolean
+
+  // 记账支持
+  amount?: number
+  tx_type?: 'income' | 'expense'
+  category?: string
+  payment_method?: string
+  is_transaction?: boolean
+
   created_at?: string
   updated_at?: string
 }
