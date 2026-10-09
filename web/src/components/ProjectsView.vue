@@ -1,17 +1,42 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import type { Project } from '../types'
-import { ArrowUpRight, Github } from 'lucide-vue-next'
+import { ArrowUpRight, Github, BookOpen } from 'lucide-vue-next'
 
-defineProps<{
+const props = defineProps<{
   projects: Project[]
 }>()
+
+const activeCategory = ref<string>('all')
+
+const categories = computed(() => {
+  const set = new Set<string>()
+  props.projects.forEach((p) => {
+    if (p.category) set.add(p.category)
+  })
+  return Array.from(set)
+})
+
+const filteredProjects = computed(() => {
+  if (activeCategory.value === 'all') return props.projects
+  return props.projects.filter((p) => p.category === activeCategory.value)
+})
+
+const isCodeRepo = (proj: Project) => {
+  return (
+    proj.github_url &&
+    proj.github_url.includes('github.com') &&
+    proj.category !== '生活手艺' &&
+    proj.category !== '路线探索'
+  )
+}
 </script>
 
 <template>
   <div class="max-w-4xl mx-auto px-5 sm:px-8 py-20 sm:py-28 text-left">
     
     <!-- 标头 -->
-    <header class="pb-12 border-b border-[var(--border-subtle)] mb-14 space-y-4">
+    <header class="pb-12 border-b border-[var(--border-subtle)] mb-10 space-y-4">
       <div class="flex items-center gap-3">
         <h1 class="font-serif-editorial text-4xl sm:text-5xl font-normal text-[var(--ink-primary)]">
           造物
@@ -24,22 +49,54 @@ defineProps<{
         手艺、工具与好奇心驱动的尝试。
       </p>
       <p class="text-base sm:text-lg text-[var(--ink-secondary)] font-serif-editorial max-w-2xl leading-relaxed pt-2">
-        编程只是我体验生活、表达创造力的一门手艺。就像手冲一杯咖啡、或者打磨一件木器一样，在逻辑的泥土里亲手塑造出确定性的东西。这里记录着我做过的工具、踩过的坑，以及那些在大学和深夜工位里诞生的真实经历。
+        编程只是我体验生活、表达创造力的一门手艺。就像手冲一杯咖啡、或者打磨一件木器一样，在逻辑的泥土里亲手塑造出确定性的东西。这里记录着我做过的系统、踩过的坑，以及那些在深夜工位和山野晨光里诞生的真实经历。
       </p>
     </header>
+
+    <!-- 类别视角筛选 (呼吸感排版) -->
+    <div
+      v-if="categories.length > 1"
+      class="flex flex-wrap items-center gap-x-6 gap-y-2 mb-14 text-xs font-mono-archive text-[var(--ink-muted)] border-b border-[var(--border-subtle)] pb-4"
+    >
+      <span class="text-[var(--ink-secondary)] mr-1">分类 //</span>
+      <button
+        @click="activeCategory = 'all'"
+        class="transition-colors cursor-pointer py-1 hover:text-[var(--ink-primary)]"
+        :class="{
+          'text-[var(--ink-primary)] font-semibold border-b border-[var(--ink-primary)]':
+            activeCategory === 'all',
+        }"
+      >
+        全部 ({{ projects.length }})
+      </button>
+      <button
+        v-for="cat in categories"
+        :key="cat"
+        @click="activeCategory = cat"
+        class="transition-colors cursor-pointer py-1 hover:text-[var(--ink-primary)]"
+        :class="{
+          'text-[var(--ink-primary)] font-semibold border-b border-[var(--ink-primary)]':
+            activeCategory === cat,
+        }"
+      >
+        {{ cat }}
+      </button>
+    </div>
 
     <!-- 项目故事清单 (Editorial Stories, 非模板化 Card 墙) -->
     <div class="divide-y divide-[var(--border-subtle)] space-y-16">
       
       <article
-        v-for="(proj, idx) in projects"
+        v-for="(proj, idx) in filteredProjects"
         :key="proj.id"
         class="pt-14 first:pt-0 space-y-6"
       >
         <!-- 序号、状态与归属 -->
         <div class="flex items-center justify-between text-xs font-mono-archive text-[var(--ink-muted)]">
           <div class="flex items-center gap-2">
-            <span class="text-[var(--ink-primary)] font-semibold">0{{ idx + 1 }}.</span>
+            <span class="text-[var(--ink-primary)] font-semibold">
+              {{ String(idx + 1).padStart(2, '0') }}.
+            </span>
             <span class="tracking-wider">{{ proj.category }}</span>
           </div>
           <span class="border border-[var(--border-subtle)] px-2 py-0.5 rounded-xs text-[10px] uppercase">
@@ -76,13 +133,15 @@ defineProps<{
           </div>
 
           <a
+            v-if="proj.github_url"
             :href="proj.github_url"
             target="_blank"
             rel="noopener noreferrer"
             class="inline-flex items-center gap-1.5 text-[var(--ink-primary)] hover-underline pb-0.5"
           >
-            <Github class="w-3.5 h-3.5" />
-            <span>查看 GitHub 源码</span>
+            <Github v-if="isCodeRepo(proj)" class="w-3.5 h-3.5" />
+            <BookOpen v-else class="w-3.5 h-3.5" />
+            <span>{{ isCodeRepo(proj) ? '查看 GitHub 源码' : '查看完整方案与路书' }}</span>
             <ArrowUpRight class="w-3 h-3" />
           </a>
         </div>

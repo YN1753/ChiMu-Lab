@@ -139,6 +139,36 @@ const removeTx = async (id: number) => {
   emit('transactionDeleted', id)
   loadData()
 }
+
+// 支出光谱细线条颜色与占比 (Earthy publication film palette)
+const CATEGORY_COLORS: Record<string, string> = {
+  餐饮: '#a24f2b', // 暖赭石
+  交通: '#4a6b82', // 青石灰
+  购物: '#8c6d46', // 旧皮褐
+  娱乐: '#7a5980', // 暮紫
+  住房: '#3f5a4a', // 苔藓绿
+  学习: '#5c6773', // 墨色
+  医疗: '#b35c5c', // 枯叶红
+  其他: '#8a857b', // 米灰
+}
+
+const spectrumItems = computed(() => {
+  if (!summary.value || !summary.value.total_expense || summary.value.total_expense <= 0) return []
+  const breakdown = summary.value.category_breakdown || {}
+  const total = summary.value.total_expense
+  return Object.entries(breakdown)
+    .filter(([_, amt]) => amt > 0)
+    .map(([cat, amt]) => {
+      const percentage = Math.round((amt / total) * 1000) / 10
+      return {
+        category: cat,
+        amount: amt,
+        percentage,
+        color: CATEGORY_COLORS[cat] || '#8a857b',
+      }
+    })
+    .sort((a, b) => b.amount - a.amount)
+})
 </script>
 
 <template>
@@ -216,6 +246,42 @@ const removeTx = async (id: number) => {
           :class="(summary?.balance || 0) >= 0 ? 'text-[var(--ink-primary)]' : 'text-red-700'"
         >
           {{ (summary?.balance || 0) < 0 ? '-' : '' }}¥{{ formatMoney(Math.abs(summary?.balance || 0)) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- 支出光谱细线条 (Spending Spectrum Bar · Editorial 典雅色带) -->
+    <div
+      v-if="summary && summary.total_expense > 0 && spectrumItems.length > 0"
+      class="pb-10 mb-14 border-b border-[var(--border-subtle)] space-y-4"
+    >
+      <div class="flex items-center justify-between text-xs font-mono-archive text-[var(--ink-muted)]">
+        <span class="tracking-wider">// 支出光谱分布 · SPECTRUM</span>
+        <span>{{ spectrumItems.length }} 个支出类目</span>
+      </div>
+
+      <!-- 分段光谱细线 (微小圆角，纯色拼接) -->
+      <div class="h-2 w-full rounded-full bg-[var(--bg-subtle)] overflow-hidden flex">
+        <div
+          v-for="item in spectrumItems"
+          :key="item.category"
+          :style="{ width: `${item.percentage}%`, backgroundColor: item.color }"
+          class="h-full transition-all duration-300 relative group cursor-pointer"
+          :title="`${item.category}: ¥${formatMoney(item.amount)} (${item.percentage}%)`"
+        ></div>
+      </div>
+
+      <!-- 类目图例与占比明细 -->
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-mono-archive">
+        <div
+          v-for="item in spectrumItems"
+          :key="item.category"
+          class="flex items-center gap-2 text-[var(--ink-secondary)]"
+        >
+          <span class="w-2 h-2 rounded-full shrink-0" :style="{ backgroundColor: item.color }"></span>
+          <span>{{ item.category }}</span>
+          <span class="text-[var(--ink-muted)]">{{ item.percentage }}%</span>
+          <span class="font-mono-archive text-[var(--ink-primary)]">¥{{ formatMoney(item.amount) }}</span>
         </div>
       </div>
     </div>

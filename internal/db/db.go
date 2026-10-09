@@ -174,6 +174,30 @@ func seedData(database *gorm.DB) {
 			Featured:    false,
 			Order:       7,
 		},
+		{
+			Title:       "Harmo V60 浅烘冲煮方案",
+			Subtitle:    "基于日晒埃塞俄比亚豆的变水温阶梯萃取法",
+			Description: "抛弃玄学冲煮，以 92℃ → 88℃ 变水温阶梯注水，稳定探索浅烘豆花果香气与甜感平衡的手冲方案。",
+			Story:       "清晨的第一杯手冲是我开启一天的仪式。为了稳定复现柑橘与茉莉花香，用温度计和秒表记录了上百次注水数据，整理出这套自用的阶梯水温冲煮参数。",
+			Category:    "生活手艺",
+			Tags:        "手冲咖啡,V60,风味探索,生活手艺",
+			GithubURL:   "https://github.com/YN1753/ChiMu-Lab",
+			Status:      "Active",
+			Featured:    true,
+			Order:       8,
+		},
+		{
+			Title:       "西湖杨公堤夜骑巡航指南",
+			Subtitle:    "21KM 环湖避开人流的深夜独行路书",
+			Description: "夜里十点后的西湖杨公堤没有游人与喧嚣，树影与湿润水汽掠过耳旁。包含路况、补给点与安全提示的骑行路书。",
+			Story:       "写代码卡住或心浮气躁的夜晚，骑上公路车钻进杨公堤和茅家埠的树影里。风把杂念吹散，呼吸找回节奏。这是我在这座城市里最隐秘的充能时刻。",
+			Category:    "路线探索",
+			Tags:        "公路车,夜骑,西湖路书,路线探索",
+			GithubURL:   "https://github.com/YN1753/ChiMu-Lab",
+			Status:      "Active",
+			Featured:    true,
+			Order:       9,
+		},
 	}
 	for _, p := range projects {
 		database.Create(&p)

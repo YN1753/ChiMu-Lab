@@ -419,6 +419,32 @@ const projects = ref<Project[]>([
     featured: false,
     order: 7,
   },
+  {
+    id: 8,
+    title: 'Harmo V60 浅烘冲煮方案',
+    subtitle: '基于日晒埃塞俄比亚豆的变水温阶梯萃取法',
+    description: '抛弃玄学冲煮，以 92℃ → 88℃ 变水温阶梯注水，稳定探索浅烘豆花果香气与甜感平衡的手冲方案。',
+    story: '清晨的第一杯手冲是我开启一天的仪式。为了稳定复现柑橘与茉莉花香，用温度计和秒表记录了上百次注水数据，整理出这套自用的阶梯水温冲煮参数。',
+    category: '生活手艺',
+    tags: '手冲咖啡,V60,风味探索,生活手艺',
+    github_url: 'https://github.com/YN1753/ChiMu-Lab',
+    status: '日常践行',
+    featured: true,
+    order: 8,
+  },
+  {
+    id: 9,
+    title: '西湖杨公堤夜骑巡航指南',
+    subtitle: '21KM 环湖避开人流的深夜独行路书',
+    description: '夜里十点后的西湖杨公堤没有游人与喧嚣，树影与湿润水汽掠过耳旁。包含路况、补给点与安全提示的骑行路书。',
+    story: '写代码卡住或心浮气躁的夜晚，骑上公路车钻进杨公堤和茅家埠的树影里。风把杂念吹散，呼吸找回节奏。这是我在这座城市里最隐秘的充能时刻。',
+    category: '路线探索',
+    tags: '公路车,夜骑,西湖路书,路线探索',
+    github_url: 'https://github.com/YN1753/ChiMu-Lab',
+    status: '长期更新',
+    featured: true,
+    order: 9,
+  },
 ])
 
 const currentCategory = ref<ArchiveCategory>('all')
@@ -710,6 +736,9 @@ watch(currentView, (newV) => {
 <template>
   <div class="min-h-screen bg-[var(--bg-archive)] text-[var(--ink-primary)] flex flex-col justify-between selection:bg-[var(--accent-warm)]/15 selection:text-[var(--accent-warm)] transition-colors duration-300">
     
+    <!-- 纯原生 SVG 纸张微噪点覆盖层（哑光相纸与实体书质感） -->
+    <div class="paper-grain-overlay" aria-hidden="true" />
+
     <!-- 极简克制顶部导航（集成右上角「＋」与「我的生活⌄」） -->
     <HeaderNav
       :currentView="currentView"
