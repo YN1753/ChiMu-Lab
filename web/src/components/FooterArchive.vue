@@ -9,10 +9,10 @@ import { ArrowUpRight } from 'lucide-vue-next'
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-8 border-b border-[var(--border-subtle)]">
         <div>
           <span class="text-[var(--ink-primary)] font-semibold tracking-wider font-serif-editorial text-sm">
-            迟暮的生活档案馆
+            散页 · LOOSE LEAF
           </span>
           <p class="mt-1 text-[11px] text-[var(--ink-secondary)]">
-            记录做过的事、看过的风景、思考过的念头，和不想遗忘的瞬间。
+            迟暮的数字生活档案馆与造物工坊 · 记录做过的事、看过的风景、思考过的念头。
           </p>
         </div>
 
@@ -33,7 +33,7 @@ import { ArrowUpRight } from 'lucide-vue-next'
       <!-- 版权与定位 -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-[11px]">
         <div>
-          © 2024–2026 迟暮 (ChiMu). 时间刻度下的真实生活。
+          © 2024–2026 迟暮 · Curated by ChiMu. 真实生活大于一切。
         </div>
         <div class="flex items-center gap-4">
           <a href="https://github.com/YN1753" target="_blank" class="hover:text-[var(--ink-primary)]">

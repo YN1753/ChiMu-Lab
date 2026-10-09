@@ -200,3 +200,25 @@ export interface SiteConfig {
   icp_number: string
   icp_link: string
 }
+
+export interface GearItem {
+  id?: string
+  name: string
+  spec?: string
+  category: string
+  status?: string
+  note?: string
+  link?: string
+}
+
+export interface UserProfile {
+  name: string
+  title: string
+  avatar: string
+  location: string
+  bio: string
+  philosophy: string
+  email: string
+  github: string
+  gearList: GearItem[]
+}

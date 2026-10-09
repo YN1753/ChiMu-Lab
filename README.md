@@ -1,16 +1,16 @@
-# ChiMu-Lab (迟暮生活档案馆) 🎞️
+# 散页 · Loose Leaf
 
-> **Digital Atelier & Living Archive · 迟暮的私人数字暗房与生活档案**
+> **Digital Atelier & Living Archive · 迟暮的数字生活档案馆与造物工坊**
 >
-> 🌐 线上站点: [https://codeactivityhub.top](https://codeactivityhub.top)  
-> 🔗 GitHub 个人主页: [https://github.com/YN1753](https://github.com/YN1753)  
-> 📜 ICP 备案号: [浙ICP备2026081664号](https://beian.miit.gov.cn/)
+> 线上站点: [https://codeactivityhub.top](https://codeactivityhub.top)  
+> 主理人 GitHub: [https://github.com/YN1753](https://github.com/YN1753)  
+> 备案号: [浙ICP备2026081664号](https://beian.miit.gov.cn/)
 
 ---
 
-## 📖 项目定位与设计哲学
+## 项目定位与设计哲学
 
-**ChiMu-Lab** 摒弃了千篇一律的程序员技能简历模板与商业宣传辞令，立足于**“写给自己看”的诚恳态度**，打造为一个充满呼吸感、出版物美感与时间沉淀质感的**个人数字生活档案馆 (Digital Atelier & Living Archive)**。
+**《散页》 (Loose Leaf)** 摒弃了千篇一律的程序员技能简历模板与商业宣传辞令，立足于**“写给自己看”的诚恳态度**，打造为一个充满纸张微噪点质感、出版物美感与时间沉淀质感的**个人数字生活档案馆 (Digital Atelier & Living Archive)**。主理人为**迟暮**。
 
 核心理念：**生活大于项目，真实大于表演**。
 - **时间按顺序流淌的真实印记**：收集秋日的桂花、夜雨的咖啡、读书与音乐的手记、胶片相纸与吉光片羽。

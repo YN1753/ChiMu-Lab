@@ -84,15 +84,15 @@ const showHeatmap = ref(false)
       <div class="space-y-4">
         <div class="flex items-baseline justify-between">
           <h1 class="font-serif-editorial text-3xl sm:text-5xl font-medium tracking-tight text-[var(--ink-primary)]">
-            迟暮
+            散页
           </h1>
           <span class="font-mono-archive text-xs text-[var(--ink-muted)]">
             杭州 · {{ todayDisplay }}
           </span>
         </div>
 
-        <p class="font-serif-editorial text-xs sm:text-sm tracking-widest text-[var(--ink-muted)]">
-          一个属于我自己的数字生活空间。
+        <p class="font-mono-archive text-xs sm:text-sm tracking-widest text-[var(--ink-muted)] uppercase">
+          // LOOSE LEAF · 迟暮的生活档案馆
         </p>
 
         <p class="font-serif-editorial text-base sm:text-lg text-[var(--ink-secondary)] leading-relaxed italic max-w-2xl pt-1">

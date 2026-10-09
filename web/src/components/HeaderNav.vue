@@ -37,7 +37,7 @@ const navItems = [
   { key: 'projects', label: '项目' },
   { key: 'now', label: '当下' },
   { key: 'archive', label: '归档' },
-  { key: 'about', label: '关于' },
+  { key: 'about', label: '主理人' },
 ]
 
 // 辅助工具与设置
@@ -107,16 +107,16 @@ onUnmounted(() => {
   <header class="sticky top-0 z-50 w-full bg-[var(--bg-archive)]/92 backdrop-blur-md border-b border-[var(--border-subtle)] transition-colors duration-300">
     <div class="max-w-5xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
       
-      <!-- 极简中文标识：迟暮 · 生活档案 -->
+      <!-- 极简出版标识：散页 · LOOSE LEAF · 迟暮 -->
       <button
         @click="setView('home')"
         class="text-left group cursor-pointer"
       >
         <span class="font-serif-editorial text-xl font-medium tracking-wider text-[var(--ink-primary)]">
-          迟暮
+          散页
         </span>
-        <span class="text-xs text-[var(--ink-muted)] ml-2.5 hidden sm:inline tracking-wider font-normal">
-          / 生活档案
+        <span class="text-xs text-[var(--ink-muted)] ml-2.5 hidden sm:inline tracking-wider font-mono-archive">
+          LOOSE LEAF · 迟暮
         </span>
       </button>
 
